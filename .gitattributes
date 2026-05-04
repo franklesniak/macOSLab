@@ -31,6 +31,12 @@ tests/**/__snapshots__/**     text eol=lf
 tests/**/fixtures/**          text eol=lf
 testdata/**                   text eol=lf
 
+# Shell scripts must use LF: CRLF breaks shebang resolution and option
+# parsing (e.g. `set -euo pipefail\r` is rejected by bash) when the script
+# is checked out on Windows with `core.autocrlf=true` and then executed
+# inside a Linux container, such as the devcontainer post-create hook.
+*.sh                          text eol=lf
+
 # Binary overrides: prevent the broad rules above (or any default
 # text-detection) from treating these common binary file types as text.
 # The `binary` macro expands to `-text -diff`.
