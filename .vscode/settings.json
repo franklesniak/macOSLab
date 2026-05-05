@@ -1,6 +1,6 @@
 {
-    "window.title": "Go to .vscode/settings.json and make this the name of the repo",
-    "[powershell]": {
-        "files.encoding": "utf8"
-    }
+  "window.title": "macOSLab",
+  "[powershell]": {
+    "files.encoding": "utf8"
+  }
 }

@@ -38,12 +38,10 @@ If a style-guide update appears warranted but has not been explicitly authorized
   - Do not push code when pre-commit or required validation checks are failing; fix issues and re-run until the checks pass.
   - Use the repository's existing validation commands as needed:
     - `npm run lint:md`
-    - `pytest tests/ -v --cov --cov-report=term-missing`
-    - `pytest tests/test_schema_examples.py -v` (after any schema or schema-example change)
+    - `npm run lint:md:nested`
+    - `pre-commit run --all-files`
+    - `Invoke-ScriptAnalyzer -Path . -Settings .\.github\linting\PSScriptAnalyzerSettings.psd1`
     - `Invoke-Pester -Path tests/ -Output Detailed`
-    - `terraform fmt -check -recursive`
-    - `tflint --recursive`
-    - `terraform test -verbose`
   - The `pre-commit run --all-files` command exercises the data-file hooks configured in [`.pre-commit-config.yaml`](.pre-commit-config.yaml) (the authoritative list of active hooks), covering categories such as strict JSON syntax (`check-json`), YAML parsing (`check-yaml`) and style (`yamllint`), GitHub Actions linting (`actionlint`), JSON Schema validation (`check-jsonschema`), and schema self-validation (`check-metaschema`). The dedicated [`.github/workflows/data-ci.yml`](.github/workflows/data-ci.yml) workflow re-runs these so JSON/YAML/Actions enforcement can be required via branch protection.
   - JSON, YAML, and schema authoring guidance lives in:
     - [`.github/instructions/json.instructions.md`](.github/instructions/json.instructions.md)
@@ -57,8 +55,6 @@ If a style-guide update appears warranted but has not been explicitly authorized
     - JSON: `.github/instructions/json.instructions.md`
     - Markdown/Docs: `.github/instructions/docs.instructions.md`
     - PowerShell: `.github/instructions/powershell.instructions.md`
-    - Python: `.github/instructions/python.instructions.md`
-    - Terraform: `.github/instructions/terraform.instructions.md`
     - YAML: `.github/instructions/yaml.instructions.md`
 
 - **Do not**
@@ -175,7 +171,3 @@ When a pull request is created or when the owner posts a PR comment containing `
 ### Resuming a paused loop
 
 When the PR owner posts a comment containing `@claude resume review loop`, resume the loop from step 1 (request a fresh Copilot review). The round counter and timeout reset on resume.
-
----
-
-> This file is part of the `franklesniak/copilot-repo-template` template. Customize or remove agent instruction files for platforms you do not use. See `OPTIONAL_CONFIGURATIONS.md` for details.

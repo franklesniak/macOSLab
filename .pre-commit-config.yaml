@@ -17,9 +17,9 @@
 # Install:  pip install pre-commit && pre-commit install
 # Run:  pre-commit run --all-files
 #
-# Note: This file configures pre-commit hooks for all projects. It handles
-# Python formatting/linting and Markdown validation. Remove only if your
-# project does not use pre-commit at all.
+# Note: This file configures pre-commit hooks for macOSLab repository hygiene,
+# Markdown validation, data-file validation, and schema validation. Remove only
+# if the repository stops using pre-commit at all.
 
 repos:
   # General hooks
@@ -53,20 +53,6 @@ repos:
     hooks:
       - id: actionlint
 
-  # Python formatting (remove if not using Python)
-  - repo: https://github.com/psf/black
-    rev: 26.3.1
-    hooks:
-      - id: black
-        args: [--line-length=100]
-
-  # Python linting (remove if not using Python)
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.12
-    hooks:
-      - id: ruff-check
-        args: [--fix, --line-length=100]
-
   # JSON Schema validation
   #
   # The hooks below cover three distinct categories:
@@ -81,10 +67,9 @@ repos:
   #      Invalid example data files under
   #      `schemas/examples/example-config/invalid/` are intentionally NOT
   #      wired into a normal pre-commit hook because they are expected to
-  #      fail validation. They are exercised by
-  #      `tests/test_schema_examples.py`, which auto-discovers
-  #      schema/example pairs and asserts that valid examples pass and
-  #      invalid examples fail.
+  #      fail validation. macOSLab does not keep Python project tests in Phase
+  #      0, so the invalid examples remain reference fixtures until the real
+  #      evidence schema replaces the worked example in Phase 7.
   #
   #   B. Schema self-validation
   #      Validates the worked-example schema itself against its declared
@@ -150,13 +135,3 @@ repos:
     rev: v0.22.1
     hooks:
       - id: markdownlint-cli2
-
-  # Terraform formatting and validation (remove if not using Terraform)
-  - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.105.0
-    hooks:
-      - id: terraform_fmt
-      - id: terraform_validate
-      - id: terraform_tflint
-        args:
-          - --args=--config=__GIT_WORKING_DIR__/.tflint.hcl

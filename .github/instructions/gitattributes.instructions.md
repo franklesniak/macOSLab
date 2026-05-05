@@ -14,12 +14,12 @@ description: "Rules for .gitattributes entries, including line-ending pinning fo
 - **Status:** Active
 - **Owner:** Repository Maintainers
 - **Last Updated:** 2026-04-21
-- **Scope:** Applies to any `.gitattributes` file in repositories that adopt these instructions, independent of programming language. Governs how committed text artifacts are protected against platform-dependent checkout rewriting.
+- **Scope:** Applies to any `.gitattributes` file in this repository, independent of programming language. Governs how committed text artifacts are protected against platform-dependent checkout rewriting.
 - **Related:** [Repository Copilot Instructions](../copilot-instructions.md)
 
 ## Purpose and Scope
 
-This file defines the normative rule for entries in `.gitattributes` that protect byte-exact text artifacts from platform-dependent line-ending rewriting. It applies to every `.gitattributes` file in any repository that adopts these instructions, regardless of the programming languages used in the repository.
+This file defines the normative rule for entries in `.gitattributes` that protect byte-exact text artifacts from platform-dependent line-ending rewriting. It applies to every `.gitattributes` file in this repository, regardless of the programming languages used in the repository.
 
 > **Note:** This document uses [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords (**MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, **MAY**) to indicate requirement levels.
 
@@ -48,9 +48,9 @@ tests/**/golden/*.json text eol=lf
 
 A blanket rule such as `* text=auto` **MUST NOT** be treated as a substitute for per-path `eol=lf` pinning. `text=auto` lets Git auto-detect text files and normalize to LF in the repository, but it does **not** force LF on Windows checkouts when `core.autocrlf=true` is in effect: Git still applies the working-tree line-ending conversion configured on the host and can rewrite LF to CRLF on checkout. Only explicit `eol=lf` on an artifact path guarantees that the bytes in the working tree match the bytes in the repository on every platform.
 
-## Defaults Shipped by This Template
+## Repository Defaults
 
-This template ships a repo-root `.gitattributes` file with LF-pinning defaults for common byte-exact fixture locations:
+This repository ships a repo-root `.gitattributes` file with LF-pinning defaults for common byte-exact fixture locations:
 
 - `tests/**/golden/**`
 - `tests/**/goldens/**`
@@ -61,7 +61,7 @@ This template ships a repo-root `.gitattributes` file with LF-pinning defaults f
 
 These paths are assumed to contain **text** fixtures. To keep the defaults safe when binary assets are committed under the same directories (for example, `.png` screenshots under `__snapshots__/`), the shipped `.gitattributes` also declassifies a curated list of common binary extensions (images, documents and archives, compiled artifacts, audio and video, fonts) using the `binary` macro so that Git does not apply line-ending conversion to them.
 
-Downstream adopters **MUST** extend these entries whenever they introduce a new byte-exact fixture location that is not already covered (for example, a project-specific `expected/` directory, a `golden_files/` tree, or signed payloads under a custom path). New entries **SHOULD** follow the "as narrow as practical" guidance above. Existing template entries **SHOULD NOT** be removed unless the maintainer has confirmed that no byte-exact comparison exists in the repository that depends on those paths.
+Maintainers **MUST** extend these entries whenever they introduce a new byte-exact fixture location that is not already covered (for example, a project-specific `expected/` directory, a `golden_files/` tree, or signed payloads under a custom path). New entries **SHOULD** follow the "as narrow as practical" guidance above. Existing entries **SHOULD NOT** be removed unless the maintainer has confirmed that no byte-exact comparison exists in the repository that depends on those paths.
 
 ### Excluding Binary Files Under Fixture Paths
 
@@ -83,7 +83,7 @@ The Git-layer rule defined here is necessary but not sufficient for byte-exact s
 - Tools that **compare** fixtures **SHOULD** read bytes in a mode that does not perform its own newline translation (for example, binary mode) when the comparison is byte-exact.
 - Hashing and signing tools **SHOULD** operate on raw bytes and **MUST NOT** depend on on-disk text normalization.
 
-These language-specific concerns are out of scope for this instructions file; they are addressed in the relevant language instructions (for example, `python.instructions.md`, `powershell.instructions.md`). The Git-layer rule and the producer/consumer rules are complementary: each alone is insufficient, and both are needed for stable byte-exact artifacts across platforms.
+These language-specific concerns are out of scope for this instructions file; they are addressed in the relevant language instructions when this repository has matching source files (for example, `powershell.instructions.md` for PowerShell code). The Git-layer rule and the producer/consumer rules are complementary: each alone is insufficient, and both are needed for stable byte-exact artifacts across platforms.
 
 ## Rationale
 

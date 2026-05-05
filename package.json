@@ -1,16 +1,19 @@
 {
-  "name": "copilot-repo-template",
+  "name": "macoslab",
   "version": "1.0.0",
-  "description": "Template repository with Copilot instructions and code quality tooling",
+  "description": "PowerShell tooling and Markdown docs for reproducible Intune-managed macOS VM labs",
   "private": true,
   "scripts": {
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#.venv\" \"#**/.venv\"",
     "lint:md:nested": "node .github/scripts/lint-nested-markdown.js"
   },
   "keywords": [
-    "template",
-    "copilot",
-    "linting"
+    "macos",
+    "intune",
+    "powershell",
+    "parallels",
+    "utm",
+    "pester"
   ],
   "author": "Frank Lesniak",
   "license": "MIT",

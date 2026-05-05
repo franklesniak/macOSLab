@@ -4,15 +4,17 @@
 
 ## Metadata
 
-- **Status:** Active
+- **Status:** Deprecated
 - **Owner:** Repository Maintainers
-- **Last Updated:** 2026-05-04
-- **Scope:** Revised task instructions for running Phase 0 bootstrap work in `franklesniak/macOSLab` with Codex. This document is a handoff prompt for the coding agent; it is not a protected repository governance file.
-- **Related:** [`GETTING_STARTED_NEW_REPO.md`](../GETTING_STARTED_NEW_REPO.md), [`OPTIONAL_CONFIGURATIONS.md`](../OPTIONAL_CONFIGURATIONS.md), [`AGENTS.md`](../AGENTS.md), [Repository Copilot Instructions](../.github/copilot-instructions.md)
+- **Last Updated:** 2026-05-05
+- **Scope:** Historical task instructions used for the initial Phase 0 bootstrap work in `franklesniak/macOSLab`. This document is retained for context; current repository rules live in the related governance and planning documents.
+- **Related:** [`README.md`](../README.md), [`AGENTS.md`](../AGENTS.md), [Repository Copilot Instructions](../.github/copilot-instructions.md), [Phase 0 PR description](phase-0-bootstrap-pr-description.md), [macOSLab repository specification](planning/macOS-imaging-08c-repo-spec-final.md), [macOSLab ADRs](planning/macOS-imaging-08e-ADRs.md)
 
 ## Purpose
 
-Use this document as the source prompt when asking Codex to perform Phase 0 bootstrap work for `franklesniak/macOSLab`. It incorporates the owner updates made on 2026-05-04:
+This document is retained as historical context for the initial Phase 0 bootstrap work. Do not treat it as current task authorization; current protected-file authorization is recorded in [Phase 0 Bootstrap PR Description Draft](phase-0-bootstrap-pr-description.md) and governed by [Repository Copilot Instructions](../.github/copilot-instructions.md).
+
+The original prompt incorporated the owner updates made on 2026-05-04:
 
 - Do not use `franklesniak@users.noreply.github.com` as a contact email.
 - For general conduct/contact guidance, instruct people to contact the repository owners using the contact links on their GitHub profiles.
@@ -28,8 +30,8 @@ You are working in `franklesniak/macOSLab`, a repository created from `franklesn
 
 Your job is to perform Phase 0 (Bootstrap) by walking through, in order, every relevant step in:
 
-1. [`GETTING_STARTED_NEW_REPO.md`](../GETTING_STARTED_NEW_REPO.md)
-2. [`OPTIONAL_CONFIGURATIONS.md`](../OPTIONAL_CONFIGURATIONS.md)
+1. The now-removed template guide `GETTING_STARTED_NEW_REPO.md`.
+2. The now-removed template guide `OPTIONAL_CONFIGURATIONS.md`.
 
 Tailor the result to this repository's actual goals. Skip steps that require manual GitHub-side action, and explicitly note each skipped step in the PR description.
 
@@ -77,7 +79,7 @@ There is no Python source code and no Terraform / HCL.
 Therefore:
 
 - Purge all Terraform / HCL content from the template: CI jobs, examples, `.gitignore` entries, pre-commit hooks, Terraform-named directories, README sections, PR-template sections, Dependabot ecosystems, and related docs.
-- Exception: do not delete or edit `.github/instructions/terraform.instructions.md` or any other protected instruction file. Instead, list "remove or de-link `terraform.instructions.md`" as an Open Question / Requested Authorization in the PR description.
+- Historical exception: the original Phase 0 task did not authorize deleting or editing `.github/instructions/terraform.instructions.md` or any other protected instruction file. That authorization was granted separately on 2026-05-05 and applied in the protected-instruction cleanup.
 - Purge Python sample/source content and Python-specific CI jobs per ADR-0008.
 - Keep pre-commit itself and pre-commit hooks that happen to be implemented in Python, including `check-jsonschema`, `check-json`, `check-yaml`, `yamllint`, and `actionlint`. These are development tooling, not project Python code.
 - If all Python source code is removed, delete the Black and Ruff hook entries from `.pre-commit-config.yaml`.

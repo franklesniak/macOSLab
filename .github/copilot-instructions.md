@@ -15,10 +15,15 @@ These instructions are authoritative for all changes in this repository.
 
 ## Source of Truth
 
-> **Customize this section** for your project. Point to your authoritative specification or design document. Example:
->
-> - Read **`docs/spec/requirements.md`** before making changes.
-> - If any instruction here conflicts with the spec, **the spec wins**.
+For repository workflow, safety, protected-file policy, and validation discipline, this file is the canonical source of truth.
+
+For product behavior and implementation scope, read:
+
+- [README.md](../README.md) for the current bootstrap state and validation commands.
+- [macOSLab Repository Specification](../docs/planning/macOS-imaging-08c-repo-spec-final.md) for the implementation contract.
+- [macOSLab Architecture Decision Records](../docs/planning/macOS-imaging-08e-ADRs.md) for accepted and conditional design decisions.
+
+If product specifications conflict with this file's safety, protected-file, or validation rules, follow this file and raise an explicit Open Question instead of weakening the rule.
 
 ## Protected Instruction Files
 
@@ -92,24 +97,24 @@ In addition to formatting, linting, trailing-whitespace, and end-of-file fixes, 
 - `check-yaml` — parse-checks `.yml` / `.yaml` files.
 - `yamllint` — enforces YAML style per `.yamllint.yml`.
 - `actionlint` — lints GitHub Actions workflow files.
-- `check-jsonschema` — JSON Schema validation. Validates: (a) the worked-example schema's valid example data under `schemas/examples/example-config/valid/` against `schemas/example-config.schema.json`; (b) selected real load-bearing repository configuration files (for example, `.github/dependabot.yml`) against built-in vendor schemas shipped with `check-jsonschema`; and (c) any future project-owned schema-backed file families that downstream maintainers wire up in `.pre-commit-config.yaml`.
+- `check-jsonschema` — JSON Schema validation. Validates: (a) the worked-example schema's valid example data under `schemas/examples/example-config/valid/` against `schemas/example-config.schema.json`; (b) selected real load-bearing repository configuration files (for example, `.github/dependabot.yml`) against built-in vendor schemas shipped with `check-jsonschema`; and (c) any future project-owned schema-backed file families wired up in `.pre-commit-config.yaml`.
 - `check-metaschema` — self-validates project-owned schemas (currently `schemas/example-config.schema.json`) against their declared JSON Schema metaschema, where configured in `.pre-commit-config.yaml`.
 
 `.pre-commit-config.yaml` is the authoritative list of active hooks. Do **not** rely on a hardcoded total hook count when describing the validation model; consult `.pre-commit-config.yaml` directly to see which hooks are wired up. For the policy and rationale behind which real load-bearing configuration files receive built-in schema validation, see the **Built-in Schema Validation for Real Load-Bearing Configuration Files** ADR in [`.github/TEMPLATE_DESIGN_DECISIONS.md`](TEMPLATE_DESIGN_DECISIONS.md).
 
 Prettier is **opt-in** and is **not** part of the default data-file toolchain. (This framing has been re-verified against the built-in schema validation ADR and remains correct.)
 
-> **Schema example tests.** The contract that valid example fixtures pass and invalid example fixtures fail is exercised by [`tests/test_schema_examples.py`](../tests/test_schema_examples.py). Run `pytest tests/test_schema_examples.py -v` after any schema or schema-example change. The dedicated [`.github/workflows/data-ci.yml`](workflows/data-ci.yml) workflow re-runs the data-file hooks (`check-json`, `check-yaml`, `yamllint`, `actionlint`, `check-jsonschema`, `check-metaschema`) so JSON/YAML/Actions enforcement can be made a required check via branch protection independent of the Python CI job. See [`schemas/README.md`](../schemas/README.md) for the worked example, the canonical downstream removal checklist, and future-work candidates. Downstream repositories MAY add additional `check-jsonschema` hook entries for their own schema-backed file families.
+> **Schema example hooks.** The worked-example schema remains in [`schemas/example-config.schema.json`](../schemas/example-config.schema.json) to keep the schema-validation toolchain exercised until a production macOSLab evidence schema replaces it. Run `pre-commit run check-jsonschema --all-files` and `pre-commit run check-metaschema --all-files` after any schema or schema-example change. The dedicated [`.github/workflows/data-ci.yml`](workflows/data-ci.yml) workflow re-runs the data-file hooks (`check-json`, `check-yaml`, `yamllint`, `actionlint`, `check-jsonschema`, `check-metaschema`) so JSON/YAML/Actions enforcement can be made a required check via branch protection. See [`schemas/README.md`](../schemas/README.md) for the worked example and evidence-schema replacement notes.
 >
 > **When schema contracts change**, agents updating any schema **MUST** keep the following in sync in the same change:
 >
 > - The schema file under `schemas/<name>.schema.json`.
 > - Valid example fixtures under `schemas/examples/<name>/valid/`.
-> - Invalid example fixtures under `schemas/examples/<name>/invalid/`.
+> - Invalid reference fixtures under `schemas/examples/<name>/invalid/`, when retained for documentation or future contract tests.
 > - The pre-commit hook scope in `.pre-commit-config.yaml`.
 > - `.github/workflows/data-ci.yml` only when **adding or removing a hook ID** (for example, introducing a new `check-yaml-custom` hook), or when adding, removing, or renaming an explicit CI step or hook alias that the workflow invokes by name. Changes to an **existing** hook's `files:` regex (including `check-jsonschema` scope changes) are picked up automatically, because each `data-ci.yml` step invokes hooks by ID via `pre-commit run <hook-id> --all-files`.
 > - The **Built-in Schema Validation for Real Load-Bearing Configuration Files** ADR in [`.github/TEMPLATE_DESIGN_DECISIONS.md`](TEMPLATE_DESIGN_DECISIONS.md) when **adding or removing** a default validated real load-bearing configuration file (for example, when wiring or unwiring a new built-in vendor schema).
-> - Any documentation that references the schema or the validation policy (for example, `schemas/README.md`, `README.md`, `CONTRIBUTING.md`, and `OPTIONAL_CONFIGURATIONS.md`).
+> - Any documentation that references the schema or the validation policy (for example, `schemas/README.md`, `README.md`, and `CONTRIBUTING.md`).
 
 ### For GitHub Copilot Coding Agent (Automated PRs)
 
@@ -158,15 +163,15 @@ For the rationale, see the **Workflow Version Pinning and Dependabot Coherence**
 
 ### Action versions in `uses:` references
 
-- Third-party action versions **MUST** remain directly visible in `uses:` references (for example, `actions/checkout@v6`, `hashicorp/setup-terraform@v4`) so Dependabot's `github-actions` ecosystem can update them.
+- Third-party action versions **MUST** remain directly visible in `uses:` references (for example, `actions/checkout@v6`, `actions/setup-node@v6`, and `actions/setup-python@v6`) so Dependabot's `github-actions` ecosystem can update them.
 - Repeated `uses:` references to the same action across jobs and steps are acceptable when each occurrence is a normal Dependabot-managed `uses:` reference. Dependabot updates each `uses:` line directly.
 - Do **NOT** store an action version in a workflow-level `env:` variable, comment, cache key, file path, shell literal, manually constructed image tag, or any other secondary location as a mirror of a `uses:` version. The `uses:` line **MUST** be the only authoritative source for the action version because Dependabot rewrites `uses:` references and will leave unrelated literals stale.
 - Do **NOT** copy a Dependabot-managed action version into secondary workflow locations that Dependabot will not reliably rewrite (for example, cache keys, file paths, shell commands, manually constructed image tags, or comments presented as authoritative version state).
-- If secondary workflow behavior needs to change when a `uses:` version changes, derive that behavior from a stable source that naturally changes with the workflow or tool configuration. Prefer cache keys scoped to the specific configuration file that governs the cached artifact — for example, `hashFiles('.pre-commit-config.yaml')` for pre-commit caches, `hashFiles('.tflint.hcl')` for TFLint plugin caches, or `hashFiles('**/.terraform.lock.hcl')` for Terraform provider caches, mirroring the pattern already used in this repository's workflows. Avoid broad wildcard patterns such as `hashFiles('.github/workflows/*.yml')` for cache keys: any unrelated workflow edit would invalidate every job's cache. The goal is to track the configuration that actually drives the cached content, not the workflow definition that consumes it.
+- If secondary workflow behavior needs to change when a `uses:` version changes, derive that behavior from a stable source that naturally changes with the workflow or tool configuration. Prefer cache keys scoped to the specific configuration file that governs the cached artifact — for example, `hashFiles('.pre-commit-config.yaml')` for pre-commit caches and `package-lock.json` for npm caches. Avoid broad wildcard patterns such as `hashFiles('.github/workflows/*.yml')` for cache keys: any unrelated workflow edit would invalidate every job's cache. The goal is to track the configuration that actually drives the cached content, not the workflow definition that consumes it.
 
 ### Tool versions passed as action inputs or shell arguments
 
-Tool versions that are not managed by Dependabot — for example, `terraform_version: "1.14.4"` passed to `hashicorp/setup-terraform@v4`, or `tflint_version: v0.51.1` passed to `terraform-linters/setup-tflint@v6` — **SHOULD** still avoid unnecessary duplication. If the same tool version is required in multiple workflow jobs or steps, prefer a single source of truth where GitHub Actions supports one, such as a workflow-level `env:` value for the CLI/tool version.
+Tool versions that are not managed by Dependabot — for example, `node-version: '20'` passed to `actions/setup-node@v6`, or `python-version: '3.x'` passed to `actions/setup-python@v6` for pre-commit tooling — **SHOULD** still avoid unnecessary duplication. If the same tool version is required in multiple workflow jobs or steps, prefer a single source of truth where GitHub Actions supports one, such as a workflow-level `env:` value for the CLI/tool version.
 
 ### Asymmetry: workflow-level `env:` for action versions vs. tool versions
 
@@ -179,8 +184,8 @@ The two categories are **not** symmetric, and the difference is the entire point
 
 Action wrapper versions and the tool versions they install are **separate pins** that travel through different channels:
 
-- `hashicorp/setup-terraform@v4` is the setup action version (managed by Dependabot via `uses:`).
-- `terraform_version: "1.14.4"` is the Terraform CLI version installed by that setup action (not managed by Dependabot; manually maintained).
+- `actions/setup-node@v6` is the setup action version (managed by Dependabot via `uses:`).
+- `node-version: '20'` is the Node.js runtime version installed by that setup action (not managed by Dependabot; manually maintained).
 
 Both pins exist in the same workflow step, but they update on different cadences and through different mechanisms. Do not conflate them.
 
@@ -191,8 +196,8 @@ If a Dependabot-managed dependency genuinely cannot be represented only through 
 ### Concrete examples in this repository
 
 - Pinned action majors such as `actions/checkout@v6`, `actions/setup-python@v6`, `actions/cache@v5`, and `actions/setup-node@v6` appear repeatedly in workflow `uses:` lines. These are acceptable because each occurrence is a normal Dependabot-managed `uses:` reference.
-- `terraform_version: "1.14.4"` appears in multiple jobs in [`.github/workflows/terraform-ci.yml`](workflows/terraform-ci.yml). This is a Terraform CLI version (not the `hashicorp/setup-terraform` action version), so it is **not** a Dependabot `uses:` desynchronization case. It is a useful candidate for a future single source of truth (such as a workflow-level `env:` value) if duplication grows; refactoring existing workflows to that shape is out of scope for this rule.
-- `tflint_version: v0.51.1` is passed to `terraform-linters/setup-tflint@v6`. This is a tool-version pin distinct from the setup action version; the same dual-pin model applies.
+- `node-version: '20'` in [`.github/workflows/markdownlint.yml`](workflows/markdownlint.yml) is a Node.js runtime version, not the `actions/setup-node` action version, so it is **not** a Dependabot `uses:` desynchronization case.
+- `python-version: '3.x'` in pre-commit workflows is a runtime selector for Python-based development tooling. Python is not project source code in this repository unless Python source files and project configuration are intentionally introduced.
 
 ## Repository Self-Containment
 
@@ -208,7 +213,7 @@ It applies to, but is not limited to:
 
 Do not embed references to:
 
-- Work stream identifiers, sprint names, milestone labels, or phase numbers that are not defined inside this repository.
+- Work stream identifiers, sprint names, milestone labels, or implementation-stage labels that are not defined inside this repository.
 - Ticket, issue, or project IDs that resolve only inside a private or external tracker.
 - Internal team, person, or communication-channel names.
 - Roadmap, design, or planning documents that are not published in this repository or otherwise publicly resolvable from links in this repository.
@@ -232,8 +237,9 @@ For each PR-sized change:
   - Pre-commit hooks will auto-fix many issues (formatting, linting, whitespace).
   - Always review and commit these auto-fixes as part of your change.
 - Add/adjust tests for new behavior.
-  - Python: pytest tests in `tests/`
   - PowerShell: Pester tests in `tests/PowerShell/`
+  - Markdown/docs: `npm run lint:md` and `npm run lint:md:nested`
+  - Data/schema files: the applicable pre-commit hooks documented in `.pre-commit-config.yaml`
 - For data-file changes (JSON, JSONC, YAML, YAML-based GitHub Actions workflows), run the applicable validation hooks via `pre-commit run --all-files` so that `check-json`, `check-yaml`, `yamllint`, `actionlint`, and (where configured) `check-jsonschema` all pass before committing.
 - Keep changes small and reviewable; avoid "big bang" refactors.
 - Update docs/spec only if behavior is intentionally changed (and note why).
@@ -262,19 +268,9 @@ This repository uses modular instruction files covering both language-specific s
 | JSON | `.github/instructions/json.instructions.md` | `**/*.json`, `**/*.jsonc` |
 | Markdown/Docs | `.github/instructions/docs.instructions.md` | `**/*.md` |
 | PowerShell | `.github/instructions/powershell.instructions.md` | `**/*.ps1` |
-| Python | `.github/instructions/python.instructions.md` | `**/*.py` |
-| Terraform | `.github/instructions/terraform.instructions.md` | `**/*.tf`, `**/*.tfvars`, `**/*.tftest.hcl`, `**/*.tf.json`, `**/*.tftpl`, `**/*.tfbackend` |
 | YAML | `.github/instructions/yaml.instructions.md` | `**/*.yml`, `**/*.yaml` |
 
-**Note:** The PowerShell instructions include comprehensive guidance on Pester testing. The Terraform instructions include comprehensive guidance on Terraform Test framework.
-
-**To customize for your project:**
-
-- Remove instruction files for scopes you don't use
-- Add new instruction files for additional languages or cross-cutting rules as needed
-- Update this table to reflect the instruction files present in your project
-
-> **Terraform note:** If your project does not use Terraform, remove the Terraform instruction file (`.github/instructions/terraform.instructions.md`), remove the Terraform row from the table above, and remove Terraform-related entries from the Linting Configurations and Testing Tools sections below.
+**Note:** The PowerShell instructions include guidance on Pester testing. If future work adds a new source family such as Python or Terraform, add or restore the matching modular instruction file in the same change as the first meaningful code/tooling for that family.
 
 ## Agent Instruction Files
 
@@ -290,10 +286,7 @@ This repository includes agent instruction files at the repository root to suppo
 
 When explicitly authorized to modify high-priority shared guidance in `.github/copilot-instructions.md` (for example, canonical file location, safety rules, pre-commit expectations, validation commands, or language-instruction references), update the minimal summaries in any remaining agent files as needed. Avoid copying large shared sections into the entry point files.
 
-**To customize for your project:**
-
-- Remove agent files for platforms you do not use
-- Keep the remaining agent files limited to minimal inline summaries plus any necessary platform-specific guidance
+Keep the root agent files limited to minimal inline summaries plus any necessary platform-specific guidance.
 
 ## Linting Configurations
 
@@ -303,7 +296,6 @@ This repository includes linting tool configurations that align with the coding 
 | --- | --- | --- |
 | PSScriptAnalyzer | `.github/linting/PSScriptAnalyzerSettings.psd1` | PowerShell formatting/linting (OTBS style) |
 | markdownlint | `.markdownlint.jsonc` | Markdown linting |
-| TFLint | `.tflint.hcl` | Terraform linting |
 
 ### Running Linters
 
@@ -311,6 +303,7 @@ This repository includes linting tool configurations that align with the coding 
 
 ```bash
 npm run lint:md
+npm run lint:md:nested
 ```
 
 **PowerShell:**
@@ -319,39 +312,18 @@ npm run lint:md
 Invoke-ScriptAnalyzer -Path .\script.ps1 -Settings .\.github\linting\PSScriptAnalyzerSettings.psd1
 ```
 
-**Terraform:**
-
-```bash
-terraform fmt -check -recursive
-tflint --recursive
-```
-
 ## Testing Tools
 
-This repository includes testing infrastructure for Python, PowerShell, and Terraform:
+This repository currently includes testing infrastructure for PowerShell:
 
 | Language | Framework | Configuration | Test Location |
 | --- | --- | --- | --- |
-| Python | pytest | `pyproject.toml` (`[tool.pytest.ini_options]`) | `tests/` |
 | PowerShell | Pester 5.x | Inline in `.github/workflows/powershell-ci.yml` | `tests/PowerShell/` |
-| Terraform | Terraform Test (requires Terraform 1.6+) | Built-in | `modules/*/tests/` or `tests/` |
 
 ### Running Tests
-
-**Python:**
-
-```bash
-pytest tests/ -v --cov --cov-report=term-missing
-```
 
 **PowerShell:**
 
 ```powershell
 Invoke-Pester -Path tests/ -Output Detailed
-```
-
-**Terraform:**
-
-```bash
-terraform test -verbose
 ```

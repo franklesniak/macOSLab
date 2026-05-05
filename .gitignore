@@ -1,7 +1,7 @@
 # Dependencies
 node_modules/
 
-# Python
+# Python tool environments and caches
 __pycache__/
 *.py[cod]
 *$py.class
@@ -22,9 +22,40 @@ htmlcov/
 # Pre-commit
 .pre-commit-cache/
 
-# OS files
+# macOS and local lab artifacts
 .DS_Store
 Thumbs.db
+*.ipsw
+*.dmg
+*.iso
+*.app/
+*.pvm/
+*.utm/
+evidence/
+Evidence/
+.maclab/
+media-cache/
+.media-cache/
+vm-cache/
+.vm-cache/
+screenshots/
+recordings/
+*.mov
+*.mp4
+*.heic
+*.png
+*.jpg
+*.jpeg
+testResults.xml
+
+# Secrets and local credentials
+.envrc
+*.pem
+*.p12
+*.pfx
+*.key
+id_rsa*
+*.token
 
 # IDE
 .vscode/*
