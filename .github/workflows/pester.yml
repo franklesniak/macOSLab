@@ -1,0 +1,88 @@
+name: Pester
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  PESTER_VERSION: '5.7.1'
+
+jobs:
+  pester:
+    name: Pester and PSScriptAnalyzer
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Confirm PowerShell 7.4 or newer
+        shell: pwsh
+        run: |
+          if ($PSVersionTable.PSVersion -lt [version]'7.4') {
+            throw "PowerShell 7.4 or newer is required. Found $($PSVersionTable.PSVersion)."
+          }
+
+      - name: Install PowerShell test modules
+        shell: pwsh
+        run: |
+          Install-Module -Name Pester -RequiredVersion $env:PESTER_VERSION -Force -Scope CurrentUser
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+          Import-Module Pester
+          Import-Module PSScriptAnalyzer
+          Write-Host "Pester version: $((Get-Module Pester).Version)"
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $settingsPath = '.github/linting/PSScriptAnalyzerSettings.psd1'
+          $candidatePath = @('src', 'scripts', 'examples/MMSMOA-2026')
+          $existingPath = @(
+            foreach ($path in $candidatePath) {
+              if (Test-Path -LiteralPath $path) {
+                $path
+              }
+            }
+          )
+
+          if ($existingPath.Count -eq 0) {
+            Write-Host 'No PowerShell source paths exist yet.'
+            return
+          }
+
+          $results = @(
+            foreach ($path in $existingPath) {
+              Invoke-ScriptAnalyzer -Path $path -Recurse -Settings $settingsPath
+            }
+          )
+
+          if ($results.Count -gt 0) {
+            $results | Format-Table -AutoSize
+            throw 'PSScriptAnalyzer found issues.'
+          }
+
+      - name: Run Pester
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = 'tests/'
+          $config.Run.Exit = $true
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.TestResult.OutputPath = 'testResults.xml'
+          $config.Output.Verbosity = 'Detailed'
+
+          Invoke-Pester -Configuration $config
+
+      - name: Upload Pester results
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: pester-results
+          path: testResults.xml
+          if-no-files-found: ignore

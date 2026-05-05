@@ -10,7 +10,7 @@
 - **Related:** [Start Here](docs/Start-Here.md), [Prerequisites](docs/Prereqs.md), [macOSLab repository specification](docs/spec/macOSLab-repository-spec.md), [macOSLab ADRs](docs/planning/macOS-imaging-08e-ADRs.md)
 
 [![Pre-commit CI](https://github.com/franklesniak/macOSLab/actions/workflows/precommit-ci.yml/badge.svg)](https://github.com/franklesniak/macOSLab/actions/workflows/precommit-ci.yml)
-[![PowerShell CI](https://github.com/franklesniak/macOSLab/actions/workflows/powershell-ci.yml/badge.svg)](https://github.com/franklesniak/macOSLab/actions/workflows/powershell-ci.yml)
+[![Pester](https://github.com/franklesniak/macOSLab/actions/workflows/pester.yml/badge.svg)](https://github.com/franklesniak/macOSLab/actions/workflows/pester.yml)
 [![Markdown lint](https://github.com/franklesniak/macOSLab/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/franklesniak/macOSLab/actions/workflows/markdownlint.yml)
 [![Data CI](https://github.com/franklesniak/macOSLab/actions/workflows/data-ci.yml/badge.svg)](https://github.com/franklesniak/macOSLab/actions/workflows/data-ci.yml)
 
