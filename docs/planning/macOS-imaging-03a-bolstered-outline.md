@@ -5,9 +5,9 @@
 
 - **Status:** Draft
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-04
+- **Last Updated:** 2026-05-05
 - **Scope:** Talk-development working artifact for the MMSMOA 2026 session: "Don't Brick the CEO's Mac: MMSMOA 2026 Session Plan and Speaker Runbook". Captures interim concepting, prioritization, outline, or runbook content for that session; not a final published deliverable.
-- **Related:** [Merged repository specification](macOS-imaging-08c-merged.md), [Architecture decision records](macOS-imaging-08e-ADRs.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
+- **Related:** [macOSLab repository specification](../spec/macOSLab-repository-spec.md), [Architecture decision records](macOS-imaging-08e-ADRs.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
 
 ## Document Conventions
 
@@ -31,8 +31,10 @@ The session outline now aligns with the final `macOSLab` repository decisions:
 - The companion repository is `franklesniak/macOSLab`, public, MIT-licensed, and initialized from `franklesniak/copilot-repo-template`.
 - The automation floor is PowerShell 7.4 or newer. PowerShell 5.1 compatibility is not part of the talk or repository promise.
 - The initial Pester version is 5.7.1. The inherited template's PowerShell CI should use `macos-latest`; Python CI can be removed if no Python sample content remains.
-- The live demo target is macOS Tahoe 26.4.1. The repo should also support currently Apple-supported macOS compatibility targets, initially macOS Sequoia 15.7.5 and macOS Sonoma 14.8.5.
+- The live demo target is macOS Tahoe 26.4.1 when the demo host is also on macOS 26.x. The repo should also support currently Apple-supported macOS compatibility targets, initially macOS Sequoia 15.7.5 and macOS Sonoma 14.8.5, but only after host/provider preflight confirms the requested host/guest pairing.
 - The primary live provider remains Parallels Desktop Pro Edition. UTM remains the provider-swap path. Tart is optional and stubbed in v1 unless explicitly approved later.
+- macOS guests on Apple Silicon must be framed as Apple Virtualization framework workloads. Same-major host/guest macOS is the only vendor-documented guaranteed path in current Parallels guidance; higher-than-host guests must be treated as unsupported by default or explicitly owner-approved after rehearsal evidence.
+- Full coverage across every currently supported macOS major version may require more than one Apple-silicon host. If the same-major rule is applied strictly for macOS 14.8.5, macOS 15.7.5, and macOS 26.4.1, plan for up to three host Macs, one on each major version, and verify that each physical Mac model can actually run the required host macOS.
 - Tart and Orchard are discussed as Fair Source/free-tier tools: Tart's free-tier documentation describes a 100 CPU-core limit, and Orchard's free-tier documentation describes a 4-worker limit. This is practical planning guidance, not legal advice.
 - Apple licensing should be framed around Apple-branded host hardware, permitted purposes, and the commonly relevant boundary of up to two additional macOS virtual instances per Apple-branded host under Apple's current macOS terms. Do not present that as blanket enterprise legal advice.
 - The public v1 repo should not ship checked-in example screenshots. Local rehearsal screenshots and deck screenshots are still allowed if fully redacted and kept out of the repo unless a later Phase 10 TODO explicitly approves visual artifacts.
@@ -361,7 +363,7 @@ Stage phrase:
 
 ### Host and Guest Version Caution
 
-Avoid an oversimplified rule like "host must always be same or newer" unless you qualify it.
+Avoid an oversimplified rule like "host must always be same or newer." Current Parallels guidance is stricter for the guaranteed path: same-major host and guest macOS. Higher-than-host guests may fail, and lower-than-host guests are still provider/version-dependent rather than a blanket promise.
 
 Better wording:
 
@@ -370,6 +372,10 @@ Better wording:
 Practical rule:
 
 - Keep the host on a known-good build for the life of a demo or regression cycle.
+- Prefer a host whose macOS major version matches the demo guest's macOS major version.
+- Treat every cross-major host/guest pairing as a rehearsal item that needs explicit provider evidence before it appears in a live demo, script default, or published compatibility claim.
+- Treat full major-version coverage as a host-fleet problem, not only a disk-space problem. Supporting macOS 14.x, 15.x, and 26.x with same-major host/guest pairings may require up to three Mac systems.
+- Remember that Mac hardware has a minimum supported macOS version. Newer hardware may not boot older host macOS releases, which means it also cannot provide the same-major host for older macOS guest testing.
 - Record host macOS version, hypervisor version, guest macOS version, and guest build in every evidence bundle.
 - Re-run the lab readiness tests after host updates, hypervisor updates, and major Intune/Defender policy changes.
 
@@ -377,11 +383,21 @@ Initial guest-version policy:
 
 | Purpose | macOS target | Stage meaning |
 | --- | --- | --- |
-| Live MMSMOA demo | macOS Tahoe 26.4.1 | Primary version for the demo VMs. |
-| Compatibility target | macOS Sequoia 15.7.5 | Keep the repo usable for supported 15.x environments. |
-| Compatibility target | macOS Sonoma 14.8.5 | Keep the repo usable for supported 14.x environments. |
+| Live MMSMOA demo | macOS Tahoe 26.4.1 | Primary version for the demo VMs when the host is also macOS 26.x. |
+| Compatibility target | macOS Sequoia 15.7.5 | Keep the repo usable for supported 15.x environments after host/provider preflight confirms the pairing. |
+| Compatibility target | macOS Sonoma 14.8.5 | Keep the repo usable for supported 14.x environments after host/provider preflight confirms the pairing. |
 
-The rule is not "support only these three patch versions forever." The rule is "support the macOS versions Apple currently supports, and record the exact host/guest/build values used for each evidence run."
+The rule is not "support only these three patch versions forever." The rule is "support the macOS versions Apple currently supports, verify host/provider compatibility before creation, and record the exact host/guest/build values used for each evidence run."
+
+Host hardware planning examples:
+
+| Desired guest coverage | Preferred same-major host | Hardware planning implication |
+| --- | --- | --- |
+| macOS Sonoma 14.8.5 | macOS 14.x host | Requires Apple-silicon hardware that can boot macOS 14. Newer Mac models that shipped after macOS 14 may not be usable for this host role. |
+| macOS Sequoia 15.7.5 | macOS 15.x host | A Mac mini M4-class host is a reasonable planning example for macOS 15 and can also be upgraded later, but upgrading it to macOS 26 changes its same-major VM coverage. |
+| macOS Tahoe 26.4.1 | macOS 26.x host | Newer M5-era hosts may be pinned to macOS 26 as their minimum host OS, making them good macOS 26 lab hosts but poor choices for same-major macOS 14 or 15 VM coverage. |
+
+The stage-friendly simplification is: one known-good host can carry the demo. The enterprise-lab truth is: if you must continuously validate every supported macOS major version, budget for a small host matrix and check each Mac model's minimum and maximum supported macOS before buying or repurposing hardware.
 
 ### Apple Virtualization Framework and QEMU
 
@@ -389,8 +405,9 @@ Keep this to one practical slide.
 
 - Apple's Virtualization framework is the first-party foundation for supported macOS guest virtualization on Apple Silicon.
 - Parallels macOS Arm guests use Apple's Virtualization framework.
-- UTM can use Apple Virtualization and QEMU depending on the guest and configuration.
+- UTM can use Apple Virtualization and QEMU depending on the guest and configuration, but virtualized macOS guests on Apple Silicon use Apple Virtualization rather than QEMU.
 - Tart uses Apple's Virtualization framework and is designed for automation-heavy workflows.
+- The same-major host/guest caution applies to macOS guests across Parallels, UTM with Apple Virtualization, and any future Tart macOS-guest path. It does not describe non-macOS guests or UTM/QEMU emulation paths outside this repo's macOS VM scope.
 - The practical impact is that provider automation surfaces differ.
 
 Do not make attendees feel they must become Virtualization framework developers.
@@ -404,6 +421,7 @@ Example:
 | Component | Version tested | Why it matters |
 | --- | --- | --- |
 | Host macOS | `<host-macOS-version>` | Determines restore-image compatibility and Virtualization framework behavior. |
+| Host/guest pairing | `same-major` / `cross-major-tested` / `rejected` | Shows whether the macOS guest pairing is guaranteed, rehearsed as best effort, or blocked. |
 | Parallels Desktop | `<parallels-version>` | macOS Arm snapshot and CLI behavior can vary by version. |
 | UTM | `<utm-version>` | Automation and template behavior can vary by version. |
 | PowerShell | `<powershell-version>`; must be 7.4 or newer | Cross-platform module behavior and remoting behavior. |
@@ -598,7 +616,9 @@ Script these in speaker notes:
 
 ### Hardware
 
-Use one primary Apple-silicon Mac for the full demo chain. Bring a second Mac if available, but do not design the session around needing two.
+Use one primary Apple-silicon Mac for the full demo chain. Bring a second Mac if available, but do not design the live session around needing a multi-host matrix.
+
+For real lab planning, do not let the one-host stage plan hide the compatibility constraint. If the organization needs reliable same-major coverage for macOS 14.x, 15.x, and 26.x, it may need up to three Apple-silicon Macs, each capable of running the matching host macOS major version. Newest hardware is not automatically the best lab hardware for older guest coverage because it may not support older host macOS releases.
 
 Minimum practical recommendation:
 
@@ -827,6 +847,7 @@ Slide: "Choose based on operating model."
 | Cost | Commercial subscription. | Free direct download; optional paid App Store convenience. |
 | Admin UX | Highest polish for local desktop workflows. | Good experimentation UX. |
 | Automation surface | `prlctl` is strong for many lifecycle operations in Pro/Business workflows. | `utmctl`, AppleScript, Shortcuts, and templates; automation coverage differs by feature. |
+| macOS guest compatibility | Same-major host/guest macOS is the safest default; cross-major pairings require rehearsal evidence. | Same Apple Virtualization host/guest caution for macOS guests; UTM/QEMU differences matter for non-macOS guests, not this macOS VM path. |
 | Snapshots/clones | Useful in current versions; confirm Parallels Desktop 20+ for macOS Arm VM snapshots. | Useful, but workflow differs and may require template/config discipline. |
 | Stage reliability | Strong local demo choice when version-checked. | Good provider-swap proof if prepared. |
 | Procurement story | Easier for many enterprises. | Easier where no tool budget exists. |
@@ -965,6 +986,7 @@ Goal: show the polished commercial path and PowerShell driving provider-specific
 Live path:
 
 - Confirm Parallels version supports the macOS Arm VM features used in the demo.
+- Confirm the host macOS major version matches the demo guest, or show the recorded rehearsal evidence for any cross-major pairing.
 - Create or register the VM from a prepared restore image.
 - Apply sizing profile.
 - Start the VM or jump to a created VM.
@@ -1015,6 +1037,7 @@ Live path:
 
 - Switch provider parameter from Parallels to UTM.
 - Show UTM template/config artifact.
+- Confirm the UTM path uses Apple Virtualization for the macOS guest and the same host/guest compatibility classification used by the Parallels path.
 - Start or inspect the UTM VM.
 - Show that the same higher-level validation flow still applies.
 
@@ -1228,7 +1251,7 @@ Six buckets. Few enough that the slide is a real menu rather than a wall of text
 
 | Bucket | Example questions |
 | --- | --- |
-| Lab construction and lifecycle | How much RAM? Parallels or UTM? How do I keep old builds across host upgrades? How do I size for two concurrent VMs? |
+| Lab construction and lifecycle | How much RAM? Parallels or UTM? Do I need one host per macOS major version? How do I keep old builds across host upgrades? How do I size for two concurrent VMs? |
 | Enrollment, tenant strategy, and cleanup | Demo tenant or production? How do I avoid stale Intune/Entra records after a rollback? What is the right teardown ritual? |
 | Risky-policy validation | What can I prove for FileVault in a VM? How do I really test Defender? What is the PPPC nuance I keep missing? |
 | Compliance and Conditional Access timing | Why does Intune say one thing and Entra another? How do I avoid waiting on CA during a live demo? |
@@ -1589,6 +1612,12 @@ Answer:
 
 > If you need the most polished local enterprise workflow and can buy a commercial tool, start with Parallels. If you need no-cost experimentation and can accept more template/configuration work, start with UTM. If you want CI image distribution and CLI-first runner workflows, look at Tart as a second phase.
 
+### "Do I need three Macs to support every macOS version?"
+
+Answer:
+
+> Maybe. If you apply the same-major host/guest rule strictly and you need reliable coverage for macOS 14, 15, and 26 at the same time, plan for up to three Apple-silicon hosts, each running the matching host major version. New hardware may not boot older macOS releases, so an M5-era Mac may be a great macOS 26 host but a poor macOS 14 or 15 lab host. Conversely, a Mac mini M4-class host is useful for macOS 15 and can move to macOS 26, but it is not the answer for same-major macOS 14 coverage. Verify the specific Mac model against Apple's compatibility lists before buying lab hardware.
+
 ### "Why PowerShell instead of shell scripts?"
 
 Answer:
@@ -1725,14 +1754,15 @@ Re-check these close to the event because Apple, Parallels, UTM, Tart, and Micro
 
 - Apple Software License Agreements.
 - Apple Developer Virtualization framework documentation.
+- [Apple Support: How to download and install macOS](https://support.apple.com/en-us/102662), especially the compatibility and installer-download notes that macOS versions must be compatible with the Mac and no earlier than the version that came with it.
 - Apple Support APNs and enterprise network requirements.
 - Apple Platform Deployment PPPC payload documentation.
 - Apple Platform Security notes for FileVault and Secure Enclave behavior.
-- Parallels KB: installing macOS VMs on Apple Silicon.
-- Parallels KB: known limitations of macOS Arm VMs.
-- Parallels command-line interface documentation.
-- UTM scripting and `utmctl` documentation.
-- Tart documentation and license.
+- [Parallels CLI: Create a Virtual Machine](https://docs.parallels.com/landing/parallels-desktop-developers-guide/command-line-interface-utility/manage-virtual-machines-from-cli/general-virtual-machine-management/create-a-virtual-machine), especially the same-major host/guest note for Apple Silicon macOS VMs.
+- [Parallels KB 128867: Known limitations of macOS virtual machines on Mac computers with Apple silicon](https://kb.parallels.com/en/128867), especially Apple Virtualization framework limits, snapshots, USB, networking, and higher-than-host guest warnings.
+- [UTM macOS guest support](https://docs.getutm.app/guest-support/macos/), especially Apple Virtualization requirements and IPSW guidance.
+- [UTM Apple backend settings](https://docs.getutm.app/settings-apple/settings-apple/), especially the note that Apple Virtualization is the only UTM path for virtualized macOS on Apple Silicon.
+- [Tart documentation](https://tart.run/) and license.
 - mist-cli documentation.
 - Microsoft Learn: macOS management in Intune.
 - Microsoft Learn: FileVault with Intune.

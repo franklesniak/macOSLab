@@ -8,7 +8,7 @@
 - **Owner:** Repository Maintainers
 - **Last Updated:** 2026-05-05
 - **Scope:** Historical task instructions used for the initial Phase 0 bootstrap work in `franklesniak/macOSLab`. This document is retained for context; current repository rules live in the related governance and planning documents.
-- **Related:** [`README.md`](../README.md), [`AGENTS.md`](../AGENTS.md), [Repository Copilot Instructions](../.github/copilot-instructions.md), [Phase 0 PR description](phase-0-bootstrap-pr-description.md), [macOSLab repository specification](planning/macOS-imaging-08c-repo-spec-final.md), [macOSLab ADRs](planning/macOS-imaging-08e-ADRs.md)
+- **Related:** [`README.md`](../README.md), [`AGENTS.md`](../AGENTS.md), [Repository Copilot Instructions](../.github/copilot-instructions.md), [Phase 0 PR description](phase-0-bootstrap-pr-description.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md), [macOSLab ADRs](planning/macOS-imaging-08e-ADRs.md)
 
 ## Purpose
 

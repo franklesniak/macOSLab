@@ -7,7 +7,7 @@
 - **Owner:** Frank Lesniak
 - **Last Updated:** 2026-05-05
 - **Scope:** Minimal bootstrap README for `franklesniak/macOSLab`. Full user-facing setup and operating documentation is planned for Phase 1.
-- **Related:** [Phase 0 bootstrap instructions](docs/phase-0-bootstrap-codex-instructions.md), [macOSLab repository specification](docs/planning/macOS-imaging-08c-repo-spec-final.md), [macOSLab ADRs](docs/planning/macOS-imaging-08e-ADRs.md)
+- **Related:** [Phase 0 bootstrap instructions](docs/phase-0-bootstrap-codex-instructions.md), [macOSLab repository specification](docs/spec/macOSLab-repository-spec.md), [macOSLab ADRs](docs/planning/macOS-imaging-08e-ADRs.md)
 
 `macOSLab` is a PowerShell 7.4+ starter kit for building reproducible Apple-silicon macOS VM labs for Intune policy testing. The repository is initialized from [`franklesniak/copilot-repo-template`](https://github.com/franklesniak/copilot-repo-template) and is being tailored for the `MacLab` PowerShell module.
 

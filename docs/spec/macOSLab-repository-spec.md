@@ -5,9 +5,9 @@
 
 - **Status:** Draft for owner approval
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-04
+- **Last Updated:** 2026-05-05
 - **Scope:** Human-readable implementation specification for creating the public `franklesniak/macOSLab` repository from the [`franklesniak/copilot-repo-template`](https://github.com/franklesniak/copilot-repo-template). It defines repository identity, authority hierarchy, safety rules, functional requirements, file layout, PowerShell module contracts, provider contracts, scripts, examples, documentation, tests, CI, phase gates, and definition of done.
-- **Related:** [Original prompt](macOS-imaging-08-repo-spec.md), [Bolstered outline](macOS-imaging-03a-bolstered-outline.md), [Software runbook](macos-imaging-05c-recommended-software-step-by-step-revised.md), [Repository description](macos-imaging-06a-repo-description.md), [CFP submission](macOS-imaging-01a-CFP-submission.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Architecture decision records](macOS-imaging-08e-ADRs.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md), [PowerShell Writing Style](../../.github/instructions/powershell.instructions.md)
+- **Related:** [Original prompt](../planning/macOS-imaging-08-repo-spec.md), [Bolstered outline](../planning/macOS-imaging-03a-bolstered-outline.md), [Software runbook](../planning/macos-imaging-05c-recommended-software-step-by-step-revised.md), [Repository description](../planning/macos-imaging-06a-repo-description.md), [CFP submission](../planning/macOS-imaging-01a-CFP-submission.md), [Closed questions archive](../planning/macOS-imaging-08d-closed-questions-archive.md), [Architecture decision records](../planning/macOS-imaging-08e-ADRs.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md), [PowerShell Writing Style](../../.github/instructions/powershell.instructions.md)
 
 ## 1. Approval Summary
 
@@ -58,7 +58,7 @@ If you only have 15 minutes:
 3. Read Section 9, "Security and Redaction Requirements."
 4. Skim Section 14, "Repository File Map."
 5. Read Section 21, "Implementation Phases."
-6. Consult the [closed questions archive](macOS-imaging-08d-closed-questions-archive.md) only if you need historical rationale for a decision.
+6. Consult the [closed questions archive](../planning/macOS-imaging-08d-closed-questions-archive.md) only if you need historical rationale for a decision.
 
 ## 4. Approval Checklist
 
@@ -212,11 +212,13 @@ For initial implementation and rehearsal, the support matrix is:
 
 | Purpose | macOS major version | Initial version target | Notes |
 | --- | --- | --- | --- |
-| Live MMSMOA demo path | macOS Tahoe 26.x | `26.4.1` | Primary demo VM version. |
-| Compatibility target | macOS Sequoia 15.x | `15.7.5` | Supported compatibility target for users who are not ready for 26.x. |
-| Compatibility target | macOS Sonoma 14.x | `14.8.5` | Supported compatibility target for users still on 14.x. |
+| Live MMSMOA demo path | macOS Tahoe 26.x | `26.4.1` | Primary demo VM version when the host is also macOS 26.x. |
+| Compatibility target | macOS Sequoia 15.x | `15.7.5` | Compatibility target for users whose host/provider preflight confirms this pairing. |
+| Compatibility target | macOS Sonoma 14.x | `14.8.5` | Compatibility target for users whose host/provider preflight confirms this pairing. |
 
 Future updates SHOULD track the macOS versions Apple currently supports with security updates. The implementation MUST record exact host macOS, guest macOS, and build numbers in the Provider Version Matrix rather than relying on marketing version names alone.
+
+For macOS guests on Apple-silicon hosts, the implementation MUST treat host/guest compatibility as a provider preflight gate, not as a static version table. The default supported path is a macOS guest whose major version matches the host's macOS major version. Cross-major guests MAY be documented as compatibility targets only when provider documentation or owner-supplied preflight evidence confirms they work on the specific host/provider combination. A guest macOS major version greater than the host macOS major version MUST be rejected by default or require an explicit owner-approved override because current Parallels guidance warns that this may not run reliably.
 
 ### 8.2 Out of Scope
 
@@ -383,6 +385,15 @@ For initial documentation, use the macOS Tahoe software license agreement as the
 - The repo MUST NOT claim to provide legal advice or replace the user's vendor/procurement review.
 
 This boundary belongs in `docs/Apple-Silicon-Constraints.md`, `docs/Hypervisor-Decision-Guide.md`, and `docs/CI-and-Tart.md`.
+
+The repository documentation MUST also explain the Apple Virtualization framework compatibility boundary for macOS guests on Apple silicon:
+
+- Current [Parallels CLI documentation](https://docs.parallels.com/landing/parallels-desktop-developers-guide/command-line-interface-utility/manage-virtual-machines-from-cli/general-virtual-machine-management/create-a-virtual-machine) states that, on Apple silicon, the only guaranteed macOS VM compatibility scenario is a guest with the same macOS major version as the host.
+- Current [Parallels macOS Arm VM limitations](https://kb.parallels.com/en/128867) state that Parallels macOS Arm VMs are built on Apple's Virtualization framework and that running a macOS VM with a version higher than the host may not be possible.
+- Current [UTM macOS guest documentation](https://docs.getutm.app/guest-support/macos/) describes macOS guests on Apple silicon as Apple Virtualization-backed and recommends the most compatible IPSW. Current [UTM Apple backend documentation](https://docs.getutm.app/settings-apple/settings-apple/) states that Apple Virtualization is the only way UTM runs virtualized macOS on Apple silicon.
+- Current [Tart documentation](https://tart.run/) describes Tart as using Apple's native Virtualization.Framework.
+
+This compatibility boundary applies to Parallels, UTM when running macOS guests on Apple Virtualization, and any later Tart macOS-guest implementation. It does not automatically apply to non-macOS guests or to UTM/QEMU emulation paths that are outside this repository's macOS VM scope.
 
 | Color | Meaning | Examples |
 | --- | --- | --- |
@@ -1159,6 +1170,9 @@ Each provider file MUST expose provider-specific primitives that the public cmdl
 - Providers do not delete VMs, snapshots, or media without confirmation/`ShouldProcess`.
 - Providers use shared networking, not bridged networking, by default.
 - Providers disable host-to-guest sharing features that blur identity boundaries unless a future owner-approved change explicitly permits them.
+- Providers MUST compare host macOS major version, requested guest macOS major version, provider, and restore-image metadata before creating a macOS VM.
+- Providers MUST report whether the requested host/guest pairing is same-major supported, documented cross-major best effort, or rejected.
+- Providers MUST include the host/guest compatibility classification in the Provider Version Matrix when a VM is created or evidence is written.
 
 ### 17.4 Parallels Provider
 
@@ -1169,6 +1183,7 @@ Required behavior:
 - Detect `prlctl`.
 - Capture Parallels version and edition where possible.
 - Warn if Standard edition is detected because the demo assumes Pro or Business automation.
+- Enforce the Apple Virtualization host/guest compatibility gate in Section 8.1.1 before `prlctl create`.
 - Create/register VMs from the chosen artifact path.
 - Start and stop VMs.
 - Create, list, and restore snapshots/checkpoints.
@@ -1184,6 +1199,7 @@ Required behavior:
 
 - Detect UTM and `utmctl` where available.
 - Enforce Apple Virtualization for macOS guests, not QEMU emulation.
+- Enforce the Apple Virtualization host/guest compatibility gate in Section 8.1.1 before creating or importing a macOS guest.
 - Use Shared Network, not bridged.
 - Reference `examples/utm/macos-lab-template.utm.json`.
 - Where `utmctl` cannot perform a primitive, throw a clear "manual step required" error and link to the documented procedure.
@@ -1197,6 +1213,7 @@ The v1 provider MAY be a stub that:
 
 - Implements `Test-ProviderInstalled_Tart`.
 - Implements `Get-ProviderVersion_Tart`.
+- Documents the Apple Virtualization host/guest compatibility gate if a later owner-approved change adds macOS guest creation.
 - Throws a clear "Tart provider is documented but not implemented in v1" error for all mutating primitives.
 - Points to `docs/CI-and-Tart.md`.
 
@@ -1632,7 +1649,7 @@ The v1 build is complete when all of these are true on `main`:
 
 ## 24. Owner Decisions Archive
 
-Closed owner decisions and implementation uncertainties are archived in [macOS-imaging-08d-closed-questions-archive.md](macOS-imaging-08d-closed-questions-archive.md). Durable decisions are recorded in [macOS-imaging-08e-ADRs.md](macOS-imaging-08e-ADRs.md).
+Closed owner decisions and implementation uncertainties are archived in [macOS-imaging-08d-closed-questions-archive.md](../planning/macOS-imaging-08d-closed-questions-archive.md). Durable decisions are recorded in [macOS-imaging-08e-ADRs.md](../planning/macOS-imaging-08e-ADRs.md).
 
 The future coding agent MUST use this specification and the ADR file as the active contract. The archive is historical context, not a pending work list.
 

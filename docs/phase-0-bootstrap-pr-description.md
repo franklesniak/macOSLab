@@ -3,11 +3,13 @@
 
 ## Metadata
 
-- **Status:** Draft
+- **Status:** Deprecated
 - **Owner:** Repository Maintainers
 - **Last Updated:** 2026-05-05
-- **Scope:** PR-description content for the Phase 0 bootstrap branch. This records applied steps, skipped steps, manual owner actions, validation, and protected-instruction cleanup.
-- **Related:** [Phase 0 bootstrap instructions](phase-0-bootstrap-codex-instructions.md), [macOSLab repository specification](planning/macOS-imaging-08c-repo-spec-final.md), [macOSLab ADRs](planning/macOS-imaging-08e-ADRs.md)
+- **Scope:** Historical PR-description content for the Phase 0 bootstrap branch. This records applied steps, skipped steps, manual owner actions, validation, and protected-instruction cleanup; it is not the current pull request description.
+- **Related:** [Phase 0 bootstrap instructions](phase-0-bootstrap-codex-instructions.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md), [macOSLab ADRs](planning/macOS-imaging-08e-ADRs.md)
+
+This document is deprecated and retained only as historical bootstrap context. Do not use it as the current pull request description or as task authorization for future work.
 
 ## Summary
 

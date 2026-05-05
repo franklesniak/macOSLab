@@ -22,7 +22,7 @@ The valid examples are checked by the `Validate example-config valid examples` p
 
 ## Future Evidence Schema
 
-The repository specification defines the real evidence-bundle schema in Section 25 of [macOSLab Repository Specification](../docs/planning/macOS-imaging-08c-repo-spec-final.md#25-evidence-bundle-schema). Phase 7 must replace this worked example with that real schema and update `.pre-commit-config.yaml`, data-file CI, examples, and documentation in the same change.
+The repository specification defines the real evidence-bundle schema in Section 25 of [macOSLab Repository Specification](../docs/spec/macOSLab-repository-spec.md#25-evidence-bundle-schema). Phase 7 must replace this worked example with that real schema and update `.pre-commit-config.yaml`, data-file CI, examples, and documentation in the same change.
 
 That work is tracked in [TODO-Phase-07-Evidence-Pipeline.md](../TODO-Phase-07-Evidence-Pipeline.md).
 

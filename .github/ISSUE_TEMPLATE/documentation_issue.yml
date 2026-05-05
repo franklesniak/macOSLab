@@ -30,7 +30,7 @@ body:
     attributes:
       label: Where is it?
       description: Link to the file, section, or page where the issue exists.
-      placeholder: e.g., README.md#validation or docs/planning/macOS-imaging-08c-repo-spec-final.md
+      placeholder: e.g., README.md#validation or docs/spec/macOSLab-repository-spec.md
     validations:
       required: false
 

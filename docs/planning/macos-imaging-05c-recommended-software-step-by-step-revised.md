@@ -5,9 +5,9 @@
 
 - **Status:** Draft
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-04
+- **Last Updated:** 2026-05-05
 - **Scope:** Talk-development working artifact for the MMSMOA 2026 session: "Step-by-Step Acquisition & Installation Instructions". Captures interim concepting, prioritization, outline, or runbook content for that session; not a final published deliverable.
-- **Related:** [Merged repository specification](macOS-imaging-08c-merged.md), [Architecture decision records](macOS-imaging-08e-ADRs.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
+- **Related:** [macOSLab repository specification](../spec/macOSLab-repository-spec.md), [Architecture decision records](macOS-imaging-08e-ADRs.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
 
 Follow these steps **in order**. This document separates **software/services you acquire**, **host Mac prerequisites**, **host software installation**, **host verification**, **service configuration prerequisites**, **VM-baked software**, and **final verification**.
 
@@ -17,18 +17,20 @@ Follow these steps **in order**. This document separates **software/services you
 
 Use these fixed decisions while following the runbook:
 
-- The companion repo is `franklesniak/macOSLab`, initialized from `franklesniak/copilot-repo-template`.
-- The owner will create a separate template-initialization implementation guide before the coding agent builds the repo. This runbook verifies the resulting repo; it does not replace that guide.
+- The companion repo is `franklesniak/macOSLab`, initialized from `franklesniak/copilot-repo-template`, with Phase 0 bootstrap complete.
+- This runbook verifies the evolving starter kit; it does not replace the repository specification, ADRs, or implementation-phase instructions.
 - Use PowerShell 7.4 or newer only. PowerShell 5.1 compatibility is not a goal.
 - Pin Pester to 5.7.1 for the initial repo and rehearsal validation.
-- The primary demo guest is macOS Tahoe 26.4.1. Keep compatibility with currently Apple-supported macOS versions, initially macOS Sequoia 15.7.5 and macOS Sonoma 14.8.5.
+- The primary demo guest is macOS Tahoe 26.4.1 when the host is also on macOS 26.x. Keep compatibility with currently Apple-supported macOS versions, initially macOS Sequoia 15.7.5 and macOS Sonoma 14.8.5, but only after host/provider preflight confirms the requested host/guest pairing.
 - Use Parallels Desktop Pro Edition as the primary provider. Use UTM only if Demo 3 is live. Tart is optional and remains a v1 stub unless explicitly approved later.
+- macOS guests on Apple Silicon must be treated as Apple Virtualization framework workloads. Same-major host/guest macOS is the safest vendor-documented path; a guest newer than the host may fail, and any cross-major pairing needs explicit rehearsal evidence before it appears in a live demo or compatibility claim.
+- Full coverage across macOS 14.8.5, 15.7.5, and 26.4.1 may require up to three Apple-silicon host Macs, one per host macOS major version. Newer Mac hardware may not boot older host macOS releases, so it may not be suitable for same-major testing of older macOS guests.
 - Tart and Orchard publish Fair Source/free-tier terms. Treat Tart's 100 CPU-core free-tier limit and Orchard's 4-worker free-tier limit as planning constraints, not as legal advice.
 - Plan around Apple's current macOS license posture: Apple-branded host hardware, permitted purposes, and the commonly relevant boundary of up to two additional macOS virtual instances per Apple-branded host. Have legal/procurement confirm organizational use.
 - Keep `SECURITY.md` unchanged by default in the generated repo. Do not rewrite it.
 - `Reset-IntuneMacLabDevice.ps1` is report-only in v1. It identifies candidate stale cloud records and manual cleanup steps; it does not retire, soft-delete, or hard-delete Intune, Entra, or Defender records.
 - Do not commit example screenshots to the public v1 repo. Keep rehearsal/deck screenshots local unless later Phase 10 work explicitly approves checked-in visual artifacts.
-- If deferred work remains, create root per-phase TODO files such as `TODO-Phase-04-Media-Acquisition.md`, `TODO-Phase-05-Parallels-Provider.md`, `TODO-Phase-06-UTM-Provider.md`, `TODO-Phase-08-Validation-Loop.md`, and `TODO-Phase-10-Deferred-Work.md`. Omit a phase TODO file only when that phase has no deferred work.
+- If deferred work remains, create root per-phase TODO files such as `TODO-Phase-00-Branch-Protection.md`, `TODO-Phase-04-Media-Acquisition.md`, `TODO-Phase-05-Parallels-Provider.md`, `TODO-Phase-06-UTM-Provider.md`, `TODO-Phase-07-Evidence-Pipeline.md`, `TODO-Phase-08-Validation-Loop.md`, and `TODO-Phase-10-Deferred-Work.md`. Omit a phase TODO file only when that phase has no deferred work.
 
 ## Phase 1 — Acquire Licenses, Accounts, and Services
 
@@ -525,12 +527,19 @@ Do this **before** you spend time building or snapshotting VMs. Catching a broke
    pwsh --version
    code --version
    mist --help
+   mist version
+   mist help list
+   mist help download
    prlctl --version
+   prlctl list --help
+   prlctl snapshot-list --help
+   prlsrvctl info
    ```
 
 2. If installed, also verify:
 
    ```bash
+   /Applications/UTM.app/Contents/MacOS/utmctl list
    tart --version
    ```
 
@@ -577,9 +586,11 @@ Once the starter kit exists:
    - `tests/`
    - any demo scripts and example artifacts referenced from `docs/Start-Here.md`
    - root phase TODO files for any deferred work:
+     - `TODO-Phase-00-Branch-Protection.md`
      - `TODO-Phase-04-Media-Acquisition.md`
      - `TODO-Phase-05-Parallels-Provider.md`
      - `TODO-Phase-06-UTM-Provider.md`
+     - `TODO-Phase-07-Evidence-Pipeline.md`
      - `TODO-Phase-08-Validation-Loop.md`
      - `TODO-Phase-10-Deferred-Work.md`
 5. Stage the starter kit somewhere stable on disk (for example, `~/Demo/macOSLab`) and avoid moving or renaming it after this point — later steps and helper scripts assume a fixed local path.
@@ -617,7 +628,7 @@ Once the starter kit is checked out (Step 21) or otherwise generated:
    - `tests/Validation.Defender.Tests.ps1`
    - `.github/workflows/powershell-ci.yml`
 
-   These tests and the PowerShell GitHub Actions workflow are also **verified, not authored**, by this document. The workflow should use the inherited template's `macos-latest` runner pattern. If the generated repo contains Python sample workflow content but no Python code remains, that Python workflow content can be removed during implementation.
+   These tests and the PowerShell GitHub Actions workflow are also **verified, not authored**, by this document. The workflow should use the inherited template's `macos-latest` runner pattern. The Phase 0 bootstrap trims Python and Terraform sample/source content from this repository shape; Python may still appear only as a local tooling runtime for pre-commit hooks such as `check-jsonschema`.
 
 ### Step 23: Verify the `Protect-MacLabEvidence.ps1` evidence-protection helper
 
@@ -776,18 +787,33 @@ Phase 6 walks you from "no VM yet" through the three foundational snapshots (`Cl
    - At least **2× your largest VM disk** of free space on the host SSD (one copy for the live VM, one copy's worth of headroom for snapshot deltas and clones).
    - At least **(VM RAM + 4 GB)** of free physical RAM during demos (the host still needs RAM to run VS Code, PowerShell, the browser, screen recording, etc.).
 5. Plan around Apple's concurrency posture on Apple silicon: treat **two concurrent macOS guests per Apple-branded host** as the relevant design boundary to plan around, subject to Apple's current license terms and your organization's legal/procurement interpretation. Design the live talk around **one running VM at a time** — that is plenty for the planned demos, and it sidesteps the boundary entirely.
+6. Plan host hardware around **host/guest macOS major-version coverage**, not only CPU, RAM, and storage. Same-major host/guest macOS is the safest default for Apple-silicon macOS guests:
+   - If the organization needs reliable coverage for macOS 14.x, 15.x, and 26.x at the same time, plan for up to **three** Apple-silicon host Macs, one on each matching host macOS major version.
+   - Verify that each physical Mac model can boot the required host macOS before buying or repurposing it. Newer hardware may not boot older macOS releases, so it cannot provide the same-major host needed for older guest testing.
+   - A Mac mini M4-class host is a reasonable planning example for macOS 15.x and can later move to macOS 26.x, but upgrading it changes its same-major VM coverage.
+   - Newer M5-era hosts may be pinned to macOS 26.x as their minimum host OS, making them useful macOS 26 lab hosts but poor choices for same-major macOS 14.x or 15.x VM coverage.
+   - Do not try to solve older guest coverage by simply buying the newest Mac with the most RAM. Compatibility may require the right generation of Mac, not just a bigger Mac.
+
+   Host matrix planning example:
+
+   | Desired guest coverage | Preferred same-major host | Hardware planning implication |
+   | --- | --- | --- |
+   | macOS Sonoma 14.8.5 | macOS 14.x host | Requires Apple-silicon hardware that can boot macOS 14. Newer Mac models that shipped after macOS 14 may not be usable for this host role. |
+   | macOS Sequoia 15.7.5 | macOS 15.x host | Useful on hardware that supports macOS 15; upgrading that host to macOS 26 changes its same-major coverage. |
+   | macOS Tahoe 26.4.1 | macOS 26.x host | Useful for the live Tahoe demo path and newer hardware whose minimum host OS is macOS 26. |
 
 ### Step 28: Acquire and stage the pinned macOS restore image or provider-appropriate install artifact with `mist-cli`
 
 You already installed `mist-cli` in Step 12. Use it now to fetch the **exact** macOS build you intend to demo, rather than letting each hypervisor's "download macOS" UI pick whatever the App Store currently serves.
 
-For the MMSMOA demo, the initial target is macOS Tahoe 26.4.1. Keep the repo compatible with currently Apple-supported macOS versions, initially including macOS Sequoia 15.7.5 and macOS Sonoma 14.8.5, but do not demo a different version accidentally. Record the exact marketing version and build number every time.
+For the MMSMOA demo, the initial target is macOS Tahoe 26.4.1 when the host is also macOS 26.x. Keep the repo compatible with currently Apple-supported macOS versions, initially including macOS Sequoia 15.7.5 and macOS Sonoma 14.8.5, but do not demo a different version accidentally and do not assume every host can run every guest. Record the exact marketing version, build number, host macOS version/build, physical Mac model, provider, and host/guest compatibility classification every time.
 
 The goal of this step is **not** to produce a specific file extension. The goal is a **pinned, cached, recorded** macOS build that every hypervisor in your matrix consumes consistently. On Apple silicon, the appropriate artifact is a **restore image or provider-appropriate install artifact** (typically an `.ipsw` for UTM and the recovery/restore-image path for current Parallels) — not an ISO. The `.app` installer bundle that older Parallels workflows consumed is no longer the default Apple-silicon path; treat it as one possible artifact, not as *the* artifact.
 
 Whatever artifact your tested provider version actually consumes, the discipline is the same:
 
 - Pin the macOS version/build. For the live demo, use macOS Tahoe 26.4.1 unless you deliberately change the Provider Version Matrix before rehearsal.
+- Confirm the host macOS major version is compatible with the guest. Prefer same-major host/guest macOS; treat cross-major pairings as rehearsal-only until proven on the exact host/provider/version combination.
 - Acquire the correct restore image or provider-appropriate install artifact for that pinned build.
 - Cache it locally in a known path that your demo scripts and hypervisors can find.
 - Record metadata for it (version string, build number, source URL, date acquired, file size).
@@ -796,43 +822,57 @@ Whatever artifact your tested provider version actually consumes, the discipline
 
 > The important thing is not the file extension. The important thing is that the macOS build is pinned, cached, recorded, and used consistently across every hypervisor in your matrix.
 
-The concrete commands below walk the **`.app` installer** path with `mist download installer ... application` — the artifact most current Apple-silicon Parallels workflows still accept and that doubles as the live-demo fallback for Demo 1. **The matching `.ipsw` for the same pinned build is acquired in Step 30** (only if you build a UTM VM); the `mist`-driven workflow for the IPSW lives there so the artifact metadata stays linked to the same pinned build without duplicating the `mist` command surface here.
+The concrete commands below use the **firmware / IPSW** path because current Parallels CLI documentation shows Apple-silicon macOS VM creation from a restore image, and UTM macOS guests also consume IPSW restore images. The `.app` installer path may still be useful as a fallback or for adjacent workflows, but do not make it the default Apple-silicon VM artifact.
 
-1. In Terminal on the host Mac, list available macOS installers and pick the one you want to demo on:
-
-   ```bash
-   mist list installer
-   ```
-
-2. Download that installer to a known cache location. Pick a path you will remember (the demo scripts in the repo expect `~/Demo/Installers/` by default; adjust if you are using a different layout):
+1. In Terminal on the host Mac, create a durable media cache and capture the installed `mist` command surface:
 
    ```bash
    mkdir -p ~/Demo/Installers
-   sudo mist download installer "<exact version string from mist list>" application \
-     --application-name "Install macOS <version>.app" \
+   mist version > ~/Demo/Installers/mist-version.txt 2>&1 || true
+   mist --help > ~/Demo/Installers/mist-help.txt 2>&1 || true
+   mist help list > ~/Demo/Installers/mist-help-list.txt 2>&1 || true
+   mist help download > ~/Demo/Installers/mist-help-download.txt 2>&1 || true
+   ```
+
+2. List available firmware and compatible installer metadata. Firmware is the primary VM media path; installer metadata is retained as useful cross-check context and a fallback if a provider-specific workflow still needs it:
+
+   ```bash
+   mist list firmware --export ~/Demo/Installers/mist-firmware.json
+   mist list installer --compatible --export ~/Demo/Installers/mist-installers-compatible.json
+   ```
+
+3. In `mist-firmware.json`, choose the firmware row for the pinned build. Prefer a row that is:
+   - the exact macOS version and build you intend to demo
+   - compatible with the host according to `mist`
+   - signed, when both signed and unsigned rows appear for the same build
+
+4. Download the pinned firmware. Leave `%NAME%`, `%VERSION%`, and `%BUILD%` as literal `mist` filename tokens:
+
+   ```bash
+   mist download firmware "26.4.1" \
+     --firmware-name "Install %NAME% %VERSION%-%BUILD%.ipsw" \
      --output-directory ~/Demo/Installers
    ```
 
-   The `sudo` is required because `mist` writes a privileged installer bundle. You will be prompted for your host Mac password.
+   If your installed `mist` version ignores or lacks `--output-directory`, it may place firmware under `/Users/Shared/Mist`. That is acceptable as long as you record the actual path and use that same path in the Provider Version Matrix and demo scripts.
 
-3. Reset ownership of the cache directory and the downloaded installer back to your normal user. Because `mist` ran as root, `~/Demo/Installers/` and the artifact inside it are now owned by `root`, which causes confusing permission errors later when scripts or hypervisors try to read or copy the artifact as the regular user:
-
-   ```bash
-   sudo chown -R "$(whoami):staff" ~/Demo/Installers
-   ```
-
-   Use the `staff` group on macOS (the default primary group for local users); if you have customized your account's primary group, substitute accordingly.
-
-4. Verify the artifact landed where you expect:
+5. Verify the artifact landed where you expect:
 
    ```bash
    ls -la ~/Demo/Installers
+   ls -la /Users/Shared/Mist 2>/dev/null || true
    ```
 
-   At this point you should see the pinned `Install macOS <version>.app` bundle. Keep it. You will reuse this pinned build for the Parallels VM (Step 29) and for **Demo 1** during the talk. If you also build a UTM VM, the matching `.ipsw` for the same pinned build will be added to this same directory in Step 30; you do **not** need to see an `.ipsw` here yet.
+   At this point you should see an `.ipsw` for the pinned macOS build in either `~/Demo/Installers` or `/Users/Shared/Mist`.
 
-5. Record metadata for the cached artifact: macOS version string, build number, the exact `mist` command line you used, the source URL `mist` resolved to, the date acquired, the file size, and (where practical) a SHA-256 checksum. The Provider Version Matrix (see Step 31) is the right place to keep this.
-6. **Do not** also rely on each hypervisor's built-in macOS download flow. Doing both creates two slightly different builds in your lab and makes the demos non-reproducible.
+6. Record metadata for the cached artifact: macOS version string, build number, host macOS version/build, physical Mac model, host/guest pairing classification, the exact `mist` command line you used, the source URL `mist` resolved to, the date acquired, the file size, and a SHA-256 checksum.
+
+   ```bash
+   shasum -a 256 "/path/to/pinned.ipsw"
+   ```
+
+   The Provider Version Matrix (see Step 31) is the right place to keep this.
+7. **Do not** also rely on each hypervisor's built-in macOS download flow. Doing both creates two slightly different builds in your lab and makes the demos non-reproducible.
 
 ### Step 29: Create the macOS VM in Parallels Desktop Pro Edition
 
@@ -840,8 +880,10 @@ Do this even if you also plan to use UTM. Parallels is the primary path.
 
 Use the **current Parallels-supported Apple-silicon macOS VM creation path** for the Parallels version you have actually tested. The Parallels UI for creating an Apple-silicon macOS guest changes between major releases (recovery-partition install, restore-image flow, IPSW import, etc.), so:
 
-- **Re-check the Parallels KB close to the event** for any UI or workflow changes between when you wrote your runbook and the day of the talk.
-- **Use the provider-supported restore-image / IPSW / recovery workflow** appropriate for the tested Parallels version. Drive Parallels with the **same pinned macOS build** you cached in Step 28, using whichever artifact that Parallels version actually accepts.
+- **Re-check the Parallels CLI docs and KB close to the event** for any CLI, UI, or workflow changes between when you wrote your runbook and the day of the talk.
+- **Use the provider-supported restore-image / IPSW / recovery workflow** appropriate for the tested Parallels version. Current Parallels CLI documentation shows `prlctl create <vm_name> -o macos --restore-image <path-to-ipsw>` for Apple-silicon macOS VM creation.
+- **Confirm the host/guest pairing before creation.** Same-major host/guest macOS is the safest documented path. If the requested guest is newer than the host, stop unless you have an explicit owner-approved rehearsal exception.
+- Drive Parallels with the **same pinned macOS build** you cached in Step 28, using whichever artifact that Parallels version actually accepts.
 - **Record the Parallels version in the Provider Version Matrix** (see Step 31). The pair "tested Parallels version + macOS build" is part of evidence, not optional metadata.
 - **Confirm during rehearsal** that the tested Parallels version supports the macOS Arm VM snapshot behavior the demo depends on (named snapshot, restore from named snapshot, snapshot taken from a cleanly shut-down VM).
 - **Do not depend on Coherence Mode** or any other desktop visual integration as the stage "wow." Coherence is an attractive Parallels feature, but it is not what makes this talk land.
@@ -855,11 +897,18 @@ The meaningful stage "wow" is the demo loop itself:
 
 Anything Parallels-specific that doesn't serve those four beats is decoration.
 
-1. Open **Parallels Desktop**.
-2. From the menu bar choose **File → New…**.
-3. Choose the macOS-creation entry that matches your tested Parallels version's current Apple-silicon path — typically **Install macOS from the restore image** or **Install macOS using the recovery partition**. If your tested Parallels version still supports importing the cached `Install macOS <version>.app` bundle from Step 28, you may use that path. Otherwise, point Parallels at the **matching restore image / IPSW for the pinned macOS build you selected in Step 28** — the Step 28 metadata (macOS version string and build number recorded in the Provider Version Matrix) is the source of truth for *which* build, not the source of an IPSW artifact: Step 28's commands produce only the `.app` installer bundle. To obtain the IPSW for that pinned build, run the `mist download firmware` flow in **Step 30 sub-step 5** — that block is reusable even if you are skipping the rest of Step 30 because Demo 3 will be narration-only. Do not let Parallels download a different macOS build behind your back.
-4. When prompted for the VM **name and location**, use a name that matches your snapshot convention from Step 27, e.g. `parallels-mac26-base`. Save it under your default Parallels VM location (do not move it manually afterward — Parallels tracks paths internally).
-5. Before clicking **Create**, click **Customize settings before installation** and apply your sizing profile from Step 27:
+1. Prefer the CLI path if it is supported by the tested Parallels version:
+
+   ```bash
+   prlctl create "parallels-mac26-base" -o macos \
+     --restore-image "/path/to/pinned.ipsw"
+   ```
+
+   Replace the VM name and IPSW path with your actual naming convention and the artifact path recorded in Step 28.
+2. If you use the GUI instead, open **Parallels Desktop**, choose **File → New…**, and select the macOS-creation entry that matches your tested Parallels version's current Apple-silicon path, typically **Install macOS from the restore image** or **Install macOS using the recovery partition**. Point Parallels at the **matching restore image / IPSW for the pinned macOS build you selected in Step 28**. Do not let Parallels download a different macOS build behind your back.
+3. If the CLI created a VM shell without the sizing profile you need, open the VM's configuration before first boot and apply the sizing profile from Step 27.
+4. For the GUI path, when prompted for the VM **name and location**, use a name that matches your snapshot convention from Step 27, e.g. `parallels-mac26-base`. Save it under your default Parallels VM location (do not move it manually afterward — Parallels tracks paths internally).
+5. Before first boot, or before clicking **Create** in the GUI path, apply your sizing profile from Step 27:
    - **Hardware → CPU & Memory:** set the vCPU and RAM values for your chosen profile.
    - **Hardware → Hard Disk:** set the size for your chosen profile. Leave the disk type at the Parallels default (expanding/sparse).
    - **Hardware → Network:** set **Source** to **Shared Network**. Do **not** use Bridged for the demo VM. Bridged works on a home network but routinely fails on conference Wi-Fi (no DHCP from the conference network to a "second MAC", captive portals, etc.).
@@ -876,8 +925,8 @@ Skip this step entirely if Demo 3 will be narration-only.
 UTM is in the matrix because it is a useful provider-swap demonstration, **not** because it has feature parity with Parallels. Treat that gap as a feature of Demo 3, not a defect to paper over:
 
 - Use **Virtualize**, not **Emulate**, for Apple-silicon macOS guests. On Apple silicon hosts, macOS guests **must** use Apple Virtualization; QEMU emulation cannot run macOS guests meaningfully on Apple silicon and will waste your time.
-- Use the **matching IPSW / restore image for the same pinned macOS build** from Step 28. Do not let UTM pick a different build.
-- The IPSW / restore image must come from the **same pinned media acquisition process** as Step 28, not from a separate ad-hoc download. If you only cached the `.app` installer in Step 28, fetch the matching `.ipsw` with the same `mist`-driven workflow (shown below) so the artifact metadata stays linked to the same pinned build.
+- Use the **matching IPSW / restore image for the same pinned macOS build** from Step 28. Do not let UTM pick a different build or perform its own automatic macOS download for the live demo path.
+- Confirm the host/guest pairing before creation. Same-major host/guest macOS is the safest documented path; any cross-major UTM macOS guest needs explicit rehearsal evidence on the exact host/UTM/version combination.
 - **Record the UTM version** in the Provider Version Matrix (see Step 31).
 - **Record the UTM template / config artifact** if you used one (exported `.utm` bundle definition, JSON config, etc.), so the same VM shape is reproducible.
 - **Do not imply UTM automation has full feature parity with Parallels automation.** The provider wrapper (`MacLab` provider abstraction) should make UTM's automation gaps **explicit** — for example, a UTM provider command that cannot be scripted should fail loudly with a clear "manual step required" message, rather than silently no-op-ing.
@@ -886,30 +935,7 @@ UTM is in the matrix because it is a useful provider-swap demonstration, **not**
 2. Click **Create a New Virtual Machine**.
 3. Choose **Virtualize** (not **Emulate**).
 4. Choose **macOS 12+**.
-5. When asked for an IPSW, point UTM at the IPSW that corresponds to the same macOS version you cached in Step 28. If you only cached the `.app` installer, fetch the matching IPSW with `mist` using the same pinned build:
-
-   First, list the available firmware artifacts (this is a different `mist` subcommand than the installer listing in Step 28 — `firmware`, not `installer`):
-
-   ```bash
-   mist list firmware
-   ```
-
-   From that listing, pick the firmware whose **build number** matches the installer build you recorded in the Step 28 Provider Version Matrix entry. The Apple-published version string for an IPSW is sometimes spelled differently from the matching `.app` installer's marketing version, so always match by **build number**, not by marketing version:
-
-   ```bash
-   sudo mist download firmware "<exact version string from mist list firmware whose build matches Step 28>" \
-     --output-directory ~/Demo/Installers
-   ```
-
-   This produces an `.ipsw` file in `~/Demo/Installers/` for the **same pinned macOS build** you used for Parallels.
-
-   Reset ownership of the new artifact back to your normal user. Because `mist` ran as root, the `.ipsw` is now owned by `root`, which causes the same class of confusing permission errors Step 28 warned about (UTM, scripts, or later move/rename steps will fail to read the file as the regular user):
-
-   ```bash
-   sudo chown -R "$(whoami):staff" ~/Demo/Installers
-   ```
-
-   Record metadata for the IPSW alongside the Step 28 metadata (build number, source URL, date, size, checksum).
+5. When asked for an IPSW, point UTM at the exact IPSW path recorded in Step 28.
 6. Apply your sizing profile from Step 27 (CPU, RAM, disk size).
 7. For **Network**, leave UTM's default **Shared Network**. Do **not** select Bridged.
 8. For **Display** and **Input**, accept the defaults. Do **not** enable any host directory sharing for this VM.
@@ -956,7 +982,9 @@ Setup Assistant is where most "my snapshot doesn't behave the same way every tim
 15. **Record the Provider Version Matrix.** This is **part of evidence, not optional metadata** — the matrix is what lets you (and anyone reviewing the demo afterward) reproduce the exact stack the demo ran on. Keep it next to the demo repo and update it when any component changes. Record at minimum:
 
     - **Host macOS** version and build.
+    - **Host Mac model** and the host's minimum supported macOS major version, where known.
     - **Guest macOS** version and build (the pinned build from Step 28).
+    - **Host/guest pairing classification**: `same-major`, `cross-major-tested`, or `rejected`.
     - **Hypervisor version** (Parallels Desktop Pro version; UTM version if you built a UTM VM; both if you built both).
     - **PowerShell version** (`$PSVersionTable.PSVersion` from the host); must be 7.4 or newer.
     - **Pester version**; use 5.7.1 for the initial demo/repo validation.
@@ -1151,7 +1179,7 @@ This is the single highest-leverage thing in Phase 6. Most "my demo broke on sta
 - [ ] Presentify is installed, permitted, and tested on your presentation display
 - [ ] The Apple MDM Push certificate is active in Intune, and the Apple ID used is organization-owned
 - [ ] Apple Business / ADE integration is active, if applicable
-- [ ] The cached macOS restore image or provider-appropriate install artifact (and matching `.ipsw` if you built a UTM VM) is present at the path your demo scripts expect
+- [ ] The cached macOS restore image / IPSW or provider-appropriate install artifact is present at the path your demo scripts expect
 
 #### Five-checkpoint snapshot/checkpoint set
 
@@ -1228,7 +1256,9 @@ The evidence-protection helper is named `Protect-MacLabEvidence.ps1`. Do **not**
 
 - [ ] Provider Version Matrix is recorded for the event:
   - host macOS version and build
+  - host Mac model and host macOS compatibility role
   - guest macOS version and build
+  - host/guest pairing classification: `same-major`, `cross-major-tested`, or `rejected`
   - Parallels Desktop version
   - UTM version, if used
   - PowerShell 7.4+ version
@@ -1295,8 +1325,20 @@ The evidence-protection helper is named `Protect-MacLabEvidence.ps1`. Do **not**
 - **Five-checkpoint model.** The required demo states per hypervisor are `Clean-OS`, `Pre-Enroll`, `Post-Enroll-Baseline`, `Broken-Policy-State`, and `Recovered-Known-Good`. Use this five-checkpoint vocabulary throughout the talk, the deck, and any companion artifacts; do **not** fall back to "the three required snapshots."
 - **Evidence protection helper.** The evidence-protection helper is `Protect-MacLabEvidence.ps1`, which uses the approved PowerShell verb `Protect`. Do **not** introduce `Redact-MacLabEvidence.ps1` as a public cmdlet name (`Redact-` is not an approved verb).
 - **Readiness gate.** `Test-LabReadiness.ps1` is the canonical T-15 readiness gate. It **must** return green before the session.
-- **Media terminology.** Refer to the Apple-silicon macOS install media as a "restore image or provider-appropriate install artifact." When showing the wrapper helper, use `Get-MacLabMedia -Source Mist`. Do **not** use `Get-MacLabMedia -Provider Mist`; reserve `-Provider` for hypervisors such as Parallels, UTM, and Tart.
+- **Media terminology.** Refer to the Apple-silicon macOS install media as a "restore image or provider-appropriate install artifact." For the current primary VM creation path, treat the IPSW/firmware restore image as the canonical artifact unless a tested provider version requires another documented artifact. When showing the wrapper helper, use `Get-MacLabMedia -Source Mist`. Do **not** use `Get-MacLabMedia -Provider Mist`; reserve `-Provider` for hypervisors such as Parallels, UTM, and Tart.
 - **PowerShell floor.** Use PowerShell 7.4 or newer only.
 - **Tart license and scope.** Tart is optional and stubbed in v1 unless later work explicitly approves a fuller provider. Treat Tart's Fair Source/free-tier 100 CPU-core limit and Orchard's 4-worker limit as planning constraints, not legal advice.
+- **Host/guest macOS coverage.** Same-major host/guest macOS is the safest default for Apple-silicon macOS guests. If you need reliable coverage for macOS 14.x, 15.x, and 26.x at the same time, plan for up to three Apple-silicon host Macs and verify each model can boot the required host macOS. Newest hardware is not automatically best for older guest coverage because it may not support older host macOS releases.
 - **VM fidelity boundary.** The VM lab is for safe iteration, regression, and evidence automation. It does **not** replace physical Mac sign-off for hardware/security-model-dependent flows such as ADE / ABM zero-touch, Platform SSO, Touch ID, Secure Enclave-dependent behavior, and final FileVault rollout validation. **VM first, hardware last.**
 - **Cloud rollback boundary.** Snapshot rollback restores the VM. It does **not** rewind Intune, Entra, Defender portal state, audit logs, compliance history, or cloud reporting. In v1, `Reset-IntuneMacLabDevice.ps1` is report-only and documents manual cleanup steps; it does not mutate cloud records.
+
+## Public Source Notes to Re-check
+
+Re-check these before implementation or final deck freeze because Apple, Parallels, UTM, Tart, and Microsoft behavior can change:
+
+- [Apple Support: How to download and install macOS](https://support.apple.com/en-us/102662), especially the compatibility and installer-download notes that macOS versions must be compatible with the Mac and no earlier than the version that came with it.
+- [Parallels CLI: Create a Virtual Machine](https://docs.parallels.com/landing/parallels-desktop-developers-guide/command-line-interface-utility/manage-virtual-machines-from-cli/general-virtual-machine-management/create-a-virtual-machine), especially the restore-image command and same-major host/guest note for Apple Silicon macOS VMs.
+- [Parallels KB 128867: Known limitations of macOS virtual machines on Mac computers with Apple silicon](https://kb.parallels.com/en/128867), especially Apple Virtualization framework limits, snapshots, USB, networking, and higher-than-host guest warnings.
+- [UTM macOS guest support](https://docs.getutm.app/guest-support/macos/), especially Apple Virtualization requirements and IPSW guidance.
+- [UTM Apple backend settings](https://docs.getutm.app/settings-apple/settings-apple/), especially the note that Apple Virtualization is the only UTM path for virtualized macOS on Apple Silicon.
+- [Tart documentation](https://tart.run/), especially its Apple Virtualization framework positioning and CI/runner use case.

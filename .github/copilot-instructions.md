@@ -1,13 +1,13 @@
 <!-- markdownlint-disable MD013 -->
 # Repository Copilot Instructions (Repo-Wide Constitution)
 
-**Version:** 1.4.20260504.0
+**Version:** 1.4.20260505.0
 
 ## Metadata
 
 - **Status:** Active
 - **Owner:** Repository Maintainers
-- **Last Updated:** 2026-05-04
+- **Last Updated:** 2026-05-05
 - **Scope:** Repo-wide canonical instructions ("constitution") that govern all changes in this repository. This file is the authoritative source of truth for repository rules; all language-specific instruction files and agent entry points defer to it.
 - **Related:** [Documentation Writing Style](instructions/docs.instructions.md)
 
@@ -20,7 +20,7 @@ For repository workflow, safety, protected-file policy, and validation disciplin
 For product behavior and implementation scope, read:
 
 - [README.md](../README.md) for the current bootstrap state and validation commands.
-- [macOSLab Repository Specification](../docs/planning/macOS-imaging-08c-repo-spec-final.md) for the implementation contract.
+- [macOSLab Repository Specification](../docs/spec/macOSLab-repository-spec.md) for the implementation contract.
 - [macOSLab Architecture Decision Records](../docs/planning/macOS-imaging-08e-ADRs.md) for accepted and conditional design decisions.
 
 If product specifications conflict with this file's safety, protected-file, or validation rules, follow this file and raise an explicit Open Question instead of weakening the rule.

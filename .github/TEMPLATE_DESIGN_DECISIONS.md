@@ -7,7 +7,7 @@
 - **Owner:** Repository Maintainers
 - **Last Updated:** 2026-05-05
 - **Scope:** Repository-local design decisions for the `franklesniak/macOSLab` bootstrap state. The planning ADRs remain the source of truth for product architecture decisions.
-- **Related:** [macOSLab ADRs](../docs/planning/macOS-imaging-08e-ADRs.md), [macOSLab Repository Specification](../docs/planning/macOS-imaging-08c-repo-spec-final.md), [Phase 0 bootstrap instructions](../docs/phase-0-bootstrap-codex-instructions.md)
+- **Related:** [macOSLab ADRs](../docs/planning/macOS-imaging-08e-ADRs.md), [macOSLab Repository Specification](../docs/spec/macOSLab-repository-spec.md), [Phase 0 bootstrap instructions](../docs/phase-0-bootstrap-codex-instructions.md)
 
 This file replaces the inherited template design-decision record with macOSLab-specific bootstrap decisions. Protected instruction files still contain inherited links and language until the repository owner explicitly authorizes changes to those protected files.
 

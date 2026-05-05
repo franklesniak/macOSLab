@@ -5,9 +5,9 @@
 
 - **Status:** Draft for owner review
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-04
+- **Last Updated:** 2026-05-05
 - **Scope:** Architecture and planning decisions for the future `macOSLab` repository specification. This file records accepted decisions and conditional follow-up decisions that affect implementation, phase gates, or repository policy.
-- **Related:** [macOSLab merged specification](macOS-imaging-08c-merged.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Original prompt](macOS-imaging-08-repo-spec.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
+- **Related:** [macOSLab repository specification](../spec/macOSLab-repository-spec.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Original prompt](macOS-imaging-08-repo-spec.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
 
 ## ADR-0001: PowerShell Runtime Floor
 
@@ -288,3 +288,35 @@ Start `scripts/Reset-IntuneMacLabDevice.ps1` as report-only in v1. A report-only
 
 - Allow soft-delete/retire by default. Deferred because matching/scoping must be reviewed first.
 - Allow hard-delete in v1. Rejected as too risky for the first release.
+
+## ADR-0011: Apple Virtualization Host/Guest Compatibility Gate
+
+- **Status:** Accepted
+- **Date:** 2026-05-05
+
+### Context
+
+macOS guests on Apple-silicon Macs are constrained by Apple's Virtualization framework and by provider-specific support. Current Parallels CLI documentation states that the only guaranteed Apple-silicon macOS VM compatibility scenario is a guest running the same macOS major version as the host. The current Parallels macOS Arm VM limitations article also states that Parallels macOS Arm VMs are built using Apple's Virtualization framework and that running a guest with a macOS version higher than the host may not be possible.
+
+UTM's macOS guest documentation describes macOS guests on Apple silicon as Apple Virtualization-backed, and UTM's Apple backend documentation states that Apple Virtualization is the only way UTM runs virtualized macOS on Apple silicon. Tart documentation describes Tart as using Apple's native Virtualization.Framework.
+
+### Decision
+
+The repository MUST treat host/guest macOS compatibility as a provider preflight gate for macOS guests on Apple silicon.
+
+The default supported path is same-major host and guest macOS. Cross-major guest targets MAY remain in the support matrix as compatibility targets, but automation MUST NOT assume they work on every host/provider combination. A cross-major guest requires either current provider documentation that supports the pairing or owner-supplied preflight evidence for the specific host/provider/version combination. A guest macOS major version higher than the host macOS major version MUST be rejected by default or require an explicit owner-approved override.
+
+This decision applies to Parallels, UTM when running macOS guests through Apple Virtualization, and any later owner-approved Tart macOS-guest implementation. It does not apply to non-macOS guests or to UTM/QEMU emulation paths outside the repository's macOS VM scope.
+
+### Consequences
+
+- The repo can still name macOS 26.x, 15.x, and 14.x targets, but those targets are not universal guarantees across all host versions.
+- Provider code must compare host macOS, requested guest macOS, provider, provider version, and restore-image metadata before creating a VM.
+- Evidence must record the host/guest compatibility classification so future readers can distinguish same-major supported evidence from cross-major best-effort evidence.
+- Owner preflight captures for Parallels, UTM, and any future Tart path remain important because provider behavior changes with Apple and vendor releases.
+
+### Alternatives Considered
+
+- Treat the version matrix as a static list of supported guests. Rejected because vendor documentation makes support conditional on the host/provider combination.
+- Support only the live demo macOS major version. Rejected because the owner wants useful compatibility targets for users who are not ready for the newest macOS release.
+- Permit higher-than-host macOS guests by default. Rejected because vendor documentation warns that this may not run reliably.
