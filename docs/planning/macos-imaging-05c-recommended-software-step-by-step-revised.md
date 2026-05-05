@@ -527,7 +527,7 @@ Do this **before** you spend time building or snapshotting VMs. Catching a broke
    pwsh --version
    code --version
    mist --help
-   mist version
+   mist --version
    mist help list
    mist help download
    prlctl --version
@@ -542,6 +542,8 @@ Do this **before** you spend time building or snapshotting VMs. Catching a broke
    /Applications/UTM.app/Contents/MacOS/utmctl list
    tart --version
    ```
+
+   `utmctl` may launch or foreground UTM because it controls the installed app. Treat that as normal unless the command hangs, fails to return output, or prompts for an automation permission that you cannot approve.
 
 3. Launch and confirm the following open correctly:
    - Visual Studio Code
@@ -828,7 +830,7 @@ The concrete commands below use the **firmware / IPSW** path because current Par
 
    ```bash
    mkdir -p ~/Demo/Installers
-   mist version > ~/Demo/Installers/mist-version.txt 2>&1 || true
+   mist --version > ~/Demo/Installers/mist-version.txt 2>&1 || true
    mist --help > ~/Demo/Installers/mist-help.txt 2>&1 || true
    mist help list > ~/Demo/Installers/mist-help-list.txt 2>&1 || true
    mist help download > ~/Demo/Installers/mist-help-download.txt 2>&1 || true
@@ -840,6 +842,8 @@ The concrete commands below use the **firmware / IPSW** path because current Par
    mist list firmware --export ~/Demo/Installers/mist-firmware.json
    mist list installer --compatible --export ~/Demo/Installers/mist-installers-compatible.json
    ```
+
+   Owner preflight evidence from a macOS 26.4.1 Apple-silicon host showed `mist list installer --compatible` returning Tahoe 26.1 through 26.4.1 and Sequoia 15.7.2 through 15.7.5, but no Sonoma installer rows. Treat that as host-specific discovery evidence, not as a global support matrix. Older macOS targets still need their own same-major or otherwise documented host/provider preflight.
 
 3. In `mist-firmware.json`, choose the firmware row for the pinned build. Prefer a row that is:
    - the exact macOS version and build you intend to demo

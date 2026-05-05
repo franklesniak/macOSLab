@@ -33,6 +33,8 @@ Thumbs.db
 *.utm/
 evidence/
 Evidence/
+macoslab-preflight/
+macoslab-preflight*.zip
 .maclab/
 media-cache/
 .media-cache/
