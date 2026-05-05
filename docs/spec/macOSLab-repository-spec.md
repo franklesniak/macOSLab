@@ -107,7 +107,7 @@ Before the future agent begins work, the owner SHOULD initial each box that matc
 ### 4.6 Phasing and Gates
 
 - [ ] The build is delivered in phases.
-- [ ] The agent must stop at each phase gate and wait for owner approval before continuing.
+- [ ] Phase gates are implementation checkpoints. The agent should continue through locally implementable, non-destructive phases and pause at the owner-validation boundary described in Section 21 instead of stopping for owner approval after every phase.
 - [ ] The owner accepts that v1 may ship without full Tart, ADE, Log Analytics, or ConfigMgr inventory adapters if those phases are deferred.
 - [ ] The owner accepts that the agent will open `open-question` issues rather than guess when requirements are ambiguous.
 
@@ -1444,7 +1444,22 @@ For PowerShell validation, run the repo's configured Pester and PSScriptAnalyzer
 
 ## 21. Implementation Phases
 
-The build is delivered in phases. The agent MUST stop at each gate, summarize deliverables and validation, and wait for owner approval before continuing.
+The build is delivered in phases, but phase gates are implementation checkpoints rather than mandatory owner-intervention points. The agent MUST still work phase by phase, keep each phase's changes reviewable, summarize deliverables and validation for each completed phase, and keep root TODO status current. The agent SHOULD continue into the next phase when the next phase can be implemented from this specification, the ADRs, the root TODO files, committed fixtures, and local mocked validation.
+
+The current autonomous implementation span is Phase 2 through Phase 9 local implementation and validation. The supplied specification, ADRs, and TODO files contain enough detail for the coding agent to build the module skeleton, readiness gate, media workflow, Parallels provider, UTM/manual provider path, Tart stub, evidence pipeline, validation loop, and demo orchestrator without asking the owner at every intermediate phase.
+
+The agent MUST pause at the owner-validation boundary after Phase 9 local validation, before any of these actions:
+
+- Owner live dry run of apply, break, rollback, and evidence export.
+- Pushing branches or opening release PRs when not already authorized in the current task.
+- Creating the `v0.1.0-mmsmoa-preview` release tag.
+- Enabling branch protection or rulesets.
+- Starting a new macOS media download for the MMS demo path.
+- Running destructive provider actions against non-disposable VMs.
+- Mutating Intune, Entra, Defender, or other cloud records.
+- Expanding optional Phase 10 work beyond already-approved v1 stubs and documentation.
+
+The agent MUST pause earlier only when a requirement is ambiguous, required evidence is missing, validation cannot be fixed locally, or continuing would require a real provider, a real cloud tenant, a real macOS VM, a secret-bearing artifact, or any action that explicitly requires owner approval. Acceptance criteria that require owner live validation remain valid, but they are carried forward to the owner-validation boundary instead of blocking the next local implementation phase.
 
 ### 21.1 Phase 0: Bootstrap
 
@@ -1461,7 +1476,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 **Acceptance:** Section 12.3.
 
-**Gate:** Stop for owner approval.
+**Gate:** Record the phase summary and continue if the current task authorizes multi-phase implementation; otherwise pause for owner review.
 
 ### 21.2 Phase 1: Foundation Documentation
 
@@ -1483,7 +1498,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 **Acceptance:** Markdown lint green, metadata blocks present, no real secrets or identifiers.
 
-**Gate:** Stop for owner approval.
+**Gate:** Record the phase summary and continue if the next phase can be implemented locally without owner-only input.
 
 ### 21.3 Phase 2: Module Skeleton and CI
 
@@ -1501,7 +1516,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 **Acceptance:** Manifest imports, PSScriptAnalyzer is clean, Pester is green, stubs fail clearly.
 
-**Gate:** Stop for owner approval.
+**Gate:** Record the phase summary and continue if local validation passes and no owner-only input is required.
 
 ### 21.4 Phase 3: Lab Readiness Gate
 
@@ -1515,7 +1530,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 **Acceptance:** Owner can run on an Apple-silicon Mac; readiness reports green/red with clear detail.
 
-**Gate:** Stop for owner approval.
+**Gate:** Record the phase summary and continue. Owner live readiness validation is carried forward to the owner-validation boundary unless the current task explicitly asks for an earlier pause.
 
 ### 21.5 Phase 4: Media Acquisition
 
@@ -1531,7 +1546,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 **Acceptance:** Live owner run fetches a pinned macOS build and produces metadata sidecar; tests pass.
 
-**Gate:** Stop for owner approval.
+**Gate:** Record the phase summary and continue. Owner live media validation is carried forward to the owner-validation boundary unless the current task explicitly asks for an earlier pause.
 
 ### 21.6 Phase 5: Parallels Provider
 
@@ -1547,7 +1562,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 **Acceptance:** Owner live demo creates, checkpoints, restores, and removes a Parallels VM; tests pass.
 
-**Gate:** Stop for owner approval.
+**Gate:** Record the phase summary and continue. Owner live Parallels validation is carried forward to the owner-validation boundary unless the current task explicitly asks for an earlier pause.
 
 ### 21.7 Phase 6: UTM Provider and Tart Stub
 
@@ -1564,7 +1579,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 **Acceptance:** Owner confirms UTM path and manual-step gaps are clear; UTM is not represented as full live Parallels parity; tests pass.
 
-**Gate:** Stop for owner approval.
+**Gate:** Record the phase summary and continue. Owner confirmation of UTM manual-step gaps is carried forward to the owner-validation boundary unless the current task explicitly asks for an earlier pause.
 
 ### 21.8 Phase 7: Evidence Pipeline
 
@@ -1581,7 +1596,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 **Acceptance:** Redaction tests pass; evidence bundle remains redacted; schema is valid.
 
-**Gate:** Stop for owner approval.
+**Gate:** Record the phase summary and continue if redaction and schema validation pass locally.
 
 ### 21.9 Phase 8: Validation Loop
 
@@ -1597,7 +1612,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 **Acceptance:** Test plans parse and produce valid fixture evidence; Red-bucket assertions are rejected; redaction defaults on.
 
-**Gate:** Stop for owner approval.
+**Gate:** Record the phase summary and continue if test-plan parsing, fixture evidence, Red-bucket rejection, and redaction-default validation pass locally.
 
 ### 21.10 Phase 9: Demo Orchestrator and MMSMOA Examples
 
@@ -1614,7 +1629,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 **Acceptance:** Owner completes a dry run of apply, break, rollback, evidence export. Demo media steps verify and reuse the prepared IPSW without starting a new download.
 
-**Gate:** Stop for owner approval. Tag `v0.1.0-mmsmoa-preview` only with owner go-ahead.
+**Gate:** Pause at the owner-validation boundary. Do not tag `v0.1.0-mmsmoa-preview` until the owner approves the live dry run and release action.
 
 ### 21.11 Phase 10: Optional Bridges and Polish
 

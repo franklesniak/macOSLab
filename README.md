@@ -20,7 +20,7 @@ This repository is not a production Mac management platform, not legal advice, n
 
 ## Fastest Safe Start
 
-Start at [docs/Start-Here.md](docs/Start-Here.md), then read [docs/Prereqs.md](docs/Prereqs.md) before running any provider or cloud workflow. The implementation is delivered in phase gates; Phase 1 provides the foundation documentation, while module implementation begins in Phase 2.
+Start at [docs/Start-Here.md](docs/Start-Here.md), then read [docs/Prereqs.md](docs/Prereqs.md) before running any provider or cloud workflow. The implementation is delivered in phase checkpoints; the coding agent can continue through locally verifiable, non-destructive phases and pauses at the owner-validation boundary before live demo validation, release, branch protection, destructive provider/cloud actions, or optional Phase 10 expansion.
 
 The intended v1 command path is:
 

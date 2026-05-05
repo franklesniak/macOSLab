@@ -40,7 +40,8 @@ Work phase by phase, following Section 21 of the spec. For each phase:
 5. Run the required validation for the changed files, including pre-commit, Markdown lint, nested Markdown lint, Pester/PSScriptAnalyzer when PowerShell is added, and any repo-specific checks.
 6. Fix validation failures.
 7. Produce a concise phase summary listing deliverables, validation results, open issues, and whether any root TODO remains deferred.
-8. Stop at the phase gate and wait for owner approval before starting the next phase.
+8. Do not stop at every phase gate. Treat phase gates as implementation checkpoints: record the summary, keep each phase's changes reviewable, and continue into the next phase when the next phase can be implemented from the approved spec, ADRs, TODO files, and committed fixtures without destructive provider/cloud action or new owner-only input.
+9. Pause at the owner-validation boundary instead. Based on the current supplied evidence, the expected autonomous span is Phase 2 through Phase 9 local implementation and validation. Pause after Phase 9 local validation, before any owner live dry run, push, release tag, branch protection/ruleset change, new media download, destructive provider/cloud action, optional Phase 10 expansion, or other action that explicitly requires owner approval. Pause earlier only if a requirement is ambiguous, required evidence is missing, validation cannot be fixed locally, or implementation would require a real provider, real cloud tenant, real macOS VM, or secret-bearing data.
 
 Use the latest owner decisions already captured in the ADRs/TODOs:
 - Module GUID is 4d6748ba-859d-4171-9785-889eaabdb048.
