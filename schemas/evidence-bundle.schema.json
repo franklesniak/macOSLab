@@ -1,0 +1,302 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/evidence-bundle.schema.json",
+  "title": "macOSLab Evidence Bundle",
+  "description": "Redacted macOSLab evidence bundle contract for validation runs and exported evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schemaVersion",
+    "runId",
+    "createdAt",
+    "vmName",
+    "provider",
+    "snapshot",
+    "fidelity",
+    "hardwareSignoffRequired",
+    "providerVersionMatrix",
+    "redactionApplied",
+    "redactionVersion",
+    "cloudStateWarning",
+    "tests"
+  ],
+  "properties": {
+    "$schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "vmName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider": {
+      "type": "string",
+      "enum": [
+        "Parallels",
+        "UTM",
+        "Tart"
+      ]
+    },
+    "providerVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "snapshot": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fidelity": {
+      "type": "string",
+      "enum": [
+        "Green",
+        "Yellow",
+        "Red"
+      ]
+    },
+    "hardwareSignoffRequired": {
+      "type": "boolean"
+    },
+    "providerVersionMatrix": {
+      "$ref": "#/$defs/providerVersionMatrix"
+    },
+    "intuneDeviceName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "intuneDeviceIdRedacted": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\*\\*\\*REDACTED\\*\\*\\*$"
+    },
+    "tenantSuffixOnly": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\.[A-Za-z0-9.-]+$"
+    },
+    "redactionApplied": {
+      "type": "boolean",
+      "const": true
+    },
+    "redactionVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "cloudStateWarning": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/testResult"
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      }
+    }
+  },
+  "$defs": {
+    "providerVersionMatrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostMacOS",
+        "hostMacOSBuild",
+        "guestMacOS",
+        "guestBuild",
+        "hostGuestCompatibility",
+        "providerManualStepGaps",
+        "providerIsolationState",
+        "powerShellVersion",
+        "pesterVersion"
+      ],
+      "properties": {
+        "hostMacOS": {
+          "type": "string"
+        },
+        "hostMacOSBuild": {
+          "type": "string"
+        },
+        "guestMacOS": {
+          "type": "string"
+        },
+        "guestBuild": {
+          "type": "string"
+        },
+        "hostGuestCompatibility": {
+          "type": "string",
+          "enum": [
+            "same-major-supported",
+            "documented-cross-major-best-effort",
+            "rejected-higher-than-host"
+          ]
+        },
+        "parallelsVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "utmVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tartVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "powerShellVersion": {
+          "type": "string"
+        },
+        "pesterVersion": {
+          "type": "string"
+        },
+        "defenderVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "intunePolicySetId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(\\*\\*\\*REDACTED\\*\\*\\*|not-configured|synthetic-policy-set)$"
+        },
+        "providerManualStepGaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "providerIsolationState": {
+          "$ref": "#/$defs/providerIsolationState"
+        }
+      }
+    },
+    "providerIsolationState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostSharingDisabled",
+        "sharedClipboardDisabled",
+        "sharedApplicationsDisabled",
+        "smartMountDisabled",
+        "cameraSharingDisabled",
+        "bluetoothSharingDisabled",
+        "hostLocationSharingDisabled"
+      ],
+      "properties": {
+        "hostSharingDisabled": {
+          "type": "boolean"
+        },
+        "sharedClipboardDisabled": {
+          "type": "boolean"
+        },
+        "sharedApplicationsDisabled": {
+          "type": "boolean"
+        },
+        "smartMountDisabled": {
+          "type": "boolean"
+        },
+        "cameraSharingDisabled": {
+          "type": "boolean"
+        },
+        "bluetoothSharingDisabled": {
+          "type": "boolean"
+        },
+        "hostLocationSharingDisabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "testResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "kind",
+        "result",
+        "expectedFailure",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "Pass",
+            "Fail",
+            "Warn"
+          ]
+        },
+        "expectedFailure": {
+          "type": "boolean"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "attachment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "kind",
+        "redacted"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "redacted": {
+          "type": "boolean",
+          "const": true
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    }
+  }
+}

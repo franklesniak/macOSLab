@@ -1,0 +1,68 @@
+{
+  "$schemaVersion": "1.0.0",
+  "runId": "2026-05-defender-scope-001",
+  "createdAt": "2026-05-05T00:45:00Z",
+  "vmName": "mms-parallels-01",
+  "provider": "Parallels",
+  "providerVersion": "Parallels Desktop 26.3.2-57398",
+  "snapshot": "Post-Enroll-Baseline",
+  "fidelity": "Yellow",
+  "hardwareSignoffRequired": true,
+  "providerVersionMatrix": {
+    "hostMacOS": "26.4.1",
+    "hostMacOSBuild": "25E253",
+    "guestMacOS": "26.4.1",
+    "guestBuild": "25E253",
+    "hostGuestCompatibility": "same-major-supported",
+    "parallelsVersion": "26.3.2-57398",
+    "utmVersion": null,
+    "tartVersion": null,
+    "powerShellVersion": "7.4.0",
+    "pesterVersion": "5.7.1",
+    "defenderVersion": "101.25000.0000",
+    "intunePolicySetId": "***REDACTED***",
+    "providerManualStepGaps": [],
+    "providerIsolationState": {
+      "hostSharingDisabled": true,
+      "sharedClipboardDisabled": true,
+      "sharedApplicationsDisabled": true,
+      "smartMountDisabled": true,
+      "cameraSharingDisabled": true,
+      "bluetoothSharingDisabled": true,
+      "hostLocationSharingDisabled": true
+    }
+  },
+  "intuneDeviceName": "MMS-MACLAB-001",
+  "intuneDeviceIdRedacted": "***REDACTED***",
+  "tenantSuffixOnly": ".onmicrosoft.example",
+  "redactionApplied": true,
+  "redactionVersion": "1.0.0",
+  "cloudStateWarning": "VM rollback does not rewind Intune, Entra, Defender portal state, audit logs, or reporting history.",
+  "tests": [
+    {
+      "name": "Defender intentionally absent on host",
+      "kind": "DefenderHostScope",
+      "result": "Warn",
+      "expectedFailure": false,
+      "evidenceRefs": []
+    },
+    {
+      "name": "Defender guest health reports missing event providers",
+      "kind": "DefenderHealth",
+      "result": "Fail",
+      "expectedFailure": true,
+      "evidenceRefs": [
+        "mdatp-health-unhealthy.json"
+      ]
+    },
+    {
+      "name": "Defender guest health reports missing Full Disk Access",
+      "kind": "DefenderHealth",
+      "result": "Fail",
+      "expectedFailure": true,
+      "evidenceRefs": [
+        "mdatp-health-unhealthy.json"
+      ]
+    }
+  ]
+}

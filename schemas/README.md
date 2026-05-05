@@ -7,24 +7,24 @@
 - **Status:** Active
 - **Owner:** Repository Maintainers
 - **Last Updated:** 2026-05-05
-- **Scope:** Schema conventions and the temporary worked-example schema retained during Phase 0 bootstrap. The real macOSLab evidence-bundle schema is deferred to Phase 7.
+- **Scope:** Schema conventions and the macOSLab evidence-bundle schema used by validation evidence and exports.
 - **Related:** [JSON authoring standards](../.github/instructions/json.instructions.md), [YAML authoring standards](../.github/instructions/yaml.instructions.md), [Phase 7 TODO](../TODO-Phase-07-Evidence-Pipeline.md)
 
 This directory contains JSON Schemas for load-bearing JSON and YAML contracts.
 
-During Phase 0, macOSLab keeps the template worked example so the schema-validation toolchain remains exercised:
+The Phase 7 implementation replaced the temporary template worked example with the real macOSLab evidence-bundle contract:
 
-- Schema: [example-config.schema.json](example-config.schema.json)
-- Valid examples: [examples/example-config/valid/](examples/example-config/valid/)
-- Invalid reference fixtures: [examples/example-config/invalid/](examples/example-config/invalid/)
+- Schema: [evidence-bundle.schema.json](evidence-bundle.schema.json)
+- Valid examples: [examples/evidence-bundle/valid/](examples/evidence-bundle/valid/)
+- Invalid reference fixtures: [examples/evidence-bundle/invalid/](examples/evidence-bundle/invalid/)
 
-The valid examples are checked by the `Validate example-config valid examples` pre-commit hook. The schema is checked by the `Self-validate example-config schema` pre-commit hook. The invalid fixtures are retained only as reference material during Phase 0; they are not wired into a normal pre-commit hook because they are expected to fail validation.
+The valid examples are checked by the `Validate evidence-bundle valid examples` pre-commit hook. The schema is checked by the `Self-validate evidence-bundle schema` pre-commit hook. The invalid fixtures are retained as reference material and are covered by Pester tests because they are expected to fail validation.
 
-## Future Evidence Schema
+## Evidence Schema
 
-The repository specification defines the real evidence-bundle schema in Section 25 of [macOSLab Repository Specification](../docs/spec/macOSLab-repository-spec.md#25-evidence-bundle-schema). Phase 7 must replace this worked example with that real schema and update `.pre-commit-config.yaml`, data-file CI, examples, and documentation in the same change.
+The repository specification defines the evidence-bundle shape in Section 25 of [macOSLab Repository Specification](../docs/spec/macOSLab-repository-spec.md#25-evidence-bundle-schema). The committed schema extends that contract with Phase 7 owner decisions: normalized provider version matrix fields, host/guest compatibility classification, provider manual-step gaps, provider isolation state, and redaction-required fields.
 
-That work is tracked in [TODO-Phase-07-Evidence-Pipeline.md](../TODO-Phase-07-Evidence-Pipeline.md).
+The evidence schema validates durable redacted evidence summaries. It does not permit raw recovery keys, tokens, tenant identifiers, device IDs, MAC addresses, VM UUIDs, license strings, or local private host data.
 
 ## Authoring Rules
 

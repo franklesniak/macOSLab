@@ -1,0 +1,74 @@
+{
+  "$schemaVersion": "1.0.0",
+  "runId": "2026-05-mms-demo4-utm-001",
+  "createdAt": "2026-05-05T00:15:00Z",
+  "vmName": "macOSLab-UTM-Disposable",
+  "provider": "UTM",
+  "providerVersion": "4.7.5",
+  "snapshot": "Manual-UTM-Provider-Swap",
+  "fidelity": "Yellow",
+  "hardwareSignoffRequired": true,
+  "providerVersionMatrix": {
+    "hostMacOS": "26.4.1",
+    "hostMacOSBuild": "25E253",
+    "guestMacOS": "26.4.1",
+    "guestBuild": "25E253",
+    "hostGuestCompatibility": "same-major-supported",
+    "parallelsVersion": null,
+    "utmVersion": "4.7.5",
+    "tartVersion": null,
+    "powerShellVersion": "7.4.0",
+    "pesterVersion": "5.7.1",
+    "defenderVersion": "not-installed-in-host-scope",
+    "intunePolicySetId": "not-configured",
+    "providerManualStepGaps": [
+      "create",
+      "checkpoint",
+      "restore-checkpoint",
+      "delete"
+    ],
+    "providerIsolationState": {
+      "hostSharingDisabled": true,
+      "sharedClipboardDisabled": true,
+      "sharedApplicationsDisabled": true,
+      "smartMountDisabled": true,
+      "cameraSharingDisabled": true,
+      "bluetoothSharingDisabled": true,
+      "hostLocationSharingDisabled": true
+    }
+  },
+  "intuneDeviceName": null,
+  "intuneDeviceIdRedacted": null,
+  "tenantSuffixOnly": null,
+  "redactionApplied": true,
+  "redactionVersion": "1.0.0",
+  "cloudStateWarning": "VM rollback does not rewind Intune, Entra, Defender portal state, audit logs, or reporting history.",
+  "tests": [
+    {
+      "name": "UTM lifecycle status captured",
+      "kind": "ProviderLifecycle",
+      "result": "Pass",
+      "expectedFailure": false,
+      "evidenceRefs": [
+        "utm-status.txt"
+      ]
+    },
+    {
+      "name": "UTM checkpoint automation intentionally unsupported",
+      "kind": "ProviderManualGap",
+      "result": "Warn",
+      "expectedFailure": false,
+      "evidenceRefs": [
+        "examples/utm/macos-lab-template.utm.json"
+      ]
+    }
+  ],
+  "attachments": [
+    {
+      "path": "utm-status.txt",
+      "kind": "synthetic-command-output",
+      "redacted": true,
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    }
+  ]
+}

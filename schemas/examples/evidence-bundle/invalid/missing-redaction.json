@@ -1,0 +1,41 @@
+{
+  "$schemaVersion": "1.0.0",
+  "runId": "2026-05-invalid-missing-redaction",
+  "createdAt": "2026-05-05T00:00:00Z",
+  "vmName": "mms-parallels-01",
+  "provider": "Parallels",
+  "snapshot": "Post-Enroll-Baseline",
+  "fidelity": "Yellow",
+  "hardwareSignoffRequired": true,
+  "providerVersionMatrix": {
+    "hostMacOS": "26.4.1",
+    "hostMacOSBuild": "25E253",
+    "guestMacOS": "26.4.1",
+    "guestBuild": "25E253",
+    "hostGuestCompatibility": "same-major-supported",
+    "powerShellVersion": "7.4.0",
+    "pesterVersion": "5.7.1",
+    "providerManualStepGaps": [],
+    "providerIsolationState": {
+      "hostSharingDisabled": true,
+      "sharedClipboardDisabled": true,
+      "sharedApplicationsDisabled": true,
+      "smartMountDisabled": true,
+      "cameraSharingDisabled": true,
+      "bluetoothSharingDisabled": true,
+      "hostLocationSharingDisabled": true
+    }
+  },
+  "redactionApplied": false,
+  "redactionVersion": "1.0.0",
+  "cloudStateWarning": "VM rollback does not rewind cloud state.",
+  "tests": [
+    {
+      "name": "Invalid redaction state",
+      "kind": "RedactionVerification",
+      "result": "Fail",
+      "expectedFailure": true,
+      "evidenceRefs": []
+    }
+  ]
+}

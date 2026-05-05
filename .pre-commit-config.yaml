@@ -57,22 +57,17 @@ repos:
   #
   # The hooks below cover three distinct categories:
   #
-  #   A. Worked-example schema validation
-  #      Validates the valid example data files under
-  #      `schemas/examples/example-config/valid/` against the worked-example
-  #      schema at `schemas/example-config.schema.json`. See
-  #      `schemas/README.md` for the canonical worked-example documentation
-  #      and downstream-removal checklist.
-  #
-  #      Invalid example data files under
-  #      `schemas/examples/example-config/invalid/` are intentionally NOT
-  #      wired into a normal pre-commit hook because they are expected to
-  #      fail validation. macOSLab does not keep Python project tests in Phase
-  #      0, so the invalid examples remain reference fixtures until the real
-  #      evidence schema replaces the worked example in Phase 7.
+  #   A. Evidence-bundle schema validation
+  #      Validates the valid evidence example data files under
+  #      `schemas/examples/evidence-bundle/valid/` against the real macOSLab
+  #      evidence schema at `schemas/evidence-bundle.schema.json`. Invalid
+  #      evidence example data files under
+  #      `schemas/examples/evidence-bundle/invalid/` are intentionally NOT
+  #      wired into a normal pre-commit hook because they are expected to fail
+  #      validation; Pester covers those failure fixtures explicitly.
   #
   #   B. Schema self-validation
-  #      Validates the worked-example schema itself against its declared
+  #      Validates the evidence-bundle schema itself against its declared
   #      JSON Schema Draft 2020-12 metaschema using `check-metaschema`.
   #
   #   C. Real load-bearing repository configuration validation
@@ -114,11 +109,11 @@ repos:
     rev: "0.37.2"
     hooks:
       - id: check-jsonschema
-        name: Validate example-config valid examples
-        files: ^schemas/examples/example-config/valid/.*\.json$
+        name: Validate evidence-bundle valid examples
+        files: ^schemas/examples/evidence-bundle/valid/.*\.json$
         args:
           - --schemafile
-          - schemas/example-config.schema.json
+          - schemas/evidence-bundle.schema.json
       - id: check-jsonschema
         alias: validate-dependabot-config
         name: Validate Dependabot configuration
@@ -127,8 +122,8 @@ repos:
           - --builtin-schema
           - vendor.dependabot
       - id: check-metaschema
-        name: Self-validate example-config schema
-        files: ^schemas/example-config\.schema\.json$
+        name: Self-validate evidence-bundle schema
+        files: ^schemas/evidence-bundle\.schema\.json$
 
   # Markdown linting
   - repo: https://github.com/DavidAnson/markdownlint-cli2
