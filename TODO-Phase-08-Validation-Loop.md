@@ -14,6 +14,8 @@ The owner does not want Microsoft Defender for Endpoint installed on the daily-d
 
 Defender validation evidence should be collected inside a disposable macOS guest VM after the pinned VM build exists. This keeps the host clean and better matches the lab's purpose: validating Defender, PPPC/FDA, onboarding, and health from inside the managed guest.
 
+The owner approved the recommended Defender lifecycle on 2026-05-05: use Intune-based Defender deployment as the default demo path, with a preinstalled-Defender fallback for rehearsal or live-cloud timing issues. The owner's tenant does not currently have the Intune macOS Defender deployment configured, so Phase 8 documentation must include step-by-step setup instructions.
+
 Owner-supplied Defender evidence from a lab macOS environment also confirms:
 
 - `mdatp` is available at `/usr/local/bin/mdatp`.
@@ -25,11 +27,12 @@ Owner-supplied Defender evidence from a lab macOS environment also confirms:
 
 ## Remaining Open Items
 
-- [ ] After a disposable VM exists, install or deploy Defender for Endpoint inside the guest using the intended demo path.
+- [ ] After a disposable VM exists, deploy Defender for Endpoint inside the guest using the intended Intune demo path.
+- [ ] Write step-by-step Intune setup instructions for macOS Defender deployment, including package/app assignment, system extension approval, network extension approval when used, Full Disk Access/PPPC delivery, onboarding, group assignment, sync timing, and verification.
 - [ ] Capture `mdatp health` output before and after onboarding, after required system extension and Full Disk Access approvals, and after any intentionally broken policy state used in the demo.
 - [ ] Verify whether the installed `mdatp` has a true JSON output mode. If not, implement and test a parser for key/value text output rather than assuming JSON.
 - [ ] Sanitize tenant, device, machine, organization, EDR, user, and cloud identifiers before using the output as fixtures.
-- [ ] Decide whether Defender should be present in the `Pre-Enroll` snapshot or deployed live by Intune; do not accidentally hide the behavior the demo is meant to show.
+- [x] Owner decision on 2026-05-05: default to live Intune deployment after enrollment, and retain a preinstalled fallback only for rehearsal or cloud-timing backup.
 - [ ] Capture a healthy post-PPPC/onboarded state so tests can distinguish expected pre-approval failure from real Defender malfunction.
 
 ## Checklist

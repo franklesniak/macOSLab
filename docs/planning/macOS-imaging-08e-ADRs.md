@@ -77,9 +77,11 @@ Several items can safely be verified later, but the owner is concerned they will
 
 The future repository MUST create root-level per-phase TODO files when a phase has unresolved or deferred work. File names follow `TODO-Phase-<NN>-<Short-Name>.md`. Known required TODO files are:
 
+- `TODO-Phase-00-Branch-Protection.md`
 - `TODO-Phase-04-Media-Acquisition.md`
 - `TODO-Phase-05-Parallels-Provider.md`
 - `TODO-Phase-06-UTM-Provider.md`
+- `TODO-Phase-07-Evidence-Pipeline.md`
 - `TODO-Phase-08-Validation-Loop.md`
 - `TODO-Phase-10-Deferred-Work.md`
 
@@ -89,6 +91,7 @@ The file is omitted when the phase has no outstanding TODOs.
 
 - Deferred work is visible from the repo root.
 - README and phase summaries must link to active TODO files.
+- Phase 0 branch-protection and Phase 7 evidence-schema replacement work remain visible even though they were identified during bootstrap rather than in the original required TODO list.
 - Phase 10 deferral is acceptable only when the deferred items are explained in `TODO-Phase-10-Deferred-Work.md`.
 
 ### Alternatives Considered
@@ -250,7 +253,7 @@ The future repository inherits `SECURITY.md` from the template. That file is a g
 
 ### Decision
 
-Leave `SECURITY.md` unchanged by default and do not rewrite it. During Phase 1, after the inherited template file is visible, the implementation agent may propose only this exact short project-specific paragraph if it fits the existing responsible-disclosure process:
+Leave `SECURITY.md` unchanged by default and do not rewrite it. The owner approved adding only this exact short project-specific paragraph on 2026-05-05 after the inherited responsible-disclosure process was visible:
 
 > This repository ships no real tenant identifiers, no recovery keys, no tokens, and no production credentials. If you discover content that appears to be a real secret, recovery key, tenant identifier, or personal data, please report it privately through the repository's security advisory process rather than opening a public issue.
 
@@ -320,3 +323,149 @@ This decision applies to Parallels, UTM when running macOS guests through Apple 
 - Treat the version matrix as a static list of supported guests. Rejected because vendor documentation makes support conditional on the host/provider combination.
 - Support only the live demo macOS major version. Rejected because the owner wants useful compatibility targets for users who are not ready for the newest macOS release.
 - Permit higher-than-host macOS guests by default. Rejected because vendor documentation warns that this may not run reliably.
+
+## ADR-0012: Provider Isolation Verification
+
+- **Status:** Accepted
+- **Date:** 2026-05-05
+
+### Context
+
+Owner-supplied disposable Parallels VM evidence showed that a newly created macOS VM can satisfy basic provider requirements while still leaving host integration settings enabled. The captured VM was an Apple Virtualization macOS VM using Shared networking, but Parallels defaults still exposed integration features such as Shared Applications, shared clipboard/cloud, SmartMount-style host resource sharing, camera/gamepad auto-sharing, and host location sharing.
+
+Later owner-supplied hardening evidence confirmed that most integration settings can be disabled through `prlctl` switches and verified with `prlctl list -i`. The same evidence exposed two additional important command surfaces: `--share-host-location <on|off>` and `--isolate-vm <on|off>`. A follow-up run confirmed both commands succeed, but also showed that `--isolate-vm on` is not sufficient proof by itself because final VM info still must be inspected for individual sharing settings. A later ordered-sequence run confirmed the final desired state after re-applying `--auto-share-gamepad off`: stopped VM, host location off, shared clipboard/cloud off, host shared folders off, shared profile off, SmartMount off, app sharing subsettings off, and camera/Bluetooth/smart-card/gamepad sharing off. The evidence also showed that provider code should verify final VM state and settings instead of trusting exit code alone, because one stop command returned a nonzero exit while the VM later reached `State: stopped`.
+
+The repository's lab promise depends on keeping the VM identity boundary clean. A VM that accidentally inherits host sharing behavior is not safe as the durable `Clean-OS` baseline for policy validation evidence.
+
+### Decision
+
+Provider implementations MUST NOT trust hypervisor defaults for macOS VM isolation.
+
+The Parallels provider MUST disable or require manual disablement for host integration features that blur the lab boundary, including shared clipboard, shared folders, shared applications, SmartMount-style host resource sharing, shared cameras, shared Bluetooth, host location sharing, host-to-guest convenience features, and similar integration features. Where supported by the installed Parallels command surface, the provider SHOULD use explicit switches such as `--isolate-vm on`, `--share-host-location off`, and per-feature disable switches. After creation or registration, the provider MUST verify the resulting VM configuration and record the isolation state before a `Clean-OS` checkpoint is considered ready. A successful hardening command is not enough; the final parsed settings are the control.
+
+If a provider cannot disable or verify an integration feature through automation, the provider MUST surface a clear manual-step-required result. Any accepted exception MUST be explicit in the Provider Version Matrix and phase summary.
+
+Evidence schema and provider tests MUST include provider isolation fields so tests can distinguish "VM exists" from "VM is ready as an isolated lab baseline."
+
+### Consequences
+
+- Provider implementation has one extra verification step after VM creation.
+- Evidence and tests become more useful because they record boundary-sensitive VM settings.
+- The owner may need to perform manual provider UI steps when a CLI cannot disable or verify a setting.
+- A VM can be rejected for baseline use even when it starts and runs correctly.
+
+### Alternatives Considered
+
+- Trust provider defaults. Rejected because owner evidence showed defaults can leave sharing enabled.
+- Document isolation as a user responsibility only. Rejected because the module and evidence pipeline should fail clearly when the baseline is not trustworthy.
+- Disable every possible provider integration without verification. Rejected because provider defaults and CLI behavior can drift; verification is the durable control.
+
+## ADR-0013: Defender Validation Scope and Health Output Shape
+
+- **Status:** Accepted
+- **Date:** 2026-05-05
+
+### Context
+
+The owner does not want Microsoft Defender for Endpoint installed on the daily-use host Mac. Host-side `mdatp` output is therefore intentionally unavailable and must not be interpreted as missing validation evidence.
+
+Owner-supplied Defender evidence from a lab macOS environment showed `mdatp` at `/usr/local/bin/mdatp`, product version `101.26032.0016`, and `mdatp health` output as key/value text. A file named `mdatp-health.raw.json` contained the same key/value text and was not parseable JSON. The unhealthy sample included missing active event provider, network event provider not running, and Full Disk Access not granted, while still showing useful positive signals such as licensed state, engine load, cloud enabled, real-time protection, definition updates, and tamper protection.
+
+### Decision
+
+Defender validation in v1 is guest-scoped. The host readiness path MUST NOT require Microsoft Defender for Endpoint on the owner's host Mac.
+
+Phase 8 validation MUST collect Defender evidence from a disposable enrolled macOS guest VM. The validation implementation MUST support key/value text output from `mdatp health` and MAY use true JSON output only after the installed `mdatp` version is verified to support it.
+
+Defender fixtures and evidence MUST redact organization IDs, machine GUIDs, EDR machine IDs, EDR device tags, EDR configuration identifiers, tenant identifiers, device identifiers, user identifiers, and cloud configuration IDs.
+
+The default demo path deploys Defender through Intune after enrollment. A preinstalled-Defender fallback MAY be used for rehearsal or live-cloud timing backup, but it must be labeled as a fallback so the demo does not accidentally hide the Intune deployment behavior being validated.
+
+The owner's tenant does not currently have the Intune-based macOS Defender deployment configured. Phase 8 documentation MUST provide step-by-step setup instructions for the Intune macOS Defender deployment path before the demo depends on it.
+
+### Consequences
+
+- The owner's host remains clean while the lab still validates Defender behavior where it matters: inside the managed guest.
+- The parser and tests must handle key/value health output instead of assuming JSON.
+- Fixture design must include both unhealthy pre-approval states and healthy post-approval/onboarded states.
+- Demo planning must include enough tenant setup detail for the owner to configure the Intune-based deployment from scratch.
+
+### Alternatives Considered
+
+- Require Defender on the host as a readiness dependency. Rejected because it conflicts with the owner's host cleanliness requirement and does not prove guest policy behavior.
+- Assume `mdatp health` JSON. Rejected because owner evidence showed a `.json` capture that was not valid JSON.
+- Treat unhealthy Defender output as unusable. Rejected because missing approvals are expected and useful validation states during policy rollout.
+- Preinstall Defender in the `Pre-Enroll` checkpoint as the only path. Rejected because it would make the demo more reproducible but would hide the Intune deployment behavior the repo is meant to validate.
+
+## ADR-0014: UTM v1 Provider Posture
+
+- **Status:** Accepted
+- **Date:** 2026-05-05
+
+### Context
+
+Owner-supplied UTM evidence on the macOS 26.4.1 Apple-silicon demo host confirmed UTM 4.7.5 and `utmctl` 4.7.5. The evidence showed that a manually created disposable UTM VM named `macOSLab-UTM-Disposable` can be controlled through `utmctl` for basic lifecycle actions: `list`, `status`, `start` from stopped, `suspend`, resume from paused by calling `start`, and `stop`.
+
+The same evidence showed important gaps and hazards:
+
+- Top-level `utmctl` help does not advertise create, import, export, or snapshot primitives.
+- The disposable macOS VM had to be created through the GUI path.
+- `utmctl ip-address` returned `Operation not supported by the backend` for this macOS Apple Virtualization VM.
+- `utmctl start` against an already-started VM printed `Operation not available` while still returning process exit code 0.
+- `utmctl delete` help states that deletion has no confirmation.
+
+### Decision
+
+UTM is approved for v1 as an honest documented/manual provider-swap path with partial lifecycle automation. UTM is not full live parity with Parallels in v1.
+
+The UTM provider MAY automate safe lifecycle primitives proven by owner evidence, including list, status, start from stopped, suspend, resume from paused, and stop. The provider MUST treat create/import/export/snapshot/checkpoint behavior as manual-step-required unless later owner-approved evidence proves a safe automation path. The provider MUST NOT infer success from exit code alone; it MUST inspect command output and final VM status where practical.
+
+The implementation MUST document that `utmctl ip-address` is unsupported for the tested macOS Apple Virtualization path and that `utmctl delete` has no confirmation. Any destructive UTM delete behavior must remain outside the default demo path unless a later owner-approved test explicitly covers disposable clone cleanup.
+
+### Consequences
+
+- UTM remains useful for the provider-swap story without overpromising parity.
+- Phase 6 implementation can focus on truthful capability reporting and manual-step guidance.
+- Default demo reliability stays anchored on Parallels.
+- Future UTM expansion remains possible, but it requires new owner-approved evidence.
+
+### Alternatives Considered
+
+- Treat UTM as full live parity with Parallels. Rejected because current evidence does not prove automated creation, snapshot/checkpoint, IP discovery, or safe delete behavior.
+- Stub UTM entirely. Rejected because current evidence proves useful lifecycle automation and a viable documented provider-swap path.
+- Run additional clone/delete/guest-exec testing before deciding. Rejected for v1 because the already-proven gaps are enough to rule out full parity, and delete has no confirmation.
+
+## ADR-0015: Reuse Already-Downloaded Demo IPSW
+
+- **Status:** Accepted
+- **Date:** 2026-05-05
+
+### Context
+
+Owner-supplied media evidence confirmed that `mist` 2.2 successfully downloaded the pinned macOS Tahoe 26.4.1 firmware restore image for the demo host. The verified artifact is:
+
+- Path: `~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw`
+- Size: about 18 GB; Mist metadata reported `19734779897` bytes.
+- SHA-256: `8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32`
+
+Repeated downloads are slow, consume bandwidth, and increase rehearsal risk. The owner explicitly directed that no new download should be started for demo work.
+
+### Decision
+
+Owner/demo rehearsals MUST reuse the already-downloaded IPSW at `~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw`. Demo scripts and runbooks MUST verify that file exists and that its SHA-256 matches `8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32` before creating or registering demo VMs.
+
+Demo scripts MUST NOT start a new `mist download` operation when the verified IPSW is present. This rule applies to the completed repository's MMS conference demo scripts, including `scripts/Invoke-MMSDemo.ps1` and `examples/MMSMOA-2026/Demo1-Media.ps1`, not only to temporary validation commands.
+
+The expected v1 owner/demo path is `~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw`. No move is required while the file remains there. If a later demo path needs the IPSW at a different path, the runbook MUST instruct the owner to copy or move the already-downloaded file and re-run the SHA-256 verification. A new download requires explicit owner approval in the current task.
+
+### Consequences
+
+- Rehearsals avoid accidental 18 GB re-downloads.
+- Demo scripts need a prepared-media mode that accepts an existing artifact path.
+- The media acquisition cmdlet can still support download workflows for general users, but the owner/demo path defaults to verified cache reuse.
+
+### Alternatives Considered
+
+- Always call `mist download` during demos. Rejected because the artifact is already verified and the owner explicitly prohibited new downloads.
+- Move the artifact immediately to a repository path. Rejected because `.ipsw` files must never be committed and the current cache path is already usable.
+- Copy the artifact to a separate demo folder by default. Deferred because copying an 18 GB file adds time and storage use without a current need.

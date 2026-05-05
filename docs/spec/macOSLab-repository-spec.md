@@ -132,7 +132,7 @@ Before the future agent begins work, the owner SHOULD initial each box that matc
 | PowerShell module name | `MacLab` |
 | Module manifest path | `src/Modules/MacLab/MacLab.psd1` |
 | Module loader path | `src/Modules/MacLab/MacLab.psm1` |
-| Module GUID | Owner decision. Generate once with `[guid]::NewGuid()` and pin for the life of the module. |
+| Module GUID | `4d6748ba-859d-4171-9785-889eaabdb048` |
 | Initial module version | `0.1.0` |
 | PowerShell floor | PowerShell `7.4` minimum; support newer PowerShell 7.x releases unless a concrete incompatibility is documented. |
 | Pester dependency | Pester `5.7.1` pinned in CI for the initial implementation. |
@@ -195,7 +195,7 @@ If background files disagree with this specification, this specification control
 - macOS guest VMs.
 - PowerShell 7.4 or newer as the automation layer.
 - Parallels Desktop Pro Edition as the primary provider.
-- UTM as a secondary provider and provider-swap example.
+- UTM as a secondary documented/manual provider-swap path with partial lifecycle automation, not full live Parallels parity in v1.
 - Tart as an optional advanced CLI/CI path, stubbed in v1 unless explicitly approved.
 - `mist-cli`-based media discovery and acquisition.
 - Intune enrollment and validation workflows for lab-only devices and lab-only users.
@@ -217,6 +217,8 @@ For initial implementation and rehearsal, the support matrix is:
 | Compatibility target | macOS Sonoma 14.x | `14.8.5` | Compatibility target for users whose host/provider preflight confirms this pairing. |
 
 Future updates SHOULD track the macOS versions Apple currently supports with security updates. The implementation MUST record exact host macOS, guest macOS, and build numbers in the Provider Version Matrix rather than relying on marketing version names alone.
+
+For the owner/demo path, the already-downloaded macOS Tahoe 26.4.1 IPSW MUST be reused from `~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw`. This is the expected v1 MMS conference demo path, so no move is required while the file remains there. Demo scripts and runbooks MUST verify SHA-256 `8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32` before use and MUST NOT start a new `mist download` operation unless the owner explicitly approves a new download in the current task. This requirement applies to the completed repository's demo scripts, including `scripts/Invoke-MMSDemo.ps1` and `examples/MMSMOA-2026/Demo1-Media.ps1`, not only to planning or validation commands. If the IPSW must be moved for a demo, the runbook MUST instruct the owner to copy or move the existing file and re-run checksum verification.
 
 For macOS guests on Apple-silicon hosts, the implementation MUST treat host/guest compatibility as a provider preflight gate, not as a static version table. The default supported path is a macOS guest whose major version matches the host's macOS major version. Cross-major guests MAY be documented as compatibility targets only when provider documentation or owner-supplied preflight evidence confirms they work on the specific host/provider combination. A guest macOS major version greater than the host macOS major version MUST be rejected by default or require an explicit owner-approved override because current Parallels guidance warns that this may not run reliably.
 
@@ -363,9 +365,11 @@ Known root TODO files required by this specification:
 
 | File | Required initial content |
 | --- | --- |
+| `TODO-Phase-00-Branch-Protection.md` | Configure branch protection or a ruleset for `main` after the implementation is complete and the final required checks are known. |
 | `TODO-Phase-04-Media-Acquisition.md` | Verify current `mist-cli` list/download syntax and record exact commands before implementing `Get-MacLabMedia`. |
 | `TODO-Phase-05-Parallels-Provider.md` | Verify current `prlctl` syntax, version output, and edition detection on the owner/demo host. |
 | `TODO-Phase-06-UTM-Provider.md` | Verify current UTM/`utmctl` automation surface and document any manual-step-required gaps. |
+| `TODO-Phase-07-Evidence-Pipeline.md` | Replace the temporary worked-example schema with the real evidence-bundle schema and capture evidence-model implications from sanitized preflight data. |
 | `TODO-Phase-08-Validation-Loop.md` | Verify current Defender `mdatp health` output shape and sanitize fixtures before evidence tests. |
 | `TODO-Phase-10-Deferred-Work.md` | Explain every deferred Phase 10 item, why it was deferred, what would be needed to resume it, and how to validate it safely. Include any future screenshot/recording follow-up if the owner later authorizes checked-in visual artifacts. |
 
@@ -468,7 +472,7 @@ The `MacLab` module MUST expose one user-facing automation model over multiple V
 
 - Provider values are `Parallels`, `UTM`, and `Tart`.
 - Parallels is implemented as the primary working path.
-- UTM has either a working automation path or a clearly documented template/manual path.
+- UTM is implemented as a clearly documented/manual provider-swap path with partial lifecycle automation in v1.
 - Tart is optional and explicitly marked advanced or stubbed.
 - Unsupported provider capabilities return a clear warning or terminating error.
 
@@ -483,7 +487,9 @@ The repository MUST treat macOS media pinning as a first-class workflow.
 - Media acquisition uses `mist-cli` as the default source.
 - The public surface uses `Get-MacLabMedia -Source Mist`.
 - `-Provider` is reserved for hypervisor selection.
+- Firmware/IPSW restore images are the default Apple-silicon VM media path; compatible installer rows are advisory metadata unless a provider workflow explicitly requires an installer artifact.
 - Media metadata records version, build, artifact path, source, acquisition time, and checksum where practical.
+- Owner/demo scripts support a prepared-media path and MUST reuse the verified existing IPSW when present instead of starting a new download.
 - Docs use "restore image or provider-appropriate install artifact" instead of treating ISO as the Apple-silicon default.
 
 **Verification:** Unit tests validate metadata shape and parameter behavior. A manual live validation confirms a pinned artifact can be discovered and cached.
@@ -536,6 +542,8 @@ The repository MUST validate Defender for Endpoint on macOS as more than an app 
 **Acceptance Criteria:**
 
 - Docs and examples include package install, system extension approval, network extension approval when used, Full Disk Access/PPPC delivery, onboarding, and `mdatp health`.
+- Defender docs include step-by-step Intune setup for macOS Defender deployment because the owner/demo tenant does not currently have that deployment configured.
+- The default demo path deploys Defender through Intune after enrollment; a preinstalled-Defender fallback may exist only for rehearsal or live-cloud timing backup and must be labeled as a fallback.
 - Evidence records Defender version and health output after redaction.
 - Provider rollback result is included in the evidence model.
 
@@ -560,6 +568,7 @@ Every meaningful validation run MUST produce structured evidence.
 **Acceptance Criteria:**
 
 - Evidence is JSON by default.
+- The evidence schema uses normalized parsed facts as the durable contract and may include redacted or synthetic command-output attachments when those attachments help explain the run.
 - Evidence includes run ID, provider, provider version, host macOS version, guest macOS version/build, snapshot, Intune device name or redacted ID, test results, cloud-state warning, fidelity, hardware sign-off flag, and redaction status.
 - Evidence export creates a predictable folder structure.
 - Evidence export fails closed when redaction cannot be applied to sensitive fields.
@@ -757,9 +766,11 @@ macOSLab/
 ├── LICENSE
 ├── README.md
 ├── SECURITY.md
+├── TODO-Phase-00-Branch-Protection.md          # if Phase 0 branch-protection setup remains
 ├── TODO-Phase-04-Media-Acquisition.md          # if Phase 4 TODOs remain
 ├── TODO-Phase-05-Parallels-Provider.md         # if Phase 5 TODOs remain
 ├── TODO-Phase-06-UTM-Provider.md               # if Phase 6 TODOs remain
+├── TODO-Phase-07-Evidence-Pipeline.md          # if Phase 7 schema/evidence TODOs remain
 ├── TODO-Phase-08-Validation-Loop.md            # if Phase 8 TODOs remain
 ├── TODO-Phase-10-Deferred-Work.md              # if Phase 10 work is deferred
 ├── docs/
@@ -906,7 +917,7 @@ The manifest MUST include at minimum:
 @{
     RootModule        = 'MacLab.psm1'
     ModuleVersion     = '0.1.0'
-    GUID              = '<OWNER-SUPPLIED-GUID>'
+    GUID              = '4d6748ba-859d-4171-9785-889eaabdb048'
     Author            = 'Frank Lesniak'
     CompanyName       = 'Frank Lesniak'
     Copyright         = '(c) 2026 Frank Lesniak. MIT License.'
@@ -1187,14 +1198,19 @@ Required behavior:
 - Create/register VMs from the chosen artifact path.
 - Start and stop VMs.
 - Create, list, and restore snapshots/checkpoints.
+- Resolve friendly checkpoint names to provider snapshot IDs before restore because Parallels `snapshot-switch --id` expects the provider snapshot ID, not the friendly snapshot name.
+- Use reliable names-only or structured output for VM existence checks; do not assume `prlctl list -a --name` emits only VM names.
 - Return stable VM identity metadata.
 - Use Shared networking.
 - Disable Coherence, shared clipboard, shared folders, shared cameras, shared Bluetooth, shared applications, SmartMount-style host resource sharing, host location sharing, and similar host integrations when creating VMs.
+- Use explicit Parallels isolation switches where the installed command surface supports them, including `--isolate-vm on`, `--share-host-location off`, and per-feature disable switches; if a switch is unavailable, surface a clear manual-step-required result and verify the final VM configuration.
 - Verify the resulting VM configuration after creation because Parallels defaults may leave host integration settings enabled even when the lab requires isolation.
+- Treat final parsed VM settings, not successful command completion, as the source of truth for isolation readiness.
+- Verify final VM state after lifecycle commands rather than relying only on process exit code because provider commands may return a nonzero exit while the VM eventually reaches the requested state.
 
 ### 17.5 UTM Provider
 
-UTM is the secondary provider.
+UTM is the secondary provider and documented/manual provider-swap path. UTM is not full live Parallels parity in v1.
 
 Required behavior:
 
@@ -1204,6 +1220,11 @@ Required behavior:
 - Use Shared Network, not bridged.
 - Reference `examples/utm/macos-lab-template.utm.json`.
 - Where `utmctl` cannot perform a primitive, throw a clear "manual step required" error and link to the documented procedure.
+- Automate only the UTM lifecycle primitives proven by owner evidence: list, status, start from stopped, suspend, resume from paused by calling start, and stop.
+- Treat VM creation, import/export, snapshots/checkpoints, guest file transfer, and guest command execution as manual-step-required or unsupported unless later owner-approved evidence proves a safe automation path.
+- Treat `utmctl ip-address` as unsupported for the tested macOS Apple Virtualization path.
+- Inspect command output and resulting VM status where practical because `utmctl` can print operational errors while returning process exit code 0.
+- Warn that `utmctl delete` has no confirmation and MUST NOT run by default.
 - Support the provider-swap demo path honestly, even if some steps are manual.
 
 ### 17.6 Tart Provider
@@ -1265,7 +1286,7 @@ Every script MUST:
 | `Remove-MacVm.ps1` | Thin wrapper around `Remove-MacLabVm`; prompts about cloud cleanup planning. |
 | `Reset-IntuneMacLabDevice.ps1` | Cloud cleanup/reconciliation routine. V1 is report-only. Report-only output identifies candidate Intune, Entra, and Defender records; explains why they may be stale; shows portal paths or Graph commands for manual cleanup; and writes redacted evidence. Soft-delete/retire or hard-delete is deferred and requires a later owner-approved Phase 10 item. |
 | `Send-LabEventToLogAnalytics.ps1` | Optional Phase 10 helper; disabled/deferred by default. |
-| `Invoke-MMSDemo.ps1` | Stage-friendly Demo 4 orchestrator with interactive gates and non-interactive rehearsal mode. |
+| `Invoke-MMSDemo.ps1` | Stage-friendly Demo 4 orchestrator with interactive gates and non-interactive rehearsal mode. For the MMS conference path, verify and reuse the prepared IPSW before any VM step and do not start a new media download when the prepared artifact exists and matches the expected checksum. |
 
 ## 19. Examples and Documentation
 
@@ -1289,6 +1310,8 @@ macOS:
   architecture: arm64
   artifactType: Both
   source: Mist
+  preparedArtifactPath: '<existing-ipsw-path>'
+  preparedArtifactSha256: '<existing-ipsw-sha256>'
 providerDefaults:
   parallels:
     cpus: 4
@@ -1310,6 +1333,18 @@ intune:
 fidelity:
   defaultBucket: Yellow
 ```
+
+For the owner/demo host, `preparedArtifactPath` is `~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw` and `preparedArtifactSha256` is `8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32`. Demo scripts MUST verify that prepared artifact before any VM creation or registration step. They MUST NOT start another `mist download` when the prepared artifact exists and matches the expected checksum. `Demo1-Media.ps1` MUST treat a verified prepared artifact as a completed media step for the MMS conference demo path, not as a reason to re-download.
+
+No move is required for the owner's current path. If a future demo path changes the expected IPSW location, `docs/Demo-Runbook.md` MUST include exact copy or move commands like this, followed by checksum verification:
+
+```bash
+mkdir -p "$HOME/Demo/Installers"
+mv "<current-ipsw-path>" "$HOME/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw"
+shasum -a 256 "$HOME/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw"
+```
+
+The expected checksum remains `8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32`.
 
 `examples/TestCases/` MUST contain:
 
@@ -1338,7 +1373,7 @@ Every non-trivial doc MUST include the inherited metadata block. Required docs:
 | `docs/Snapshot-Strategy.md` | Five-checkpoint model, cloud cleanup, restore testing, identity-drift warnings. |
 | `docs/Intune-Tenant-Setup.md` | Lab tenant/user/group setup, Apple MDM Push Certificate, policies, assignments, filters, CA scope cautions. |
 | `docs/FileVault-Validation.md` | Policy assignment, `fdesetup status`, escrow evidence, redacted proof, hardware sign-off boundary. |
-| `docs/Defender-Validation.md` | Package, system extension, network extension, PPPC/FDA, onboarding, `mdatp health`, evidence. |
+| `docs/Defender-Validation.md` | Package, Intune deployment setup, system extension, network extension, PPPC/FDA, onboarding, `mdatp health`, evidence. |
 | `docs/PPPC-Validation.md` | Bundle ID, code requirement, app path, profile receipt, behavior tests, pitfalls. |
 | `docs/Evidence-and-CAB.md` | Evidence design, schema, summary format, CAB usage, redaction levels. |
 | `docs/Evidence-Redaction.md` | Redaction helper behavior, field list, shape matching, verification tests. |
@@ -1516,7 +1551,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 
 ### 21.7 Phase 6: UTM Provider and Tart Stub
 
-**Goal:** Implement UTM provider-swap path and Tart v1 stub.
+**Goal:** Implement UTM documented/manual provider-swap path with partial lifecycle automation and Tart v1 stub.
 
 **Deliverables:**
 
@@ -1527,7 +1562,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 - `examples/utm/macos-lab-template.utm.json`
 - `TODO-Phase-06-UTM-Provider.md` with UTM/`utmctl` verification tasks, unless those tasks are completed and closed in the same phase.
 
-**Acceptance:** Owner confirms UTM path and manual-step gaps are clear; tests pass.
+**Acceptance:** Owner confirms UTM path and manual-step gaps are clear; UTM is not represented as full live Parallels parity; tests pass.
 
 **Gate:** Stop for owner approval.
 
@@ -1577,7 +1612,7 @@ The build is delivered in phases. The agent MUST stop at each gate, summarize de
 - `docs/Demo-Runbook.md`
 - `docs/Troubleshooting.md`
 
-**Acceptance:** Owner completes a dry run of apply, break, rollback, evidence export.
+**Acceptance:** Owner completes a dry run of apply, break, rollback, evidence export. Demo media steps verify and reuse the prepared IPSW without starting a new download.
 
 **Gate:** Stop for owner approval. Tag `v0.1.0-mmsmoa-preview` only with owner go-ahead.
 
@@ -1794,6 +1829,6 @@ Schema notes:
 >
 > Pinned macOS build: __________________________
 >
-> MacLab module GUID: __________________________
+> MacLab module GUID: `4d6748ba-859d-4171-9785-889eaabdb048`
 
 Reading-time estimate: full first pass, 60-75 minutes. Approval checklist plus ADR file, 10-15 minutes.

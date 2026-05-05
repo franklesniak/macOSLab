@@ -22,18 +22,20 @@ Owner-supplied sanitized host preflight evidence confirms the future evidence mo
 - Defender health output in key/value text form. An owner-supplied file named `mdatp-health.raw.json` contained the same key/value text as the `.txt` capture and was not parseable JSON.
 - Sanitization status for hostnames, user paths, UUIDs, MAC addresses, email addresses, license material, and other local identifiers.
 - A distinction between raw local captures, sanitized review bundles, and durable evidence summaries that are safe to commit.
+- The ad hoc 2026-05-05 sanitization pass can break machine-readable JSON by replacing sensitive JSON property lines with non-JSON text. The production evidence pipeline must preserve JSON validity when redacting structured artifacts.
 
 Do not commit the raw or sanitized preflight capture bundle. The committed evidence schema should store redacted summaries and deterministic fixture data, not private host captures.
 
 ## Remaining Open Items
 
-- [ ] Decide whether the real evidence schema stores raw command-output attachments, normalized parsed facts, or both.
+- [x] Owner decision on 2026-05-05: the evidence schema stores normalized parsed facts as the durable contract and MAY include redacted or synthetic command-output attachments where useful. Raw private captures MUST NOT be committed.
 - [ ] Add fields for host/guest macOS compatibility classification and provider manual-step gaps.
 - [ ] Add fields for provider isolation state, including whether host sharing, shared clipboard, shared applications, SmartMount/resource sharing, camera sharing, Bluetooth sharing, and host location sharing are disabled.
 - [ ] Add redaction assertions that reject license strings, hardware identifiers, local usernames, VM UUIDs, MAC addresses, tenant identifiers, device identifiers, Defender organization IDs, Defender machine IDs, Defender machine GUIDs, EDR device tags, and cloud configuration IDs.
 - [ ] Add fixtures for "tool installed but no VMs registered" states for Parallels and UTM.
 - [ ] Add fixtures for "Defender intentionally absent on host; validate inside guest" states if Phase 8 uses host/guest evidence separation.
 - [ ] Add fixtures for Defender unhealthy-but-installed states where `healthy` is `false` because event providers, network event provider, or Full Disk Access are missing.
+- [ ] Add a regression test proving structured JSON remains parseable after redaction.
 
 ## Checklist
 

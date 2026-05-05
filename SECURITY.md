@@ -6,6 +6,8 @@
 
 If you discover a security vulnerability in this project, please report it privately using one of the following methods:
 
+This repository ships no real tenant identifiers, no recovery keys, no tokens, and no production credentials. If you discover content that appears to be a real secret, recovery key, tenant identifier, or personal data, please report it privately through the repository's security advisory process rather than opening a public issue.
+
 ### Option 1: GitHub Security Advisories (Recommended)
 
 > **Note:** Private vulnerability reporting via GitHub Security Advisories is **only available for public repositories**. If this repository is private, please use the email option below, or wait until the repository is made public to use this feature.
