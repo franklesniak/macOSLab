@@ -19,7 +19,7 @@ sudo -H env "PATH=$PATH" "$NPM_BIN" install -g "@openai/codex@latest"
 python -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e ".[dev]" pre-commit
+python -m pip install pre-commit
 pre-commit install
 
 # Reclaim ownership in case a prior run created ~/.codex as root before the
