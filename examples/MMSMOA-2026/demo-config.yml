@@ -1,0 +1,29 @@
+name: "mms-demo-macos"
+macOS:
+  version: "26.4.1"
+  build: "25E253"
+  architecture: "arm64"
+  artifactType: "Firmware"
+  source: "Mist"
+  preparedArtifactPath: "~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw"
+  preparedArtifactSha256: "8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32"
+providerDefaults:
+  parallels:
+    cpus: 4
+    memoryGB: 8
+    diskGB: 128
+  utm:
+    cpus: 4
+    memoryGB: 8
+    diskGB: 128
+evidence:
+  outputRoot: "./_evidence"
+  redactSecrets: true
+network:
+  shared: true
+  bridged: false
+intune:
+  tenant: ".onmicrosoft.example"
+  policySetId: "synthetic-policy-set"
+fidelity:
+  defaultBucket: "Yellow"

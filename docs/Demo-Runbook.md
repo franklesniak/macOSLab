@@ -1,0 +1,51 @@
+<!-- markdownlint-disable MD013 -->
+# Demo Runbook
+
+## Metadata
+
+- **Status:** Active
+- **Owner:** Repository owner
+- **Last Updated:** 2026-05-05
+- **Scope:** MMSMOA demo runbook for media verification, provider paths, validation evidence, recovery pivots, and owner dry-run boundaries.
+- **Related:** [Start Here](Start-Here.md), [Troubleshooting](Troubleshooting.md), [Evidence and CAB](Evidence-and-CAB.md), [Snapshot Strategy](Snapshot-Strategy.md)
+
+## T-15 Gate
+
+Run the readiness gate before the talk:
+
+```powershell
+./scripts/Test-LabReadiness.ps1 -PreparedArtifactPath ~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw -PreparedArtifactSha256 8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32
+```
+
+Any failed required check is a stop condition for live VM work. Use fixture-backed evidence or recordings instead.
+
+## Media
+
+The owner demo path uses the existing IPSW at `~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw` with SHA-256 `8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32`. `Demo1-Media.ps1` verifies and reuses that file; it must not start another download when the checksum matches.
+
+If a future demo path changes the IPSW location, move it into place and verify:
+
+```bash
+mkdir -p "$HOME/Demo/Installers"
+mv "<current-ipsw-path>" "$HOME/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw"
+shasum -a 256 "$HOME/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw"
+```
+
+## Demo Flow
+
+1. Demo 1: run `examples/MMSMOA-2026/Demo1-Media.ps1`.
+2. Demo 2: run `examples/MMSMOA-2026/Demo2-Parallels.ps1` during owner live dry run only.
+3. Demo 3: use `examples/MMSMOA-2026/Demo3-UTM.ps1` after manually creating the documented UTM VM.
+4. Demo 4: run `examples/MMSMOA-2026/Demo4-IntuneValidation.ps1` for fixture-backed validation evidence.
+
+## Recovery Pivots
+
+If live cloud timing is slow, switch to the fixture-backed validation plan and say: "The local VM rollback is deterministic; cloud state keeps moving, so the evidence bundle records that boundary instead of pretending rollback rewinds the service."
+
+If the VM provider is not ready, use the prepared screenshots or recording and keep the command prompt visible only for redacted evidence commands.
+
+If a secret appears on screen, stop sharing immediately, rotate or invalidate the affected value, and do not commit the capture.
+
+## Final Boundary
+
+The repository is ready for owner live dry run after Phase 9 local validation. Do not push, tag `v0.1.0-mmsmoa-preview`, enable branch protection, or run destructive provider/cloud actions until the owner approves.

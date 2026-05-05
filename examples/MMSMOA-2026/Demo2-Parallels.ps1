@@ -59,6 +59,7 @@ param(
     [string]$PreparedArtifactSha256 = '8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32'
 )
 
+Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $strScriptRoot = Split-Path -Path $PSCommandPath -Parent

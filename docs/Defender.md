@@ -7,7 +7,7 @@
 - **Owner:** Repository owner
 - **Last Updated:** 2026-05-05
 - **Scope:** Documents guest-scoped Microsoft Defender for Endpoint validation and Intune setup for the macOSLab demo path.
-- **Related:** [Evidence Redaction](Evidence-Redaction.md), [Evidence and CAB](Evidence-and-CAB.md), [Phase 8 TODO](../TODO-Phase-08-Validation-Loop.md), [Defender health plan](../examples/TestCases/Defender-Health.yml)
+- **Related:** [Evidence Redaction](Evidence-Redaction.md), [Evidence and CAB](Evidence-and-CAB.md), [Phase 8 TODO](../TODO-Phase-08-Validation-Loop.md), [Defender validation plan](../examples/TestCases/Defender-Validation.yml)
 
 ## Scope
 

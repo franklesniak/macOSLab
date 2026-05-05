@@ -7,7 +7,7 @@
 - **Owner:** Repository owner
 - **Last Updated:** 2026-05-05
 - **Scope:** Documents FileVault validation evidence boundaries for macOSLab.
-- **Related:** [Evidence Redaction](Evidence-Redaction.md), [Evidence and CAB](Evidence-and-CAB.md), [FileVault smoke plan](../examples/TestCases/FileVault-Smoke.yml)
+- **Related:** [Evidence Redaction](Evidence-Redaction.md), [Evidence and CAB](Evidence-and-CAB.md), [FileVault validation plan](../examples/TestCases/FileVault-Validation.yml)
 
 ## Validation Model
 

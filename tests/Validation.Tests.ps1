@@ -17,7 +17,7 @@ AfterAll {
 Describe 'Invoke-MacPolicyValidation' {
     It 'Parses a FileVault test plan and writes redacted schema-valid evidence' {
         $strOutputRoot = Join-Path -Path $TestDrive -ChildPath 'evidence'
-        $strPlanPath = Join-Path -Path $script:strRepositoryRoot -ChildPath 'examples/TestCases/FileVault-Smoke.yml'
+        $strPlanPath = Join-Path -Path $script:strRepositoryRoot -ChildPath 'examples/TestCases/FileVault-Validation.yml'
 
         $objEvidence = Invoke-MacPolicyValidation `
             -Provider Parallels `
@@ -35,7 +35,7 @@ Describe 'Invoke-MacPolicyValidation' {
     }
 
     It 'Records Defender unhealthy fixture output as a non-terminating failed assertion' {
-        $strPlanPath = Join-Path -Path $script:strRepositoryRoot -ChildPath 'examples/TestCases/Defender-Health.yml'
+        $strPlanPath = Join-Path -Path $script:strRepositoryRoot -ChildPath 'examples/TestCases/Defender-Validation.yml'
 
         $objEvidence = Invoke-MacPolicyValidation `
             -Provider Parallels `

@@ -7,7 +7,7 @@
 - **Owner:** Repository owner
 - **Last Updated:** 2026-05-05
 - **Scope:** Documents PPPC/TCC validation evidence boundaries for macOSLab.
-- **Related:** [Evidence and CAB](Evidence-and-CAB.md), [PPPC TCC plan](../examples/TestCases/PPPC-TCC.yml)
+- **Related:** [Evidence and CAB](Evidence-and-CAB.md), [PPPC validation plan](../examples/TestCases/PPPC-Validation.yml)
 
 ## Validation Model
 
