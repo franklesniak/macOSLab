@@ -1,0 +1,26 @@
+schemaVersion: "1.0"
+name: "Compliance Smoke Test"
+description: "Fixture-backed Intune compliance and rollback validation plan."
+fidelity: "Yellow"
+expectedCheckpoint: "Broken-Policy-State"
+requiresHardwareSignoff: true
+requiredGraphScopes:
+  - "DeviceManagementManagedDevices.Read.All"
+hostMacOS: "26.4.1"
+hostMacOSBuild: "25E253"
+guestMacOS: "26.4.1"
+guestBuild: "25E253"
+hostGuestCompatibility: "same-major-supported"
+tests:
+  - name: "Compliance smoke test captures engineered failure"
+    kind: "ComplianceState"
+    result: "Fail"
+    expectedFailure: true
+    evidenceRefs:
+      - "graph-compliance-snapshot.json"
+  - name: "Rollback restored known-good checkpoint"
+    kind: "RollbackVerification"
+    result: "Pass"
+    expectedFailure: false
+    evidenceRefs:
+      - "restore-event.json"

@@ -1,0 +1,26 @@
+schemaVersion: "1.0"
+name: "Defender Health"
+description: "Fixture-backed Defender for Endpoint health validation plan."
+fidelity: "Yellow"
+expectedCheckpoint: "Post-Enroll-Baseline"
+requiresHardwareSignoff: true
+defenderVersion: "101.26032.0016"
+hostMacOS: "26.4.1"
+hostMacOSBuild: "25E253"
+guestMacOS: "26.4.1"
+guestBuild: "25E253"
+hostGuestCompatibility: "same-major-supported"
+tests:
+  - name: "Defender intentionally absent on host"
+    kind: "DefenderHostScope"
+    result: "Warn"
+    expectedFailure: false
+    evidenceRefs:
+      - "docs/Defender.md"
+  - name: "Defender health captured from guest"
+    kind: "DefenderHealth"
+    result: "Pass"
+    expectedFailure: true
+    fixture: "fixtures/mdatp-health-unhealthy.txt"
+    evidenceRefs:
+      - "fixtures/mdatp-health-unhealthy.txt"

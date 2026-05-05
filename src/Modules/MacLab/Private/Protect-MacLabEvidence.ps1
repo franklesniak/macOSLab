@@ -155,7 +155,7 @@ function Protect-MacLabEvidence {
                     Protect-Value -Value $objItem -FieldName $FieldName
                 }
             )
-            return $arrRedacted
+            return , $arrRedacted
         }
 
         $hasObject = [ordered]@{}

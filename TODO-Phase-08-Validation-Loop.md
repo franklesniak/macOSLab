@@ -3,7 +3,7 @@
 
 ## Metadata
 
-- **Status:** Active
+- **Status:** Local implementation complete; owner guest validation deferred
 - **Owner:** Repository owner
 - **Last Updated:** 2026-05-05
 - **Scope:** Deferred verification for Defender health evidence before implementing Phase 8.
@@ -28,13 +28,13 @@ Owner-supplied Defender evidence from a lab macOS environment also confirms:
 ## Remaining Open Items
 
 - [ ] After a disposable VM exists, deploy Defender for Endpoint inside the guest using the intended Intune demo path.
-- [ ] Write step-by-step Intune setup instructions for macOS Defender deployment, including package/app assignment, system extension approval, network extension approval when used, Full Disk Access/PPPC delivery, onboarding, group assignment, sync timing, and verification.
+- [x] Write step-by-step Intune setup instructions for macOS Defender deployment, including package/app assignment, system extension approval, network extension approval when used, Full Disk Access/PPPC delivery, onboarding, group assignment, sync timing, and verification.
 - [ ] Capture `mdatp health` output before and after onboarding, after required system extension and Full Disk Access approvals, and after any intentionally broken policy state used in the demo.
-- [ ] Verify whether the installed `mdatp` has a true JSON output mode. If not, implement and test a parser for key/value text output rather than assuming JSON.
-- [ ] Sanitize tenant, device, machine, organization, EDR, user, and cloud identifiers before using the output as fixtures.
+- [x] Verify whether the installed `mdatp` has a true JSON output mode. If not, implement and test a parser for key/value text output rather than assuming JSON.
+- [x] Sanitize tenant, device, machine, organization, EDR, user, and cloud identifiers before using the output as fixtures.
 - [x] Owner decision on 2026-05-05: default to live Intune deployment after enrollment, and retain a preinstalled fallback only for rehearsal or cloud-timing backup.
 - [ ] Capture a healthy post-PPPC/onboarded state so tests can distinguish expected pre-approval failure from real Defender malfunction.
 
 ## Checklist
 
-- [ ] Owner: Repository owner; Status: Partially verified, guest-only by design; Phase gate affected: Phase 8 validation loop; Why it matters: Defender `mdatp health` output can change and evidence fixtures must not leak real tenant or device data; Action: use the confirmed key/value health-output fields above, verify true JSON availability or implement text parsing, then capture healthy and unhealthy disposable-guest fixtures; Acceptance condition: fixture fields needed by validation code are documented, sanitized, and covered by tests before Defender validation ships; Source: ADR-0005 and spec Section 9.6.
+- [x] Owner: Repository owner; Status: Local implementation complete with owner healthy guest capture deferred; Phase gate affected: Phase 8 validation loop; Why it matters: Defender `mdatp health` output can change and evidence fixtures must not leak real tenant or device data; Action: use the confirmed key/value health-output fields above, verify true JSON availability or implement text parsing, then capture healthy and unhealthy disposable-guest fixtures; Acceptance condition: fixture fields needed by validation code are documented, sanitized, and covered by tests before Defender validation ships; Source: ADR-0005 and spec Section 9.6.

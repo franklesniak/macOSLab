@@ -1,0 +1,24 @@
+schemaVersion: "1.0"
+name: "PPPC TCC"
+description: "Fixture-backed PPPC and TCC validation plan."
+fidelity: "Yellow"
+expectedCheckpoint: "Post-Enroll-Baseline"
+requiresHardwareSignoff: true
+hostMacOS: "26.4.1"
+hostMacOSBuild: "25E253"
+guestMacOS: "26.4.1"
+guestBuild: "25E253"
+hostGuestCompatibility: "same-major-supported"
+tests:
+  - name: "PPPC profile receipt captured"
+    kind: "PppcProfileReceipt"
+    result: "Pass"
+    expectedFailure: false
+    evidenceRefs:
+      - "profiles-pppc-summary.txt"
+  - name: "TCC behavior check captured"
+    kind: "TccBehavior"
+    result: "Pass"
+    expectedFailure: false
+    evidenceRefs:
+      - "tcc-behavior-summary.txt"

@@ -1,0 +1,24 @@
+schemaVersion: "1.0"
+name: "FileVault Smoke"
+description: "Fixture-backed FileVault validation plan for the macOSLab evidence loop."
+fidelity: "Yellow"
+expectedCheckpoint: "Post-Enroll-Baseline"
+requiresHardwareSignoff: true
+hostMacOS: "26.4.1"
+hostMacOSBuild: "25E253"
+guestMacOS: "26.4.1"
+guestBuild: "25E253"
+hostGuestCompatibility: "same-major-supported"
+tests:
+  - name: "FileVault status captured"
+    kind: "FileVaultStatus"
+    result: "Pass"
+    expectedFailure: false
+    evidenceRefs:
+      - "fdesetup-status.txt"
+  - name: "FileVault recovery key value redacted"
+    kind: "RedactionVerification"
+    result: "Pass"
+    expectedFailure: false
+    evidenceRefs:
+      - "graph-escrow-summary.json"
