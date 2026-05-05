@@ -92,7 +92,6 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.x'
-          cache: 'pip'
 
       - name: Cache pre-commit hooks
         uses: actions/cache@v5
