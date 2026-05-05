@@ -920,7 +920,8 @@ Anything Parallels-specific that doesn't serve those four beats is decoration.
    - **Options → Travel Mode:** off.
    - **Options → More Options → Time machine:** off.
 6. Start the installation. macOS installer reboots the VM several times. This is normal. Do **not** click anything during the reboots.
-7. Plan to **shut the VM down cleanly** before any snapshot capture (Steps 32, 35, 37). Snapshotting a running or paused VM is the most common cause of MDM identity drift on restore.
+7. After creation and configuration, capture `prlctl list -i "<vm-name>"` and verify the VM is an Apple Virtualization macOS VM with Shared networking and no unwanted host integration. Owner preflight evidence showed a disposable Parallels macOS VM defaulting to several enabled integration settings, including shared applications, shared clipboard/cloud, host resource sharing, camera/gamepad sharing, and host location sharing. Treat the VM as not ready for a `Clean-OS` snapshot until those settings are disabled or explicitly accepted in the Provider Version Matrix.
+8. Plan to **shut the VM down cleanly** before any snapshot capture (Steps 32, 35, 37). Snapshotting a running or paused VM is the most common cause of MDM identity drift on restore.
 
 ### Step 30: Create the macOS VM in UTM (only if you will demo UTM live)
 
@@ -1025,6 +1026,7 @@ Do this **only** if your Demo 4 design assumes Defender is already present at th
    - an Intune-driven install captured **before** you take the snapshot. (Note: this requires enrolling the VM, which means this approach belongs in `Post-Enroll-Baseline`, not `Pre-Enroll`. Choose deliberately.)
 2. Launch Defender once.
 3. Approve any first-run permission prompts that you can approve without enrolling. Leave anything that requires MDM-pushed PPPC payloads alone — those are part of the demo.
+4. Capture `mdatp version` and `mdatp health` output after install. Do not assume a file named `.json` is parseable JSON; owner evidence showed `mdatp health` output as key/value text even when saved to a `.json` filename. Record whether the installed `mdatp` build supports a true JSON output mode, and sanitize organization, machine, EDR, tenant, device, user, and cloud identifiers before using the output as evidence fixtures.
 
 ### Step 35: Capture the `Pre-Enroll` snapshot
 
@@ -1268,6 +1270,7 @@ The evidence-protection helper is named `Protect-MacLabEvidence.ps1`. Do **not**
   - PowerShell 7.4+ version
   - Pester 5.7.1
   - Defender for Endpoint version, if used
+  - Defender health output format and redaction status, if used
   - Intune policy-set version or change identifier
   - date tested
 
@@ -1333,6 +1336,7 @@ The evidence-protection helper is named `Protect-MacLabEvidence.ps1`. Do **not**
 - **PowerShell floor.** Use PowerShell 7.4 or newer only.
 - **Tart license and scope.** Tart is optional and stubbed in v1 unless later work explicitly approves a fuller provider. Treat Tart's Fair Source/free-tier 100 CPU-core limit and Orchard's 4-worker limit as planning constraints, not legal advice.
 - **Host/guest macOS coverage.** Same-major host/guest macOS is the safest default for Apple-silicon macOS guests. If you need reliable coverage for macOS 14.x, 15.x, and 26.x at the same time, plan for up to three Apple-silicon host Macs and verify each model can boot the required host macOS. Newest hardware is not automatically best for older guest coverage because it may not support older host macOS releases.
+- **Parallels isolation verification.** Do not trust the Parallels macOS VM defaults to match this lab's isolation policy. Verify the created VM's provider info and disable host integration before the first durable snapshot.
 - **VM fidelity boundary.** The VM lab is for safe iteration, regression, and evidence automation. It does **not** replace physical Mac sign-off for hardware/security-model-dependent flows such as ADE / ABM zero-touch, Platform SSO, Touch ID, Secure Enclave-dependent behavior, and final FileVault rollout validation. **VM first, hardware last.**
 - **Cloud rollback boundary.** Snapshot rollback restores the VM. It does **not** rewind Intune, Entra, Defender portal state, audit logs, compliance history, or cloud reporting. In v1, `Reset-IntuneMacLabDevice.ps1` is report-only and documents manual cleanup steps; it does not mutate cloud records.
 

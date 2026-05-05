@@ -1189,7 +1189,8 @@ Required behavior:
 - Create, list, and restore snapshots/checkpoints.
 - Return stable VM identity metadata.
 - Use Shared networking.
-- Disable Coherence, shared clipboard, shared folders, shared cameras, shared Bluetooth, and similar host integrations when creating VMs.
+- Disable Coherence, shared clipboard, shared folders, shared cameras, shared Bluetooth, shared applications, SmartMount-style host resource sharing, host location sharing, and similar host integrations when creating VMs.
+- Verify the resulting VM configuration after creation because Parallels defaults may leave host integration settings enabled even when the lab requires isolation.
 
 ### 17.5 UTM Provider
 

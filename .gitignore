@@ -35,6 +35,8 @@ evidence/
 Evidence/
 macoslab-preflight/
 macoslab-preflight*.zip
+mdatp*.zip
+prlctl-evidence*.zip
 .maclab/
 media-cache/
 .media-cache/

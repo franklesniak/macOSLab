@@ -17,6 +17,9 @@ Owner-supplied sanitized host preflight evidence confirms the future evidence mo
 - Provider command-surface captures, such as help output and list output.
 - Media discovery JSON from `mist`.
 - Provider inventory states where no VMs are registered yet.
+- Provider inventory states where a disposable VM is registered and running.
+- Provider configuration facts that are important evidence, including Apple Virtualization type, shared networking, vCPU/RAM/disk sizing, snapshot-list output, guest-tools state, and host integration/sharing settings.
+- Defender health output in key/value text form. An owner-supplied file named `mdatp-health.raw.json` contained the same key/value text as the `.txt` capture and was not parseable JSON.
 - Sanitization status for hostnames, user paths, UUIDs, MAC addresses, email addresses, license material, and other local identifiers.
 - A distinction between raw local captures, sanitized review bundles, and durable evidence summaries that are safe to commit.
 
@@ -26,9 +29,11 @@ Do not commit the raw or sanitized preflight capture bundle. The committed evide
 
 - [ ] Decide whether the real evidence schema stores raw command-output attachments, normalized parsed facts, or both.
 - [ ] Add fields for host/guest macOS compatibility classification and provider manual-step gaps.
-- [ ] Add redaction assertions that reject license strings, hardware identifiers, local usernames, VM UUIDs, MAC addresses, tenant identifiers, and device identifiers.
+- [ ] Add fields for provider isolation state, including whether host sharing, shared clipboard, shared applications, SmartMount/resource sharing, camera sharing, Bluetooth sharing, and host location sharing are disabled.
+- [ ] Add redaction assertions that reject license strings, hardware identifiers, local usernames, VM UUIDs, MAC addresses, tenant identifiers, device identifiers, Defender organization IDs, Defender machine IDs, Defender machine GUIDs, EDR device tags, and cloud configuration IDs.
 - [ ] Add fixtures for "tool installed but no VMs registered" states for Parallels and UTM.
 - [ ] Add fixtures for "Defender intentionally absent on host; validate inside guest" states if Phase 8 uses host/guest evidence separation.
+- [ ] Add fixtures for Defender unhealthy-but-installed states where `healthy` is `false` because event providers, network event provider, or Full Disk Access are missing.
 
 ## Checklist
 
