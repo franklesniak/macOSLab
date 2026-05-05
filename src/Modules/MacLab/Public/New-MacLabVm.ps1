@@ -72,29 +72,33 @@ function New-MacLabVm {
         return
     }
 
-    if ($Provider -ne 'Parallels') {
-        throw [System.NotImplementedException]::new(
-            "Provider '${Provider}' VM creation is implemented in a later phase."
-        )
+    switch ($Provider) {
+        'Parallels' {
+            $strCacheRoot = if ($CacheRoot) {
+                $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CacheRoot)
+            } else {
+                $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath('~/Demo/Installers')
+            }
+            $strMetadataPath = Join-Path -Path $strCacheRoot -ChildPath "${MediaId}.metadata.json"
+
+            if (-not (Test-Path -LiteralPath $strMetadataPath -PathType Leaf)) {
+                throw "Media metadata was not found for '${MediaId}': ${strMetadataPath}"
+            }
+
+            $objMediaMetadata = Get-Content -LiteralPath $strMetadataPath -Raw | ConvertFrom-Json
+
+            New-MacLabVm_Parallels `
+                -Name $Name `
+                -MediaMetadata $objMediaMetadata `
+                -SizingProfile $SizingProfile `
+                -VmRoot $VmRoot `
+                -Confirm:$false
+        }
+        'UTM' {
+            New-MacLabVm_UTM -Name $Name -MediaId $MediaId -Confirm:$false
+        }
+        'Tart' {
+            New-MacLabVm_Tart -Name $Name -Confirm:$false
+        }
     }
-
-    $strCacheRoot = if ($CacheRoot) {
-        $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CacheRoot)
-    } else {
-        $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath('~/Demo/Installers')
-    }
-    $strMetadataPath = Join-Path -Path $strCacheRoot -ChildPath "${MediaId}.metadata.json"
-
-    if (-not (Test-Path -LiteralPath $strMetadataPath -PathType Leaf)) {
-        throw "Media metadata was not found for '${MediaId}': ${strMetadataPath}"
-    }
-
-    $objMediaMetadata = Get-Content -LiteralPath $strMetadataPath -Raw | ConvertFrom-Json
-
-    New-MacLabVm_Parallels `
-        -Name $Name `
-        -MediaMetadata $objMediaMetadata `
-        -SizingProfile $SizingProfile `
-        -VmRoot $VmRoot `
-        -Confirm:$false
 }

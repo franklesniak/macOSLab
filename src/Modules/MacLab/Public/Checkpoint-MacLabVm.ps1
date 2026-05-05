@@ -75,16 +75,20 @@ function Checkpoint-MacLabVm {
         return
     }
 
-    if ($Provider -ne 'Parallels') {
-        throw [System.NotImplementedException]::new(
-            "Provider '${Provider}' checkpoint capture is implemented in a later phase."
-        )
+    switch ($Provider) {
+        'Parallels' {
+            Checkpoint-MacLabVm_Parallels `
+                -Name $Name `
+                -CheckpointName $CheckpointName `
+                -Description $Description `
+                -RequireCleanShutdown:$RequireCleanShutdown `
+                -Confirm:$false
+        }
+        'UTM' {
+            Checkpoint-MacLabVm_UTM -Name $Name -CheckpointName $CheckpointName -Confirm:$false
+        }
+        'Tart' {
+            Checkpoint-MacLabVm_Tart -Name $Name -CheckpointName $CheckpointName -Confirm:$false
+        }
     }
-
-    Checkpoint-MacLabVm_Parallels `
-        -Name $Name `
-        -CheckpointName $CheckpointName `
-        -Description $Description `
-        -RequireCleanShutdown:$RequireCleanShutdown `
-        -Confirm:$false
 }

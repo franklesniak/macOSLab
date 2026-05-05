@@ -46,11 +46,15 @@ function Start-MacLabVm {
         return
     }
 
-    if ($Provider -ne 'Parallels') {
-        throw [System.NotImplementedException]::new(
-            "Provider '${Provider}' start is implemented in a later phase."
-        )
+    switch ($Provider) {
+        'Parallels' {
+            Start-MacLabVm_Parallels -Name $Name -WaitForReady:$WaitForReady -Confirm:$false
+        }
+        'UTM' {
+            Start-MacLabVm_UTM -Name $Name -WaitForReady:$WaitForReady -Confirm:$false
+        }
+        'Tart' {
+            Start-MacLabVm_Tart -Name $Name -Confirm:$false
+        }
     }
-
-    Start-MacLabVm_Parallels -Name $Name -WaitForReady:$WaitForReady -Confirm:$false
 }

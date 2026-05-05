@@ -37,16 +37,24 @@ function Get-MacLabVm {
     )
 
     if ($Provider) {
-        if ($Provider -ne 'Parallels') {
-            throw [System.NotImplementedException]::new(
-                "Provider '${Provider}' inventory is implemented in a later phase."
-            )
-        }
-
-        if ($Name) {
-            Get-MacLabVm_Parallels -Name $Name
-        } else {
-            Get-MacLabVm_Parallels
+        switch ($Provider) {
+            'Parallels' {
+                if ($Name) {
+                    Get-MacLabVm_Parallels -Name $Name
+                } else {
+                    Get-MacLabVm_Parallels
+                }
+            }
+            'UTM' {
+                if ($Name) {
+                    Get-MacLabVm_UTM -Name $Name
+                } else {
+                    Get-MacLabVm_UTM
+                }
+            }
+            'Tart' {
+                Get-MacLabVm_Tart -Name $Name
+            }
         }
         return
     }
@@ -56,6 +64,14 @@ function Get-MacLabVm {
             Get-MacLabVm_Parallels -Name $Name
         } else {
             Get-MacLabVm_Parallels
+        }
+    }
+
+    if (Test-ProviderInstalled_UTM) {
+        if ($Name) {
+            Get-MacLabVm_UTM -Name $Name
+        } else {
+            Get-MacLabVm_UTM
         }
     }
 }

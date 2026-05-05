@@ -32,7 +32,7 @@ function New-MacLabVm_Tart {
     if (-not $PSCmdlet.ShouldProcess($Name, 'Create Tart macOS lab VM')) {
         return
     }
-    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1.')
+    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1. See docs/CI-and-Tart.md.')
 }
 
 function Get-MacLabVm_Tart {
@@ -63,7 +63,7 @@ function Get-MacLabVm_Tart {
     [OutputType([pscustomobject])]
     param([string]$Name)
     $null = $Name
-    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1.')
+    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1. See docs/CI-and-Tart.md.')
 }
 
 function Start-MacLabVm_Tart {
@@ -97,7 +97,7 @@ function Start-MacLabVm_Tart {
     if (-not $PSCmdlet.ShouldProcess($Name, 'Start Tart macOS lab VM')) {
         return
     }
-    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1.')
+    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1. See docs/CI-and-Tart.md.')
 }
 
 function Stop-MacLabVm_Tart {
@@ -131,7 +131,7 @@ function Stop-MacLabVm_Tart {
     if (-not $PSCmdlet.ShouldProcess($Name, 'Stop Tart macOS lab VM')) {
         return
     }
-    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1.')
+    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1. See docs/CI-and-Tart.md.')
 }
 
 function Checkpoint-MacLabVm_Tart {
@@ -172,7 +172,7 @@ function Checkpoint-MacLabVm_Tart {
     if (-not $PSCmdlet.ShouldProcess("${Name}:${CheckpointName}", 'Capture Tart macOS lab VM checkpoint')) {
         return
     }
-    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1.')
+    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1. See docs/CI-and-Tart.md.')
 }
 
 function Restore-MacLabVmCheckpoint_Tart {
@@ -213,7 +213,7 @@ function Restore-MacLabVmCheckpoint_Tart {
     if (-not $PSCmdlet.ShouldProcess("${Name}:${CheckpointName}", 'Restore Tart macOS lab VM checkpoint')) {
         return
     }
-    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1.')
+    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1. See docs/CI-and-Tart.md.')
 }
 
 function Remove-MacLabVm_Tart {
@@ -247,7 +247,7 @@ function Remove-MacLabVm_Tart {
     if (-not $PSCmdlet.ShouldProcess($Name, 'Remove Tart macOS lab VM')) {
         return
     }
-    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1.')
+    throw [System.NotImplementedException]::new('Tart provider is documented but not implemented in v1. See docs/CI-and-Tart.md.')
 }
 
 function Get-ProviderVersion_Tart {
@@ -255,7 +255,8 @@ function Get-ProviderVersion_Tart {
     # Gets Tart provider version information.
     #
     # .DESCRIPTION
-    # Phase 2 provider scaffold. Version detection is the only approved v1 Tart primitive.
+    # Captures Tart version information when the optional Tart command is
+    # installed. Tart remains a v1 stub for lifecycle operations.
     #
     # .EXAMPLE
     # Get-ProviderVersion_Tart
@@ -265,7 +266,7 @@ function Get-ProviderVersion_Tart {
     # None.
     #
     # .OUTPUTS
-    # [pscustomobject]. Provider version record after implementation.
+    # [pscustomobject]. Provider version record.
     #
     # .NOTES
     # Version: 0.1.20260505.0
@@ -274,7 +275,29 @@ function Get-ProviderVersion_Tart {
     [CmdletBinding(PositionalBinding = $false)]
     [OutputType([pscustomobject])]
     param()
-    throw [System.NotImplementedException]::new('Tart version capture is a Phase 2 scaffold stub. Phase 6 implements the v1 Tart stub.')
+
+    $objCommand = Get-Command -Name tart -CommandType Application -ErrorAction SilentlyContinue
+    if (-not $objCommand) {
+        return [pscustomobject]@{
+            Provider = 'Tart'
+            Installed = $false
+            TartPath = $null
+            TartVersion = $null
+            Implementation = 'StubbedInV1'
+            Documentation = 'docs/CI-and-Tart.md'
+        }
+    }
+
+    $objVersion = Invoke-LoggedCommand -FilePath $objCommand.Source -ArgumentList @('--version') -TimeoutSeconds 60
+
+    [pscustomobject]@{
+        Provider = 'Tart'
+        Installed = $true
+        TartPath = $objCommand.Source
+        TartVersion = $objVersion.Stdout.Trim()
+        Implementation = 'StubbedInV1'
+        Documentation = 'docs/CI-and-Tart.md'
+    }
 }
 
 function Test-ProviderInstalled_Tart {
@@ -282,7 +305,8 @@ function Test-ProviderInstalled_Tart {
     # Tests whether Tart provider tools are installed.
     #
     # .DESCRIPTION
-    # Phase 2 provider scaffold. Installation detection is approved for the v1 Tart stub.
+    # Tests whether the optional Tart command is installed. Tart remains a v1
+    # lifecycle stub even when the command is present.
     #
     # .EXAMPLE
     # Test-ProviderInstalled_Tart
@@ -292,7 +316,7 @@ function Test-ProviderInstalled_Tart {
     # None.
     #
     # .OUTPUTS
-    # [bool]. Provider installation state after implementation.
+    # [bool]. Provider installation state.
     #
     # .NOTES
     # Version: 0.1.20260505.0
@@ -301,5 +325,6 @@ function Test-ProviderInstalled_Tart {
     [CmdletBinding(PositionalBinding = $false)]
     [OutputType([bool])]
     param()
-    return $false
+
+    $null -ne (Get-Command -Name tart -CommandType Application -ErrorAction SilentlyContinue)
 }

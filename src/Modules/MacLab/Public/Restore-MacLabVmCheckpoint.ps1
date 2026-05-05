@@ -58,11 +58,15 @@ function Restore-MacLabVmCheckpoint {
         return
     }
 
-    if ($Provider -ne 'Parallels') {
-        throw [System.NotImplementedException]::new(
-            "Provider '${Provider}' checkpoint restore is implemented in a later phase."
-        )
+    switch ($Provider) {
+        'Parallels' {
+            Restore-MacLabVmCheckpoint_Parallels -Name $Name -CheckpointName $CheckpointName -Confirm:$false
+        }
+        'UTM' {
+            Restore-MacLabVmCheckpoint_UTM -Name $Name -CheckpointName $CheckpointName -Confirm:$false
+        }
+        'Tart' {
+            Restore-MacLabVmCheckpoint_Tart -Name $Name -CheckpointName $CheckpointName -Confirm:$false
+        }
     }
-
-    Restore-MacLabVmCheckpoint_Parallels -Name $Name -CheckpointName $CheckpointName -Confirm:$false
 }

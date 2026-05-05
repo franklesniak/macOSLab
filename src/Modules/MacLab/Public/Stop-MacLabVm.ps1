@@ -46,11 +46,15 @@ function Stop-MacLabVm {
         return
     }
 
-    if ($Provider -ne 'Parallels') {
-        throw [System.NotImplementedException]::new(
-            "Provider '${Provider}' stop is implemented in a later phase."
-        )
+    switch ($Provider) {
+        'Parallels' {
+            Stop-MacLabVm_Parallels -Name $Name -Force:$Force -Confirm:$false
+        }
+        'UTM' {
+            Stop-MacLabVm_UTM -Name $Name -Force:$Force -Confirm:$false
+        }
+        'Tart' {
+            Stop-MacLabVm_Tart -Name $Name -Confirm:$false
+        }
     }
-
-    Stop-MacLabVm_Parallels -Name $Name -Force:$Force -Confirm:$false
 }

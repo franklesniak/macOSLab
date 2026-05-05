@@ -51,15 +51,23 @@ function Remove-MacLabVm {
         return
     }
 
-    if ($Provider -ne 'Parallels') {
-        throw [System.NotImplementedException]::new(
-            "Provider '${Provider}' removal is implemented in a later phase."
-        )
+    switch ($Provider) {
+        'Parallels' {
+            Remove-MacLabVm_Parallels `
+                -Name $Name `
+                -RemoveDiskFiles:$RemoveDiskFiles `
+                -Force:$Force `
+                -Confirm:$false
+        }
+        'UTM' {
+            Remove-MacLabVm_UTM `
+                -Name $Name `
+                -RemoveDiskFiles:$RemoveDiskFiles `
+                -Force:$Force `
+                -Confirm:$false
+        }
+        'Tart' {
+            Remove-MacLabVm_Tart -Name $Name -Confirm:$false
+        }
     }
-
-    Remove-MacLabVm_Parallels `
-        -Name $Name `
-        -RemoveDiskFiles:$RemoveDiskFiles `
-        -Force:$Force `
-        -Confirm:$false
 }

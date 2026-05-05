@@ -1,0 +1,49 @@
+{
+  "metadata": {
+    "status": "active",
+    "owner": "Repository owner",
+    "lastUpdated": "2026-05-05",
+    "scope": "Manual reconstruction checklist for a v1 UTM macOS lab VM."
+  },
+  "provider": {
+    "name": "UTM",
+    "versionVerified": "4.7.5",
+    "automationPosture": "manual-provider-swap-with-partial-lifecycle",
+    "utmctlPath": "/Applications/UTM.app/Contents/MacOS/utmctl"
+  },
+  "vm": {
+    "name": "macOSLab-UTM-Disposable",
+    "virtualizationBackend": "Apple Virtualization",
+    "guestVersion": "26.4.1",
+    "guestBuild": "25E253",
+    "hostGuestCompatibility": "same-major-supported",
+    "cpuCount": 4,
+    "memoryMb": 8192,
+    "diskGb": 128,
+    "networkMode": "Shared Network"
+  },
+  "media": {
+    "artifactType": "Firmware",
+    "path": "~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw",
+    "sha256": "8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32"
+  },
+  "manualSteps": [
+    "Open UTM and create a new macOS Apple Virtualization VM from the prepared IPSW.",
+    "Name the VM macOSLab-UTM-Disposable.",
+    "Use Shared Network and do not use bridged networking for the demo path.",
+    "Disable or avoid host-sharing features that blur host and guest identity boundaries.",
+    "Boot the guest and complete only the manual setup required for the provider-swap demonstration.",
+    "Use utmctl status, start, suspend, and stop for the supported v1 lifecycle checks."
+  ],
+  "unsupportedInV1": [
+    "automatedVmCreation",
+    "automatedImport",
+    "automatedExport",
+    "automatedSnapshotCapture",
+    "automatedSnapshotRestore",
+    "guestIpDiscoveryForMacAppleVirtualization",
+    "guestCommandExecution",
+    "guestFileTransfer",
+    "automatedDelete"
+  ]
+}
