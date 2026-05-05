@@ -42,14 +42,15 @@ function Stop-MacLabVm {
         [switch]$Force
     )
 
-    $null = $Provider
-    $null = $Force
-
     if (-not $PSCmdlet.ShouldProcess($Name, 'Stop macOS lab VM')) {
         return
     }
 
-    throw [System.NotImplementedException]::new(
-        'Stop-MacLabVm is a Phase 2 scaffold stub. Provider lifecycle starts in later phases.'
-    )
+    if ($Provider -ne 'Parallels') {
+        throw [System.NotImplementedException]::new(
+            "Provider '${Provider}' stop is implemented in a later phase."
+        )
+    }
+
+    Stop-MacLabVm_Parallels -Name $Name -Force:$Force -Confirm:$false
 }

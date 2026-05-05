@@ -142,15 +142,15 @@ Describe 'MacLab public command metadata' {
     }
 }
 
-Describe 'MacLab Phase 2 scaffold behavior' {
+Describe 'MacLab provider validation behavior' {
     BeforeAll {
         Import-Module -Name $script:strModuleManifestPath -Force
     }
 
-    It 'Fails clearly for unimplemented inventory behavior' {
+    It 'Fails clearly when explicit Parallels inventory tooling is missing' {
         {
             Get-MacLabVm -Provider Parallels
-        } | Should -Throw -ExpectedMessage '*Phase 2 scaffold stub*'
+        } | Should -Throw -ExpectedMessage '*prlctl was not found*'
     }
 
     It 'Rejects invalid VM names before provider dispatch' {

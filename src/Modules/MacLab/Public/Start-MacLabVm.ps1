@@ -42,14 +42,15 @@ function Start-MacLabVm {
         [switch]$WaitForReady
     )
 
-    $null = $Provider
-    $null = $WaitForReady
-
     if (-not $PSCmdlet.ShouldProcess($Name, 'Start macOS lab VM')) {
         return
     }
 
-    throw [System.NotImplementedException]::new(
-        'Start-MacLabVm is a Phase 2 scaffold stub. Provider lifecycle starts in later phases.'
-    )
+    if ($Provider -ne 'Parallels') {
+        throw [System.NotImplementedException]::new(
+            "Provider '${Provider}' start is implemented in a later phase."
+        )
+    }
+
+    Start-MacLabVm_Parallels -Name $Name -WaitForReady:$WaitForReady -Confirm:$false
 }

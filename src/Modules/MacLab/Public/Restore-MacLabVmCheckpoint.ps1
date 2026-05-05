@@ -50,14 +50,19 @@ function Restore-MacLabVmCheckpoint {
         [switch]$AcknowledgeCloudStateWarning
     )
 
-    $null = $Provider
-    $null = $AcknowledgeCloudStateWarning
+    if (-not $AcknowledgeCloudStateWarning) {
+        throw 'Restore does not rewind Intune, Entra, Defender, or other cloud state. Re-run with -AcknowledgeCloudStateWarning after confirming the rollback boundary.'
+    }
 
     if (-not $PSCmdlet.ShouldProcess("${Name}:${CheckpointName}", 'Restore macOS lab VM checkpoint')) {
         return
     }
 
-    throw [System.NotImplementedException]::new(
-        'Restore-MacLabVmCheckpoint is a Phase 2 scaffold stub. Provider checkpoint restore starts in later phases.'
-    )
+    if ($Provider -ne 'Parallels') {
+        throw [System.NotImplementedException]::new(
+            "Provider '${Provider}' checkpoint restore is implemented in a later phase."
+        )
+    }
+
+    Restore-MacLabVmCheckpoint_Parallels -Name $Name -CheckpointName $CheckpointName -Confirm:$false
 }

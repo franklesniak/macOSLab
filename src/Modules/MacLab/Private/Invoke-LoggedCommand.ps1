@@ -18,6 +18,9 @@ function Invoke-LoggedCommand {
     # .PARAMETER SensitiveArgumentPattern
     # Optional regex patterns for arguments that must be redacted in logs.
     #
+    # .PARAMETER StandardInputText
+    # Optional stdin text to pass to the process.
+    #
     # .EXAMPLE
     # Invoke-LoggedCommand -FilePath '/usr/bin/sw_vers' -ArgumentList @('-productVersion')
     # # Runs the command and captures structured output.
@@ -44,7 +47,9 @@ function Invoke-LoggedCommand {
         [ValidateRange(1, 86400)]
         [int]$TimeoutSeconds = 300,
 
-        [string[]]$SensitiveArgumentPattern = @()
+        [string[]]$SensitiveArgumentPattern = @(),
+
+        [string]$StandardInputText
     )
 
     $dateStart = Get-Date
@@ -70,6 +75,7 @@ function Invoke-LoggedCommand {
     $objStartInfo.UseShellExecute = $false
     $objStartInfo.RedirectStandardOutput = $true
     $objStartInfo.RedirectStandardError = $true
+    $objStartInfo.RedirectStandardInput = $PSBoundParameters.ContainsKey('StandardInputText')
 
     foreach ($strArgument in $ArgumentList) {
         [void]$objStartInfo.ArgumentList.Add($strArgument)
@@ -80,6 +86,11 @@ function Invoke-LoggedCommand {
 
     try {
         [void]$objProcess.Start()
+        if ($PSBoundParameters.ContainsKey('StandardInputText')) {
+            $objProcess.StandardInput.Write($StandardInputText)
+            $objProcess.StandardInput.Close()
+        }
+
         $boolExited = $objProcess.WaitForExit($TimeoutSeconds * 1000)
 
         if (-not $boolExited) {

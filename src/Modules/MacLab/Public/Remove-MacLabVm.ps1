@@ -47,15 +47,19 @@ function Remove-MacLabVm {
         [switch]$Force
     )
 
-    $null = $Provider
-    $null = $RemoveDiskFiles
-    $null = $Force
-
     if (-not $PSCmdlet.ShouldProcess($Name, 'Remove macOS lab VM')) {
         return
     }
 
-    throw [System.NotImplementedException]::new(
-        'Remove-MacLabVm is a Phase 2 scaffold stub. Provider VM removal starts in later phases.'
-    )
+    if ($Provider -ne 'Parallels') {
+        throw [System.NotImplementedException]::new(
+            "Provider '${Provider}' removal is implemented in a later phase."
+        )
+    }
+
+    Remove-MacLabVm_Parallels `
+        -Name $Name `
+        -RemoveDiskFiles:$RemoveDiskFiles `
+        -Force:$Force `
+        -Confirm:$false
 }

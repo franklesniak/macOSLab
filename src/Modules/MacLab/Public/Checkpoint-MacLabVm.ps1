@@ -49,7 +49,7 @@ function Checkpoint-MacLabVm {
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Clean-OS', 'Pre-Enroll', 'Post-Enroll-Baseline', 'Broken-Policy-State', 'Recovered-Known-Good')]
+        [ValidateNotNullOrEmpty()]
         [string]$CheckpointName,
 
         [switch]$AllowNonCanonicalCheckpoint,
@@ -59,16 +59,32 @@ function Checkpoint-MacLabVm {
         [switch]$RequireCleanShutdown
     )
 
-    $null = $Provider
-    $null = $AllowNonCanonicalCheckpoint
-    $null = $Description
-    $null = $RequireCleanShutdown
+    $arrCanonicalCheckpointName = @(
+        'Clean-OS',
+        'Pre-Enroll',
+        'Post-Enroll-Baseline',
+        'Broken-Policy-State',
+        'Recovered-Known-Good'
+    )
+
+    if ($arrCanonicalCheckpointName -notcontains $CheckpointName -and -not $AllowNonCanonicalCheckpoint) {
+        throw "Checkpoint '${CheckpointName}' is not canonical. Use -AllowNonCanonicalCheckpoint for local-only checkpoints."
+    }
 
     if (-not $PSCmdlet.ShouldProcess("${Name}:${CheckpointName}", 'Capture macOS lab VM checkpoint')) {
         return
     }
 
-    throw [System.NotImplementedException]::new(
-        'Checkpoint-MacLabVm is a Phase 2 scaffold stub. Provider checkpoint capture starts in later phases.'
-    )
+    if ($Provider -ne 'Parallels') {
+        throw [System.NotImplementedException]::new(
+            "Provider '${Provider}' checkpoint capture is implemented in a later phase."
+        )
+    }
+
+    Checkpoint-MacLabVm_Parallels `
+        -Name $Name `
+        -CheckpointName $CheckpointName `
+        -Description $Description `
+        -RequireCleanShutdown:$RequireCleanShutdown `
+        -Confirm:$false
 }

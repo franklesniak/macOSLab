@@ -36,10 +36,26 @@ function Get-MacLabVm {
         [string]$Name
     )
 
-    $null = $Provider
-    $null = $Name
+    if ($Provider) {
+        if ($Provider -ne 'Parallels') {
+            throw [System.NotImplementedException]::new(
+                "Provider '${Provider}' inventory is implemented in a later phase."
+            )
+        }
 
-    throw [System.NotImplementedException]::new(
-        'Get-MacLabVm is a Phase 2 scaffold stub. Provider inventory starts in later phases.'
-    )
+        if ($Name) {
+            Get-MacLabVm_Parallels -Name $Name
+        } else {
+            Get-MacLabVm_Parallels
+        }
+        return
+    }
+
+    if (Test-ProviderInstalled_Parallels) {
+        if ($Name) {
+            Get-MacLabVm_Parallels -Name $Name
+        } else {
+            Get-MacLabVm_Parallels
+        }
+    }
 }
