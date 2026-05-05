@@ -94,12 +94,18 @@ jobs:
               $hasErrors = $true
               foreach ($result in $results) {
                 $severity = $result.Severity
-                $message = "$($file.Name):$($result.Line):$($result.Column): [$severity] $($result.RuleName) - $($result.Message)"
+                $annotationText = "$($result.RuleName) - $($result.Message)"
 
                 if ($severity -eq 'Error') {
-                  Write-Host "::error file=$($file.FullName),line=$($result.Line),col=$($result.Column)::$($result.RuleName) - $($result.Message)"
+                  Write-Host (
+                    "::error file=$($file.FullName),line=$($result.Line),col=$($result.Column)::" +
+                    $annotationText
+                  )
                 } else {
-                  Write-Host "::warning file=$($file.FullName),line=$($result.Line),col=$($result.Column)::$($result.RuleName) - $($result.Message)"
+                  Write-Host (
+                    "::warning file=$($file.FullName),line=$($result.Line),col=$($result.Column)::" +
+                    $annotationText
+                  )
                 }
               }
             }

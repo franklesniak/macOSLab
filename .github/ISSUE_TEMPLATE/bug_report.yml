@@ -10,7 +10,11 @@ body:
       value: |
         Thank you for reporting a bug.
 
-        Security vulnerabilities must be reported privately through [GitHub private vulnerability reporting](https://github.com/franklesniak/macOSLab/security/advisories/new), not through this form.
+        Security vulnerabilities must be reported privately through
+        [GitHub private vulnerability reporting][private-vulnerability-reporting],
+        not through this form.
+
+        [private-vulnerability-reporting]: https://github.com/franklesniak/macOSLab/security/advisories/new
 
   - type: checkboxes
     id: pre_flight
