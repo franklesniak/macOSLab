@@ -6,7 +6,7 @@
 - **Status:** Draft
 - **Owner:** Repository Maintainers
 - **Last Updated:** 2026-05-05
-- **Scope:** PR-description content for the Phase 0 bootstrap branch. This records applied steps, skipped steps, manual owner actions, validation, and requested authorization.
+- **Scope:** PR-description content for the Phase 0 bootstrap branch. This records applied steps, skipped steps, manual owner actions, validation, and protected-instruction cleanup.
 - **Related:** [Phase 0 bootstrap instructions](phase-0-bootstrap-codex-instructions.md), [macOSLab repository specification](planning/macOS-imaging-08c-repo-spec-final.md), [macOSLab ADRs](planning/macOS-imaging-08e-ADRs.md)
 
 ## Summary
@@ -22,6 +22,8 @@ This Phase 0 bootstrap customizes the template repository for `franklesniak/macO
 - Customized README, CONTRIBUTING, issue templates, PR template, CODEOWNERS, package metadata, VS Code title, pre-commit, Dependabot, workflows, and `.gitignore`.
 - Removed non-protected Python sample/source files and Python package metadata.
 - Removed non-protected HCL sample files, HCL workflow/configuration, and HCL-specific docs.
+- Removed unused Python and Terraform modular instruction files after explicit owner authorization.
+- Updated protected instruction entry points to match the PowerShell/Markdown repository shape after explicit owner authorization.
 - Kept Markdown linting, nested Markdown linting, data-file validation, pre-commit, PowerShell/Pester CI, PSScriptAnalyzer settings, issue templates, PR template, CODEOWNERS, and governance files.
 - Kept the worked-example schema and `check-jsonschema` / `check-metaschema` hooks for Phase 0 validation.
 - Added required root phase TODO files, including branch-protection and Phase 7 evidence-schema replacement tracking.
@@ -40,7 +42,7 @@ This Phase 0 bootstrap customizes the template repository for `franklesniak/macO
 - README customization: applied as a minimal Phase 0 README.
 - CONTRIBUTING customization: applied for PowerShell/Markdown and retained tooling.
 - CODE_OF_CONDUCT customization: applied.
-- Copilot/protected instruction updates: skipped because protected instruction files require explicit owner authorization.
+- Copilot/protected instruction updates: applied after explicit owner authorization on 2026-05-05.
 - Validation/testing: run locally as noted in this PR after edits.
 - Cleanup: applied for non-protected template artifacts that do not match macOSLab.
 
@@ -53,10 +55,10 @@ This Phase 0 bootstrap customizes the template repository for `franklesniak/macO
 - Pre-commit configuration: applied; Black, Ruff, and HCL hooks removed, retained data-file and Markdown hooks kept.
 - Schema validation configuration: applied; worked example retained and Phase 7 replacement TODO added.
 - Markdown linting/workflow: kept.
-- Copilot instruction configuration: skipped because protected instruction files require explicit owner authorization.
+- Copilot instruction configuration: applied after explicit owner authorization on 2026-05-05.
 - CI workflow configuration: applied; Python and HCL CI removed, narrow aggregate pre-commit workflow added for retained tooling hooks.
 - Auto-fix pre-commit workflow: kept and updated to match retained hook set.
-- Placeholder check workflow: kept.
+- Placeholder check workflow: removed after repository initialization.
 - PowerShell CI workflow: kept, PowerShell 7.4 floor check added, Pester pinned to `5.7.1`.
 - Python template files: removed.
 - Pester test template: kept.
@@ -77,11 +79,8 @@ This Phase 0 bootstrap customizes the template repository for `franklesniak/macO
 - Set repository About description and topics.
 - Verify GitHub Actions are green after the branch is pushed.
 
-## Open Questions / Requested Authorization
+## Open Questions
 
-- Authorization requested: remove or de-link `.github/instructions/terraform.instructions.md` and remove inherited HCL references from protected instruction entry points.
-- Authorization requested: remove or de-link `.github/instructions/python.instructions.md` and remove inherited Python references from protected instruction entry points.
-- Authorization requested: update `.github/copilot-instructions.md`, `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` so their language tables, validation commands, and summaries match PowerShell/Markdown macOSLab.
 - Owner decision requested: whether to add the exact ADR-0009 `SECURITY.md` paragraph in Phase 1.
 
 ## Validation
