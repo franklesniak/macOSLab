@@ -3,9 +3,8 @@ function Get-MacLabMedia {
     # Discovers and caches pinned macOS media.
     #
     # .DESCRIPTION
-    # Phase 2 scaffold for the future media workflow. The implemented command
-    # will use mist-cli through the -Source Mist path and return media metadata.
-    # This scaffold imports successfully and fails clearly until Phase 4.
+    # Uses prepared media when supplied and verified, or invokes mist-cli for
+    # live media discovery/download on macOS hosts.
     #
     # .PARAMETER Version
     # macOS marketing version to discover or acquire.
@@ -28,18 +27,24 @@ function Get-MacLabMedia {
     # .PARAMETER Force
     # Redownload or refresh cached media when implementation is complete.
     #
+    # .PARAMETER PreparedArtifactPath
+    # Existing restore image or install artifact to verify and reuse.
+    #
+    # .PARAMETER PreparedArtifactSha256
+    # Expected SHA-256 for PreparedArtifactPath.
+    #
     # .PARAMETER RedactSecrets
     # Preserves the module-wide evidence posture. Defaults to true.
     #
     # .EXAMPLE
     # Get-MacLabMedia -Version '26.4.1' -Build '25E253'
-    # # Returns media metadata after Phase 4 implements this command.
+    # # Discovers or acquires media metadata.
     #
     # .INPUTS
     # None.
     #
     # .OUTPUTS
-    # [pscustomobject]. Media metadata after Phase 4 implementation.
+    # [pscustomobject]. Media metadata.
     #
     # .NOTES
     # Version: 0.1.20260505.0
@@ -67,14 +72,14 @@ function Get-MacLabMedia {
 
         [switch]$Force,
 
+        [string]$PreparedArtifactPath,
+
+        [string]$PreparedArtifactSha256,
+
         [bool]$RedactSecrets = $true
     )
 
-    $null = $Build
     $null = $Architecture
-    $null = $Source
-    $null = $ArtifactType
-    $null = $CacheRoot
     $null = $Force
     $null = $RedactSecrets
 
@@ -82,7 +87,119 @@ function Get-MacLabMedia {
         return
     }
 
-    throw [System.NotImplementedException]::new(
-        'Get-MacLabMedia is a Phase 2 scaffold stub. Phase 4 implements media acquisition.'
-    )
+    $strCacheRoot = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CacheRoot)
+    [void][System.IO.Directory]::CreateDirectory($strCacheRoot)
+
+    $strMediaId = if ($Build) { "${Version}-${Build}" } else { $Version }
+    $strMetadataPath = Join-Path -Path $strCacheRoot -ChildPath "${strMediaId}.metadata.json"
+    $dateAcquired = (Get-Date).ToUniversalTime().ToString('o')
+    $arrArtifact = @()
+    $arrCommand = @()
+
+    if ($PreparedArtifactPath) {
+        $strPreparedArtifactPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($PreparedArtifactPath)
+
+        if (-not (Test-Path -LiteralPath $strPreparedArtifactPath -PathType Leaf)) {
+            throw "Prepared artifact was not found: ${strPreparedArtifactPath}"
+        }
+
+        $strActualSha256 = (Get-FileHash -LiteralPath $strPreparedArtifactPath -Algorithm SHA256).Hash.ToLowerInvariant()
+
+        if ($PreparedArtifactSha256 -and $strActualSha256 -ne $PreparedArtifactSha256.ToLowerInvariant()) {
+            throw "Prepared artifact SHA-256 mismatch for ${strPreparedArtifactPath}."
+        }
+
+        $objPreparedFile = Get-Item -LiteralPath $strPreparedArtifactPath
+        $arrArtifact += [pscustomobject]@{
+            ArtifactType = if ($strPreparedArtifactPath.EndsWith('.ipsw', [System.StringComparison]::OrdinalIgnoreCase)) { 'Firmware' } else { $ArtifactType }
+            Path = $strPreparedArtifactPath
+            Sha256 = $strActualSha256
+            SizeBytes = $objPreparedFile.Length
+            Prepared = $true
+        }
+    } else {
+        if (-not $IsMacOS) {
+            throw 'mist-cli media acquisition requires macOS. Use -PreparedArtifactPath for fixture or already-downloaded media verification on non-macOS hosts.'
+        }
+
+        $objMistCommand = Get-Command -Name mist -ErrorAction SilentlyContinue
+        if (-not $objMistCommand) {
+            throw 'mist-cli was not found. Install mist before live media acquisition.'
+        }
+
+        $strFirmwareName = if ($Build) {
+            "UniversalMac_${Version}_${Build}_Restore.ipsw"
+        } else {
+            "UniversalMac_${Version}_Restore.ipsw"
+        }
+        $strMistExportPath = Join-Path -Path $strCacheRoot -ChildPath "${strMediaId}.mist-download.json"
+
+        if ($ArtifactType -in @('Firmware', 'Both')) {
+            $arrArgument = @(
+                'download',
+                'firmware',
+                $Version,
+                '--compatible',
+                '--output-directory',
+                $strCacheRoot,
+                '--firmware-name',
+                $strFirmwareName,
+                '--export',
+                $strMistExportPath,
+                '--no-ansi'
+            )
+            $objCommand = Invoke-LoggedCommand -FilePath $objMistCommand.Source -ArgumentList $arrArgument -TimeoutSeconds 21600
+            $arrCommand += $objCommand
+
+            if ($objCommand.ExitCode -ne 0 -or $objCommand.TimedOut) {
+                throw "mist firmware download failed. Exit code: $($objCommand.ExitCode)."
+            }
+
+            $strFirmwarePath = Join-Path -Path $strCacheRoot -ChildPath $strFirmwareName
+            if (-not (Test-Path -LiteralPath $strFirmwarePath -PathType Leaf)) {
+                throw "mist reported success but expected firmware was not found: ${strFirmwarePath}"
+            }
+
+            $objFirmwareFile = Get-Item -LiteralPath $strFirmwarePath
+            $arrArtifact += [pscustomobject]@{
+                ArtifactType = 'Firmware'
+                Path = $strFirmwarePath
+                Sha256 = (Get-FileHash -LiteralPath $strFirmwarePath -Algorithm SHA256).Hash.ToLowerInvariant()
+                SizeBytes = $objFirmwareFile.Length
+                Prepared = $false
+            }
+        }
+
+        if ($ArtifactType -in @('Installer', 'Both')) {
+            $strInstallerExportPath = Join-Path -Path $strCacheRoot -ChildPath "${strMediaId}.mist-installers.json"
+            $objCommand = Invoke-LoggedCommand -FilePath $objMistCommand.Source -ArgumentList @('list', 'installer', '--compatible', '--export', $strInstallerExportPath, '--no-ansi') -TimeoutSeconds 900
+            $arrCommand += $objCommand
+        }
+    }
+
+    $objMetadata = [pscustomobject]@{
+        MediaId = $strMediaId
+        Version = $Version
+        Build = $Build
+        Architecture = $Architecture
+        Source = $Source
+        ArtifactType = $ArtifactType
+        CacheRoot = $strCacheRoot
+        AcquiredAt = $dateAcquired
+        MetadataJsonPath = $strMetadataPath
+        Artifacts = $arrArtifact
+        Commands = @($arrCommand | ForEach-Object {
+                [pscustomobject]@{
+                    DisplayCommand = $_.DisplayCommand
+                    ExitCode = $_.ExitCode
+                    TimedOut = $_.TimedOut
+                    DurationMs = $_.DurationMs
+                }
+            })
+    }
+
+    $strJson = $objMetadata | ConvertTo-Json -Depth 8
+    [System.IO.File]::WriteAllText($strMetadataPath, $strJson, [System.Text.UTF8Encoding]::new($false))
+
+    $objMetadata
 }

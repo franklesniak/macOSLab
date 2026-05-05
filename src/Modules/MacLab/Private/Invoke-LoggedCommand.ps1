@@ -3,9 +3,8 @@ function Invoke-LoggedCommand {
     # Runs an external command with structured capture.
     #
     # .DESCRIPTION
-    # Phase 2 scaffold for the future command runner. The implemented helper
-    # will capture stdout, stderr, exit code, duration, sanitized arguments, and
-    # timeout state for provider and validation workflows.
+    # Runs an external command with bounded timeout handling and returns stdout,
+    # stderr, exit code, duration, and a redacted display command.
     #
     # .PARAMETER FilePath
     # External executable path.
@@ -21,13 +20,13 @@ function Invoke-LoggedCommand {
     #
     # .EXAMPLE
     # Invoke-LoggedCommand -FilePath '/usr/bin/sw_vers' -ArgumentList @('-productVersion')
-    # # Runs the command after Phase 3 implements this helper.
+    # # Runs the command and captures structured output.
     #
     # .INPUTS
     # None.
     #
     # .OUTPUTS
-    # [pscustomobject]. Command execution record after implementation.
+    # [pscustomobject]. Command execution record.
     #
     # .NOTES
     # Version: 0.1.20260505.0
@@ -48,12 +47,60 @@ function Invoke-LoggedCommand {
         [string[]]$SensitiveArgumentPattern = @()
     )
 
-    $null = $FilePath
-    $null = $ArgumentList
-    $null = $TimeoutSeconds
-    $null = $SensitiveArgumentPattern
+    $dateStart = Get-Date
+    $arrDisplayArgument = @(
+        foreach ($strArgument in $ArgumentList) {
+            $boolSensitive = $false
+            foreach ($strPattern in $SensitiveArgumentPattern) {
+                if ($strArgument -match $strPattern) {
+                    $boolSensitive = $true
+                }
+            }
 
-    throw [System.NotImplementedException]::new(
-        'Invoke-LoggedCommand is a Phase 2 scaffold stub. Command capture starts in later phases.'
+            if ($boolSensitive) {
+                '***REDACTED***'
+            } else {
+                $strArgument
+            }
+        }
     )
+
+    $objStartInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $objStartInfo.FileName = $FilePath
+    $objStartInfo.UseShellExecute = $false
+    $objStartInfo.RedirectStandardOutput = $true
+    $objStartInfo.RedirectStandardError = $true
+
+    foreach ($strArgument in $ArgumentList) {
+        [void]$objStartInfo.ArgumentList.Add($strArgument)
+    }
+
+    $objProcess = [System.Diagnostics.Process]::new()
+    $objProcess.StartInfo = $objStartInfo
+
+    try {
+        [void]$objProcess.Start()
+        $boolExited = $objProcess.WaitForExit($TimeoutSeconds * 1000)
+
+        if (-not $boolExited) {
+            $objProcess.Kill($true)
+            $objProcess.WaitForExit()
+        }
+
+        $strStdout = $objProcess.StandardOutput.ReadToEnd()
+        $strStderr = $objProcess.StandardError.ReadToEnd()
+
+        [pscustomobject]@{
+            FilePath = $FilePath
+            DisplayCommand = (($FilePath, $arrDisplayArgument) -join ' ')
+            ExitCode = if ($boolExited) { $objProcess.ExitCode } else { -1 }
+            TimedOut = -not $boolExited
+            StartedAt = $dateStart.ToUniversalTime().ToString('o')
+            DurationMs = [int]((Get-Date) - $dateStart).TotalMilliseconds
+            Stdout = $strStdout
+            Stderr = $strStderr
+        }
+    } finally {
+        $objProcess.Dispose()
+    }
 }
