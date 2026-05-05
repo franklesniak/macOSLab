@@ -46,6 +46,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Confirm PowerShell 7.4 or newer
+        shell: pwsh
+        run: |
+          if ($PSVersionTable.PSVersion -lt [version]'7.4') {
+            throw "PowerShell 7.4 or newer is required. Found $($PSVersionTable.PSVersion)."
+          }
+
       - name: Find PowerShell files
         id: find-ps1
         run: |
@@ -135,6 +142,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Confirm PowerShell 7.4 or newer
+        shell: pwsh
+        run: |
+          if ($PSVersionTable.PSVersion -lt [version]'7.4') {
+            throw "PowerShell 7.4 or newer is required. Found $($PSVersionTable.PSVersion)."
+          }
+
       - name: Find Pester test files
         id: find-tests
         shell: pwsh
@@ -154,7 +168,7 @@ jobs:
         if: steps.find-tests.outputs.found == 'true'
         shell: pwsh
         run: |
-          Install-Module -Name Pester -MinimumVersion 5.0 -Force -Scope CurrentUser
+          Install-Module -Name Pester -RequiredVersion 5.7.1 -Force -Scope CurrentUser
           Import-Module Pester
           Write-Host "Pester version: $((Get-Module Pester).Version)"
 

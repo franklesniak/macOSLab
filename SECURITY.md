@@ -16,12 +16,11 @@ If you discover a security vulnerability in this project, please report it priva
 
 This allows for private discussion and coordinated disclosure.
 
-### Option 2: Email
+### Option 2: GitHub Private Vulnerability Reporting Link
 
-Contact the maintainers directly at:
+Use the direct private vulnerability reporting link:
 
-<!-- TODO: Replace with your security contact email -->
-- Email: [security contact email]
+- https://github.com/franklesniak/macOSLab/security/advisories/new
 
 ### What to Include
 

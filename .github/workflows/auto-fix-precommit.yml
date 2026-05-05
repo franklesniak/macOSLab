@@ -5,17 +5,16 @@
 # created by the agent pass pre-commit CI checks without manual intervention.
 #
 # Hook coverage: This workflow runs the same `pre-commit run --all-files`
-# pipeline as `python-ci.yml`, so it runs every active hook in
+# pipeline as `precommit-ci.yml`, so it runs every active hook in
 # `.pre-commit-config.yaml` (auto-fixing where the hook supports it) —
 # including JSON (check-json), YAML (check-yaml, yamllint), GitHub Actions
-# workflows (actionlint), Markdown (markdownlint-cli2), Terraform
-# (terraform_fmt, terraform_validate, terraform_tflint), and general hygiene
-# hooks. Note that hooks like yamllint, actionlint, terraform_validate, and
-# terraform_tflint are validators that do not auto-fix; this workflow runs
-# them but does not enforce their results (the `pre-commit` exit code is
+# workflows (actionlint), Markdown (markdownlint-cli2), schema validation, and
+# general hygiene hooks. Note that hooks like yamllint and actionlint are
+# validators that do not auto-fix; this workflow runs them but does not
+# enforce their results (the `pre-commit` exit code is
 # intentionally ignored via `|| true` so that auto-fixed files can still be
 # committed). Validator failures are enforced by the `Pre-commit` job in
-# `python-ci.yml`, which runs the same hooks without `|| true`.
+# `precommit-ci.yml`, which runs the same hooks without `|| true`.
 #
 # Design considerations:
 # - Only triggers on push to copilot/** branches to avoid interfering with human work
@@ -63,16 +62,6 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.x"
-
-      # Install Terraform for pre-commit-terraform hooks (terraform_fmt, etc.)
-      # This is required because the pre-commit config includes Terraform hooks
-      # that need the Terraform binary to be available.
-      # Version Policy: Use the latest stable Terraform version for pre-commit.
-      # Review and update quarterly per TEMPLATE_MAINTENANCE.md.
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
-        with:
-          terraform_version: "1.14.4"
 
       - name: Install pre-commit
         run: pip install pre-commit

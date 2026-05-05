@@ -2,8 +2,7 @@
 #
 # Purpose: Run JSON, YAML, and GitHub Actions workflow validation as a
 # first-class, dedicated CI workflow alongside the other per-language
-# workflows (python-ci.yml, powershell-ci.yml, terraform-ci.yml,
-# markdownlint.yml).
+# workflows (precommit-ci.yml, powershell-ci.yml, markdownlint.yml).
 #
 # Hooks executed (all from .pre-commit-config.yaml):
 #   - check-json        — strict JSON syntax (.json only; .jsonc excluded)
@@ -35,13 +34,13 @@
 #
 # Design Decisions:
 #
-# 1. CI Ownership / Relationship to python-ci.yml:
-#    `python-ci.yml` continues to run the full `pre-commit run --all-files`
+# 1. CI Ownership / Relationship to precommit-ci.yml:
+#    `precommit-ci.yml` runs the full `pre-commit run --all-files`
 #    pipeline as the single canonical aggregate pre-commit gate. This
 #    workflow does NOT replace that — it adds dedicated visibility and a
 #    distinct required-check identity for JSON/YAML/Actions validation so
 #    branch protection rules and contributors can reason about data-file
-#    quality independently of Python CI.
+#    quality independently from the aggregate pre-commit gate.
 #
 #    Trade-off: the JSON/YAML/actionlint hooks run in both workflows. This
 #    duplication is intentional and accepted in exchange for clearer
@@ -58,18 +57,15 @@
 #
 # 3. Template Repository Trigger Policy:
 #    This workflow does NOT use path-based filtering. This repository is a
-#    template, and existing per-language workflows (python-ci.yml,
-#    powershell-ci.yml, terraform-ci.yml) intentionally avoid path filters
-#    so the workflow itself is exercised on every change and copied
-#    accurately by downstream consumers. This workflow mirrors that
-#    convention by running on all pushes and pull requests, plus
-#    `workflow_dispatch` to match `python-ci.yml` and `terraform-ci.yml`.
+#    repository bootstrap, and active workflows intentionally avoid path filters
+#    so the workflow itself is exercised on every change. This workflow runs on
+#    all pushes and pull requests, plus `workflow_dispatch` to match
+#    `precommit-ci.yml`.
 #
 # 4. Job and Workflow Naming:
 #    The workflow name (`Data file linting`) and job name (`Data file
-#    linting`) are deliberately distinct from `Python CI` / `Pre-commit` so
-#    that branch protection rules can require data-file validation
-#    independently from Python validation.
+#    linting`) are deliberately distinct from `Pre-commit` so branch
+#    protection rules can require data-file validation independently.
 
 name: Data file linting
 
@@ -92,7 +88,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Setup Python
+      - name: Setup Python for pre-commit tooling
         uses: actions/setup-python@v6
         with:
           python-version: '3.x'
