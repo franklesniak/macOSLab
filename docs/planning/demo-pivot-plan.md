@@ -26,9 +26,10 @@ The central demo sentence becomes:
 - Keep FileVault and Defender visible enough to satisfy the accepted session contract. Gatekeeper is the live break-and-rollback scenario, not the only high-risk policy discussed.
 - Do not depend on live Intune timing, venue Wi-Fi, or a fresh cloud sync for the stage payoff.
 - Do not commit screenshots, recordings, app bundles, restore images, tenant exports, recovery keys, UPNs, tenant IDs, device IDs, serial numbers, codesigning Team IDs, or profile identifiers copied from a real tenant.
+- Do not commit a sample `.mobileconfig`. It is not central to the repository purpose or the talk narrative; Intune Settings Catalog is the canonical policy authoring surface for this demo.
 - Keep fixture evidence sanitized and text-friendly.
 - Leave protected instruction files untouched unless the maintainer explicitly authorizes a protected-file update in the same task.
-- Validate the exact macOS profile installation command on the actual demo guest before making it part of the live path. Treat `sudo profiles install -path <file>` as a proposal until it is proven on the target OS build.
+- Treat Intune Settings Catalog delivery as the preferred and most compelling profile delivery path. Treat direct/local profile installation only as a fallback for payload-mechanics testing, and validate any local install method on the actual demo guest before relying on it.
 
 ## Repo Evaluation Summary
 
@@ -43,34 +44,57 @@ The current repo state is close enough to pivot quickly:
 - The schema is flexible enough for Gatekeeper test kinds; prefer adding a valid Gatekeeper schema example over expanding the schema unless implementation reveals a real need.
 - The planning docs, implementation prompt, repo spec, demo runbook, and slide skeleton all need to stop pointing the stage failure at Defender or compliance.
 
+## Research Update: Intune-First Delivery Decision
+
+After checking current Microsoft and Apple documentation, the canonical demo setup should use Intune as the real delivery mechanism and fixture-backed evidence as the stage reliability mechanism.
+
+Use this decision:
+
+- **Preferred rehearsal path:** deliver the System Policy Control policy from Intune Settings Catalog to a lab-only device group.
+- **Preferred stage path:** show the Intune policy and replay captured/checkpointed evidence rather than waiting for live policy arrival.
+- **Fallback path:** use manual/local profile installation only to prove payload mechanics or to recover if Intune delivery cannot be rehearsed in time.
+
+Rationale:
+
+- Microsoft documents Gatekeeper/System Policy Control as a macOS Settings Catalog area in Intune, including `Enable Assessment` and `Allow Identified Developer` settings.
+- Microsoft also documents Gatekeeper as a built-in macOS endpoint security area that can be configured, checked for compliance, and deployed through Intune.
+- Apple documents the System Policy Control payload with `EnableAssessment` and `AllowIdentifiedDevelopers`, and the Apple YAML metadata says the payload is device-channel macOS, user-channel unavailable, and allows manual install.
+- Apple user-facing macOS documentation describes manual profile installation through System Settings > General > Device Management. Modern macOS behavior should not be assumed to support unattended CLI configuration-profile installation.
+- Apple Gatekeeper documentation supports the story: by default, macOS allows App Store or identified-developer/notarized software, but users and organizations can choose App-Store-only behavior, and device management can restrict overrides.
+
+Stage wording:
+
+> This profile was delivered by Intune during rehearsal. I am using the checkpointed state and sanitized evidence so we can show the failure and rollback without waiting on cloud timing.
+
 ## Critical Verification Risk
 
-The handoff brief proposes installing the System Policy Control profile directly on the VM with:
+The original handoff brief proposed installing the System Policy Control profile directly on the VM with:
 
 ```bash
 sudo profiles install -path <file>
 ```
 
-That exact command must be verified on the target macOS guest. Modern macOS versions have changed and restricted profile installation workflows over time, and the supported `profiles` syntax can differ by version. The implementation agent should first prove the exact install, show, and removal behavior on the demo VM before updating docs or scripts that imply this is guaranteed.
+Do not treat that command as a guaranteed modern macOS path. It may be unsupported on the target OS build, may require interactive System Settings approval, or may install in the wrong profile domain. The implementation agent should not build the stage narrative around direct CLI installation unless the exact command is proven on the actual demo VM.
 
 Recommended verification sequence on the actual VM:
 
 ```bash
 profiles help
 man profiles
-sudo profiles install -type configuration -path "$HOME/Demo/macOSLab/Gatekeeper-AppStoreOnly.mobileconfig"
+sudo profiles install -type configuration -path "<local-only-path>/Gatekeeper-AppStoreOnly.mobileconfig"
 profiles show -type configuration
 spctl --status
 spctl --assess -vv "/Applications/Visual Studio Code.app"
 open -a "Visual Studio Code"
 ```
 
-If direct local profile installation does not work reliably, keep the demo story and change only the stage mechanism:
+If direct local profile installation does not work reliably, that is not a blocker. Keep the demo story and use the preferred Intune path:
 
-- Use a prebuilt `Broken-Policy-State` checkpoint captured after successful profile delivery.
+- Deliver the profile through Intune to a lab-only group during rehearsal.
+- Use a prebuilt `Broken-Policy-State` checkpoint captured after successful Intune profile delivery.
 - Use fixture-backed sanitized evidence instead of live profile installation.
-- Show the equivalent Intune Settings Catalog setting on a slide.
-- Optionally use Intune-delivered profile evidence captured during rehearsal, but do not wait for live Intune check-in on stage.
+- Show the Intune Settings Catalog policy on a slide or in a preloaded portal tab.
+- Do not wait for live Intune check-in on stage.
 
 The plan should not claim direct profile installation as a guaranteed method until the owner has a successful rehearsal transcript from the actual target VM.
 
@@ -82,8 +106,8 @@ The new Demo 4 should tell this story:
 
 1. The lab VM starts at `Post-Enroll-Baseline`.
 2. Visual Studio Code is installed at `/Applications/Visual Studio Code.app`.
-3. Firefox is installed at `/Applications/Firefox.app` as Plan B.
-4. Both apps have launched successfully under the baseline Gatekeeper policy.
+3. VS Code has launched successfully under the baseline Gatekeeper policy.
+4. Firefox is not part of the required stage or repo path. It can remain a private emergency fallback if VS Code proves unreliable during rehearsal.
 5. A new System Policy Control profile is applied with `EnableAssessment = true` and `AllowIdentifiedDevelopers = false`.
 6. Gatekeeper now permits only Mac App Store sourced apps.
 7. VS Code is signed and notarized by Microsoft, but it is not a Mac App Store app, so it is blocked.
@@ -100,7 +124,7 @@ The new Demo 4 should tell this story:
 | --- | --- |
 | `Clean-OS` | Clean guest OS before enrollment and app-specific demo state. Keep as the slowest but cleanest reset point. |
 | `Pre-Enroll` | Guest ready for enrollment, before lab identity and policy assignment. Keep for identity-fidelity rehearsals. |
-| `Post-Enroll-Baseline` | Enrolled lab VM, no App-Store-only System Policy Control payload, VS Code installed and launched successfully, Firefox installed and launched successfully, baseline `spctl` assessment accepted, evidence script ready. This is the main rollback target. |
+| `Post-Enroll-Baseline` | Enrolled lab VM, no App-Store-only System Policy Control payload, VS Code installed and launched successfully, baseline `spctl` assessment accepted, evidence script ready. This is the main rollback target. |
 | `Broken-Policy-State` | System Policy Control profile present, `EnableAssessment = true`, `AllowIdentifiedDevelopers = false`, VS Code blocked, `spctl` rejection captured, macOS block dialog captured, sanitized evidence exported. |
 | `Recovered-Known-Good` | Optional verification checkpoint after rollback proves the profile is gone or inactive, VS Code is accepted, and VS Code opens again. |
 
@@ -120,9 +144,8 @@ For stage explanation:
 | Role | App | Why |
 | --- | --- | --- |
 | Primary | Microsoft Visual Studio Code | Free, well-known, Microsoft-authored, signed/notarized, not Mac App Store sourced. The irony lands with a Microsoft endpoint audience. |
-| Fallback | Mozilla Firefox | Free, well-known outside the developer crowd, not Mac App Store sourced, same Gatekeeper mechanics. |
 
-Use the app names in public artifacts. Redact codesigning Team IDs and any profile identifiers copied from a real environment.
+Use the app name in public artifacts. Redact codesigning Team IDs and any profile identifiers copied from a real environment. Keep Firefox only as a private emergency fallback if rehearsal proves VS Code is unreliable; do not make Firefox a required fixture, stage beat, or acceptance criterion.
 
 ## Pre-Demo Setup Plan
 
@@ -141,20 +164,56 @@ On the demo guest:
 1. Install Visual Studio Code from the official VS Code download.
 2. Move or confirm the app bundle at `/Applications/Visual Studio Code.app`.
 3. Launch VS Code once under baseline Gatekeeper and quit it.
-4. Install Firefox from the official Mozilla download.
-5. Move or confirm the app bundle at `/Applications/Firefox.app`.
-6. Launch Firefox once under baseline Gatekeeper and quit it.
-7. Run and save baseline assessments:
+4. Optional private fallback: install Firefox only if rehearsal shows VS Code is unreliable. Do not make Firefox part of the required repo or stage path.
+5. Run and save baseline assessments:
 
    ```bash
    spctl --status
    spctl --assess -vv "/Applications/Visual Studio Code.app"
-   spctl --assess -vv "/Applications/Firefox.app"
    ```
 
-8. Capture `Post-Enroll-Baseline` only after both apps launch successfully.
+6. Capture `Post-Enroll-Baseline` only after VS Code launches successfully.
 
-### Gatekeeper Profile Setup
+### Intune Gatekeeper Policy Setup
+
+Use this as the primary rehearsal setup:
+
+1. Create a lab-only Entra group, for example `MACLAB-Gatekeeper-Break`.
+2. Confirm the group contains only the demo VM/device record.
+3. Create a macOS Settings Catalog profile in Intune:
+   - Platform: macOS.
+   - Profile type: Settings catalog.
+   - Category: System Policy Control.
+   - `Enable Assessment`: `True`.
+   - `Allow Identified Developer`: `False`.
+4. If the desired demo behavior includes preventing Finder override, also configure System Policy Managed:
+   - `Disable Override`: `True`.
+5. Assign the profile only to the lab break group.
+6. From Intune, run device `Sync`.
+7. From the VM, run Company Portal `Check Status`.
+8. On the VM, verify receipt and behavior:
+
+   ```bash
+   profiles show -type configuration
+   spctl --status
+   spctl --assess -vv --type execute "/Applications/Visual Studio Code.app"
+   open -a "Visual Studio Code"
+   ```
+
+9. Capture the Intune policy status, local profile receipt, `spctl` output, and app block dialog. Do not hardcode the exact dialog wording in repo docs or slides; screenshots or recordings can show the real wording during the talk.
+10. Capture `Broken-Policy-State` after the Intune-delivered policy is active and the failure is proven.
+11. Before the live talk, prepare a stage-safe rollback path:
+    - Start the VM at `Broken-Policy-State` with networking available only long enough to show the broken state if needed.
+    - Disconnect VM networking before restoring `Post-Enroll-Baseline`.
+    - Restore `Post-Enroll-Baseline` while networking is disconnected.
+    - Prove `spctl` accepts VS Code and VS Code opens locally.
+    - Reconnect networking only after the rollback proof or after the bad Intune assignment has been removed and the removal has synced.
+
+Do not take `Post-Enroll-Baseline` with networking disconnected. The baseline snapshot should represent a normal enrolled, network-capable lab VM. The stage-safe move is to disconnect networking immediately before restoring that snapshot so Intune cannot reapply the bad policy during the rollback proof.
+
+### Local Profile Fallback Setup
+
+Use this only if Intune delivery cannot be rehearsed in time, or if the team needs to prove payload mechanics without cloud timing. Keep any local `.mobileconfig` outside the repo.
 
 1. Create a synthetic local System Policy Control `.mobileconfig` for rehearsal and direct-install testing.
 2. Use payload identifiers that are clearly synthetic, for example `org.example.macOSLab.gatekeeper.appstoreonly`.
@@ -169,9 +228,10 @@ On the demo guest:
    open -a "Visual Studio Code"
    ```
 
-6. Confirm the dialog wording on the exact macOS guest version.
-7. Repeat the app block and assessment with Firefox as Plan B.
-8. Capture `Broken-Policy-State`.
+6. Capture the dialog screenshot or recording on the exact macOS guest version, but do not assert exact dialog wording in repo docs or slides.
+7. Capture `Broken-Policy-State`.
+
+If local profile installation requires System Settings interaction, record that as the fallback mechanism. Do not pretend it is unattended automation.
 
 ### Fixture Capture
 
@@ -183,14 +243,28 @@ Capture sanitized text fixtures from the actual VM and store them in `examples/T
 | `gatekeeper-status-appstore-only.txt` | Hardened `spctl --status` output after the profile applies. |
 | `gatekeeper-vscode-accepted.txt` | Baseline `spctl --assess -vv` output for VS Code. |
 | `gatekeeper-vscode-rejected.txt` | Hardened `spctl --assess -vv` output for VS Code. |
-| `gatekeeper-firefox-accepted.txt` | Baseline `spctl --assess -vv` output for Firefox. |
-| `gatekeeper-firefox-rejected.txt` | Hardened `spctl --assess -vv` output for Firefox. |
 | `profiles-system-policy-control-redacted.txt` | Sanitized `profiles show -type configuration` excerpt for the System Policy Control payload. |
 | `app-launch-vscode-blocked-dialog.txt` | Text description or transcript of the captured VS Code block dialog. |
-| `app-launch-firefox-blocked-dialog.txt` | Text description or transcript of the captured Firefox block dialog. |
 | `app-launch-vscode-recovered.txt` | Post-rollback proof that VS Code launched again. |
 
 Do not commit the actual screenshot or recording. Reference external/local stage assets in the evidence bundle with sanitized names only.
+
+Plain-language explanation: a fixture is just a saved, sanitized copy of command output from rehearsal. The repo uses fixtures so the validation tests and evidence examples can run without needing a live VM, live Intune tenant, or conference network. The implementation agent should not invent these files from scratch when real output is available. Capture the real output during rehearsal, remove sensitive or environment-specific values, then commit the sanitized text.
+
+Example workflow:
+
+1. Run a command on the VM during rehearsal, such as:
+
+   ```bash
+   spctl --assess -vv "/Applications/Visual Studio Code.app"
+   ```
+
+2. Save the output to a text file.
+3. Replace any Team ID, local user path, device name, tenant detail, or profile identifier with a placeholder.
+4. Commit the sanitized text file under `examples/TestCases/fixtures/`.
+5. Reference that fixture from `Gatekeeper-AppStoreOnly.yml` or `Gatekeeper-Recovered.yml`.
+
+The committed fixture text does not need to preserve exact macOS dialog wording. Use dialog screenshots or recordings as local stage assets, and keep only a generic text reference in the repo such as "VS Code block dialog captured during rehearsal."
 
 ### Redaction Requirements
 
@@ -217,8 +291,7 @@ Run this rehearsal end-to-end on the actual VM:
 6. Restore `Post-Enroll-Baseline`.
 7. Re-run `spctl --assess -vv "/Applications/Visual Studio Code.app"`.
 8. Launch VS Code.
-9. Confirm Firefox fallback still behaves as expected.
-10. Capture or refresh `Recovered-Known-Good`.
+9. Capture or refresh `Recovered-Known-Good`.
 
 If VS Code stays blocked after snapshot restore, stop and diagnose before the talk. That would mean the profile state or related cache is not being captured by the checkpoint in the way the demo requires.
 
@@ -265,7 +338,59 @@ Invoke-MacPolicyValidation `
   -RedactSecrets
 ```
 
-If only one test plan is implemented before the talk, use one `Gatekeeper-AppStoreOnly.yml` plan with separate baseline, broken, and recovered evidence references.
+Prefer two test plans:
+
+- `Gatekeeper-AppStoreOnly.yml` for the broken state after the Intune policy applies.
+- `Gatekeeper-Recovered.yml` for the post-rollback known-good state.
+
+This keeps each validation run honest: one plan proves the failure and one plan proves recovery. If time is tight, one combined plan is acceptable, but the output is less clean because it mixes broken and recovered state in one artifact.
+
+The `.yml` files are not Intune policies. They are small validation recipes consumed by `Invoke-MacPolicyValidation`. Each file says, in repo-readable form, "for this demo state, these checks should pass or fail, these fixtures prove it, and these evidence references should be exported." Existing examples include `Defender-Validation.yml`, `FileVault-Validation.yml`, and `Compliance-SmokeTest.yml`.
+
+For this pivot:
+
+- `Gatekeeper-AppStoreOnly.yml` represents the broken state. It should expect the System Policy Control profile to be present and VS Code to be rejected or blocked. The VS Code block is an expected failure, because the lab is intentionally proving the bad policy would break a legitimate app.
+- `Gatekeeper-Recovered.yml` represents the post-rollback state. It should expect the bad profile to be absent or inactive, `spctl` to accept VS Code, and VS Code to launch again.
+
+The repo is not proposing that every Intune change must have a `.yml` test plan. The intended pattern is narrower: write test plans for high-risk policies, repeated validation loops, demo scenarios, and changes where evidence needs to be reproducible for a change board or team handoff. The shipped `.yml` files are examples and reusable starting points, not a universal governance requirement.
+
+Use a `.yml` test plan when:
+
+- The policy can break user access, security posture, app launch, encryption, EDR health, privacy permissions, or compliance.
+- The validation will be repeated across snapshots, macOS versions, providers, or rehearsals.
+- The evidence needs to be exported consistently.
+- The result should be understandable by someone who did not run the test.
+
+Do not create a `.yml` test plan for every routine Intune setting change. For low-risk one-off changes, normal documentation, screenshots, or portal/device checks may be enough.
+
+### Optional Live Intune Deployment Variant
+
+It is reasonable, and more compelling, to initiate the Intune deployment live. Do this only as a parallel stage thread, not as the success dependency for the talk.
+
+Recommended live variant:
+
+1. Before the demo block, show the lab-only Intune Settings Catalog policy.
+2. Assign it to a lab-only static group or add the demo device to the already-assigned lab-only break group.
+3. Run Intune device `Sync`.
+4. Run Company Portal `Check Status` on the VM.
+5. Move on to other content while the policy cooks.
+6. Return to Demo 4 after 10-15 minutes.
+7. If the policy landed, use the live broken state.
+8. If the policy did not land, say the practiced pivot line and use `Broken-Policy-State` plus sanitized evidence.
+
+Practiced pivot line:
+
+> This is exactly why the lab uses checkpoints. Intune timing is part of the system, not a personal failing, so I am going to use the checkpointed broken state captured from this VM during rehearsal and show the evidence.
+
+Before the rollback money shot, prevent the policy from immediately reapplying:
+
+- Preferred stage-safe option: disconnect the VM network before restoring `Post-Enroll-Baseline`, then prove `spctl` accepts and VS Code opens locally.
+- Also safe if timing allows: remove the device from the lab break group, sync, and confirm the policy has been removed before the rollback proof.
+- Always say the caveat that the Intune assignment still exists until cleaned up.
+
+Do not capture `Post-Enroll-Baseline` with networking disconnected. Capture the baseline in the normal enrolled/network-capable state. Disconnect networking only as a stage control immediately before rollback.
+
+Do not improvise group or assignment changes against production-scoped objects. Use only the dedicated lab group and lab device.
 
 ### Demo 4 Evidence Output
 
@@ -303,21 +428,16 @@ Say this out loud and put it on a slide:
 Create:
 
 - `examples/TestCases/Gatekeeper-AppStoreOnly.yml`
-- `examples/TestCases/Gatekeeper-Recovered.yml` if separating broken and recovered plans is cleaner
+- `examples/TestCases/Gatekeeper-Recovered.yml`
 - `examples/TestCases/fixtures/gatekeeper-status-baseline.txt`
 - `examples/TestCases/fixtures/gatekeeper-status-appstore-only.txt`
 - `examples/TestCases/fixtures/gatekeeper-vscode-accepted.txt`
 - `examples/TestCases/fixtures/gatekeeper-vscode-rejected.txt`
-- `examples/TestCases/fixtures/gatekeeper-firefox-accepted.txt`
-- `examples/TestCases/fixtures/gatekeeper-firefox-rejected.txt`
 - `examples/TestCases/fixtures/profiles-system-policy-control-redacted.txt`
 - `examples/TestCases/fixtures/app-launch-vscode-blocked-dialog.txt`
-- `examples/TestCases/fixtures/app-launch-firefox-blocked-dialog.txt`
 - `examples/TestCases/fixtures/app-launch-vscode-recovered.txt`
 
-Optional if verified and fully synthetic:
-
-- `examples/MMSMOA-2026/Gatekeeper-AppStoreOnly.mobileconfig`
+Do not create or commit `examples/MMSMOA-2026/Gatekeeper-AppStoreOnly.mobileconfig`. The repository narrative should point admins to Intune Settings Catalog, not raw profile authoring. If a local `.mobileconfig` is needed for emergency payload testing, keep it outside the repo and out of the stage narrative.
 
 Do not add binary app packages or visual artifacts.
 
@@ -356,19 +476,17 @@ Prefer context-aware redaction for Team IDs so unrelated parenthesized text is n
 
 Update:
 
-- `examples/MMSMOA-2026/Demo4-IntuneValidation.ps1`
+- `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1`
 - `examples/MMSMOA-2026/demo-config.yml`
 - `scripts/Invoke-MMSDemo.ps1` if it needs an explicit Demo 4 test plan override
 
-Keep the Demo 4 script name unless there is a strong reason to rename it. Renaming close to the talk creates avoidable churn in docs, tests, and slides. It is acceptable for `Demo4-IntuneValidation.ps1` to run the Gatekeeper validation because the production analogue is still an Intune Settings Catalog policy.
+Rename `examples/MMSMOA-2026/Demo4-IntuneValidation.ps1` to `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1`. This is now an owner decision. Update references in docs, tests, demo config, and `scripts/Invoke-MMSDemo.ps1` in the same implementation pass so stale names do not survive.
 
 The config should include:
 
 - Primary app name: `Visual Studio Code`
 - Primary app path: `/Applications/Visual Studio Code.app`
-- Fallback app name: `Firefox`
-- Fallback app path: `/Applications/Firefox.app`
-- Gatekeeper profile identifier, synthetic if committed
+- Gatekeeper policy name or Intune profile display name, sanitized if copied from the demo tenant
 - Fixture root
 - Expected broken checkpoint
 - Expected rollback checkpoint
@@ -454,9 +572,10 @@ This is the main talk outline and should be updated carefully:
 
 Update the pre-demo setup runbook:
 
-- Add guest installation of VS Code and Firefox.
+- Add guest installation of VS Code.
 - Add baseline launch and `spctl` capture steps.
-- Add System Policy Control mobileconfig creation and exact-command verification.
+- Add Intune System Policy Control policy setup, assignment, sync, and evidence capture steps.
+- Remove any requirement to create or commit a sample `.mobileconfig`.
 - Add fixture capture steps.
 - Add rollback test steps.
 - Demote live Graph/Defender dependencies from the core Demo 4 path to supporting or backup validation.
@@ -501,7 +620,7 @@ Update docs so a reader can understand why the live failure is Gatekeeper while 
 - `docs/Fidelity-Boundaries.md`: place Gatekeeper policy receipt/app block in Green for VM iteration, with fleet inventory and rollout analysis as Yellow.
 - `docs/Windows-Admin-Cheat-Sheet.md`: add AppLocker/WDAC/SmartScreen to Gatekeeper/System Policy Control mapping.
 - `docs/Troubleshooting.md`: add Gatekeeper blocked-app symptoms and first checks.
-- `docs/Prereqs.md`: add VS Code, Firefox, and fixture requirements.
+- `docs/Prereqs.md`: add VS Code and fixture requirements.
 - `docs/Provider-Version-Matrix.md`: no major structural change, but add "Gatekeeper fixture captured on this guest build" if the matrix includes policy-set version notes.
 - `docs/Defender.md` and `docs/FileVault.md`: keep as high-risk validation guides; remove any implication that Defender is the only stage failure.
 - `docs/PPPC-TCC.md`: cross-link app execution policy only if it helps avoid confusing PPPC with Gatekeeper.
@@ -514,7 +633,7 @@ Create a new planning artifact modeled on `docs/planning/EXAMPLE-slides-from-ano
 Recommended path:
 
 ```text
-docs/planning/macOS-imaging-09-slide-description.md
+docs/planning/macOS-imaging-09a-generated-slides.md
 ```
 
 ### Inputs to Synthesize
@@ -703,7 +822,7 @@ This section records the pivot disposition for every file tracked before this pl
 | `docs/planning/macOS-imaging-01a-CFP-submission.md` | Do not edit; accepted contract. Use it as learning-objective validation input. |
 | `docs/planning/macOS-imaging-03a-bolstered-outline.md` | Update heavily for the Gatekeeper Demo 4 pivot, revised timeline, revised evidence, and slide skeleton. |
 | `docs/planning/macOS-imaging-08e-ADRs.md` | Add ADR accepting the Gatekeeper/System Policy Control live Demo 4 failure and noting Defender stage failure is superseded. |
-| `docs/planning/macos-imaging-05c-recommended-software-step-by-step-revised.md` | Update setup runbook for VS Code, Firefox, System Policy Control profile, fixtures, rollback verification, and reduced live cloud dependency. |
+| `docs/planning/macos-imaging-05c-recommended-software-step-by-step-revised.md` | Update setup runbook for VS Code, Intune System Policy Control policy delivery, fixtures, rollback verification, and reduced live cloud dependency. |
 | `docs/prompts/codex-goal-full-implementation.md` | Update future-agent instructions so implementation follows this pivot and does not rebuild the Defender failure story. |
 | `docs/spec/macOSLab-repository-spec.md` | Update requirements, phases, evidence examples, and demo definition for Gatekeeper while preserving FileVault/Defender accepted scope. |
 
@@ -714,8 +833,8 @@ This section records the pivot disposition for every file tracked before this pl
 | `examples/MMSMOA-2026/Demo1-Media.ps1` | No change expected. |
 | `examples/MMSMOA-2026/Demo2-Parallels.ps1` | No change expected. |
 | `examples/MMSMOA-2026/Demo3-UTM.ps1` | No change expected. |
-| `examples/MMSMOA-2026/Demo4-IntuneValidation.ps1` | Update default test plan and narration for Gatekeeper/System Policy Control evidence. Keep filename unless renaming is explicitly worth the churn. |
-| `examples/MMSMOA-2026/demo-config.yml` | Add Gatekeeper demo settings, app paths, fixture root, checkpoint names, and optional synthetic profile reference. |
+| `examples/MMSMOA-2026/Demo4-IntuneValidation.ps1` | Rename to `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1`, then update default test plan and narration for Gatekeeper/System Policy Control evidence. |
+| `examples/MMSMOA-2026/demo-config.yml` | Add Gatekeeper demo settings, app paths, fixture root, checkpoint names, and sanitized Intune policy/profile display names. |
 | `examples/TestCases/Compliance-SmokeTest.yml` | Keep as supporting deterministic validation; stop using it as the central Demo 4 failure unless needed as backup. |
 | `examples/TestCases/Defender-Validation.yml` | Keep for accepted-takeaway coverage and backup proof. |
 | `examples/TestCases/FileVault-Validation.yml` | Keep for accepted-takeaway coverage. |
@@ -751,7 +870,7 @@ This section records the pivot disposition for every file tracked before this pl
 | `scripts/Reset-IntuneMacLabDevice.ps1` | No change expected; keep report-only and use cloud-state caveat in docs. |
 | `scripts/Restore-MacVmCheckpoint.ps1` | No change expected. |
 | `scripts/Send-LabEventToLogAnalytics.ps1` | No change expected unless adding sample Gatekeeper evidence ingestion fields. |
-| `scripts/Test-LabReadiness.ps1` | Optional enhancement: add a non-default check for required demo fixture files and local app paths. Do not block generic readiness on VS Code/Firefox unless the user opts into demo-specific checks. |
+| `scripts/Test-LabReadiness.ps1` | Optional enhancement: add a non-default check for required demo fixture files and the VS Code app path. Do not block generic readiness on VS Code unless the user opts into demo-specific checks. |
 
 ### PowerShell Module
 
@@ -796,11 +915,16 @@ This section records the pivot disposition for every file tracked before this pl
 The pivot is complete when all of these are true:
 
 - Demo 4 defaults to Gatekeeper/System Policy Control blocking VS Code.
+- Intune Settings Catalog is documented as the preferred rehearsal delivery path for the Gatekeeper profile.
+- Direct/local profile installation is documented only as fallback/proof, not as the primary story.
+- No sample `.mobileconfig` is created or committed.
 - The repo still documents FileVault and Defender validation strongly enough to meet the accepted CFP.
-- `Post-Enroll-Baseline` contains VS Code and Firefox installed and successfully launched.
-- `Broken-Policy-State` blocks VS Code and Firefox through the Gatekeeper policy.
+- `Post-Enroll-Baseline` contains VS Code installed and successfully launched.
+- `Broken-Policy-State` blocks VS Code through the Gatekeeper policy.
 - Rollback to `Post-Enroll-Baseline` restores VS Code launch.
+- The stage rollback path disconnects VM networking before restoring `Post-Enroll-Baseline`, and `Post-Enroll-Baseline` itself remains a normal network-capable snapshot.
 - Gatekeeper fixtures are sanitized and committed.
+- Repo docs and slides do not assert exact macOS dialog wording.
 - No screenshot, recording, app binary, restore image, tenant export, Team ID, UPN, device ID, recovery key, or secret is committed.
 - Evidence redaction tests cover Team IDs or fixture scans fail on Team ID-shaped leakage.
 - The demo runbook contains a fixture-backed line for stage reliability.
@@ -808,15 +932,36 @@ The pivot is complete when all of these are true:
 - A new slide-description artifact exists and maps each accepted takeaway to visible slides.
 - Markdown lint, nested markdown lint, pre-commit, PSScriptAnalyzer, and Pester pass or any temporary failure is documented before handoff.
 
+## Post-Implementation Sign-Off Follow-Ups
+
+These are required after the repo changes are implemented and before conference/session sign-off:
+
+| Follow-up | Why it matters | Pass condition |
+| --- | --- | --- |
+| Verify whether Gatekeeper blocks VS Code after VS Code has already launched once. | The ideal story is "previously-working legitimate app broke after new policy." If macOS only blocks newly downloaded or updated apps, the story needs a small wording adjustment. | Rehearsal proves the already-launched VS Code path blocks, or docs/slides say the policy blocks the next newly installed or updated legitimate app. |
+| Verify live Intune delivery timing with forced Company Portal sync. | The live stage variant depends on assignment/sync landing while other content runs. | The profile lands in the target 10-15 minute window during rehearsal, or the presenter commits to using `Broken-Policy-State` as the hard fallback. |
+| Verify stage-safe rollback with networking disconnected before restore. | Prevents Intune from reapplying the bad policy immediately after rollback. | With networking disconnected before restore, `Post-Enroll-Baseline` restores, `spctl` accepts VS Code, and VS Code opens locally. |
+| Capture dialog visual asset without committing wording dependency. | The audience benefits from seeing the real dialog, but docs should not depend on exact OS wording. | Screenshot or recording exists locally for the deck/stage, and repo docs refer generically to the captured block dialog. |
+| Capture and sanitize Gatekeeper fixtures from rehearsal output. | The repo needs stable evidence examples without live VM or tenant dependencies. | Fixture files are committed as sanitized text and contain no Team IDs, tenant values, device IDs, UPNs, local home paths, or secrets. |
+
 ## Open Decisions for the Owner
 
 | Decision | Recommendation |
 | --- | --- |
-| Should `Demo4-IntuneValidation.ps1` be renamed? | No before the talk. Keep the filename and change the contents/default test plan. |
-| Should a sample `.mobileconfig` be committed? | Yes only if it is fully synthetic, text-only, and verified safe. Otherwise document a local-only profile path. |
-| Should the live path install the profile during the session? | Only if the exact command is rehearsed and reliable. Fixture replay plus checkpointed state is safer. |
-| Should Firefox be shown live? | Keep Firefox ready but do not show it unless VS Code misbehaves or the audience needs a non-developer example. |
-| Should Defender unhealthy fixtures be removed? | No. Keep them as backup and accepted-takeaway support unless they become misleading. |
+| Which delivery mechanism is canonical for the demo? | Resolved: Intune Settings Catalog delivery during rehearsal, with checkpointed/fixture-backed evidence on stage. |
+| Is local CLI profile installation required? | No. It is useful only as a fallback or payload-mechanics probe, and only if verified on the target VM. |
+| Should a live Intune deployment be initiated on stage? | Yes, if treated as a background thread with a hard checkpoint fallback. Start the assignment/sync, let it cook, then use live state only if it lands in time. |
+| Should `Demo4-IntuneValidation.ps1` be renamed? | Resolved: yes. Rename it to `Demo4-GatekeeperRollback.ps1` and update all references in the same implementation pass. |
+| Should a sample `.mobileconfig` be committed? | Resolved: no. It is not central to the repository purpose or talk narrative. Use Intune Settings Catalog as the canonical policy authoring surface. |
+| Should the live path install or wait for the profile during the session? | Do not make live arrival the critical path. Initiate the Intune deployment as a background stage thread, then use checkpointed state and sanitized evidence for the payoff if timing does not cooperate. |
+| Should Firefox be shown live? | Resolved: no. Do not make Firefox part of the required stage path, repo fixtures, or acceptance criteria. Keep it only as a private emergency fallback if VS Code proves unreliable in rehearsal. |
+| Should Defender unhealthy fixtures be removed? | Resolved: no before the talk. Keep them as backup and accepted-takeaway support, but clearly mark them as supporting fixtures rather than the live Demo 4 path. |
+| Should Gatekeeper use one test plan or split broken/recovered plans? | Resolved: split plans. Use one plan for the broken App-Store-only state and one for recovered known-good state. |
+| What is the slide-description artifact path? | Resolved: `docs/planning/macOS-imaging-09a-generated-slides.md`. |
+
+### Demo 4 Rename Decision
+
+Rename `examples/MMSMOA-2026/Demo4-IntuneValidation.ps1` to `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1`. The new name is specific, stage-readable, and matches the pivoted Demo 4 purpose: Gatekeeper breaks a legitimate app, and rollback restores the known-good state.
 
 ## Source Recheck List
 
