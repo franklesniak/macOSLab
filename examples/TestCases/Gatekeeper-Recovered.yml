@@ -1,0 +1,41 @@
+schemaVersion: "1.0"
+name: "Gatekeeper Recovered"
+description: "Fixture-backed System Policy Control validation for the post-rollback known-good Demo 4 state."
+fidelity: "Green"
+expectedCheckpoint: "Post-Enroll-Baseline"
+requiresHardwareSignoff: false
+hostMacOS: "26.4.1"
+hostMacOSBuild: "25E253"
+guestMacOS: "26.4.1"
+guestBuild: "25E253"
+hostGuestCompatibility: "same-major-supported"
+tests:
+  - name: "Rollback restored Post-Enroll-Baseline"
+    kind: "RollbackVerification"
+    result: "Pass"
+    expectedFailure: false
+    evidenceRefs:
+      - "restore-event.json"
+  - name: "Gatekeeper assessment enabled after rollback"
+    kind: "GatekeeperStatus"
+    expectedAssessmentEnabled: true
+    expectedFailure: false
+    fixture: "fixtures/gatekeeper-status-baseline.txt"
+  - name: "VS Code accepted after rollback"
+    kind: "GatekeeperAssessment"
+    expectedAssessment: "Accepted"
+    expectedFailure: false
+    message: "VS Code accepted after rollback to Post-Enroll-Baseline."
+    fixture: "fixtures/gatekeeper-vscode-accepted.txt"
+  - name: "VS Code launch recovered"
+    kind: "AppLaunchRecovered"
+    result: "Pass"
+    expectedFailure: false
+    fixture: "fixtures/app-launch-vscode-recovered.txt"
+  - name: "Cloud assignment cleanup warning retained"
+    kind: "CloudStateWarning"
+    result: "Warn"
+    expectedFailure: false
+    message: "Intune assignment still requires cleanup before production expansion."
+    evidenceRefs:
+      - "docs/Snapshot-Strategy.md"

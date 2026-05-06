@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Host, provider, tooling, and tenant prerequisites for building and validating a `macOSLab` environment.
 - **Related:** [Start Here](Start-Here.md), [Hypervisor Decision Guide](Hypervisor-Decision-Guide.md), [Apple Silicon Constraints](Apple-Silicon-Constraints.md), [Provider Version Matrix](Provider-Version-Matrix.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md)
 
@@ -27,6 +27,8 @@ Recommended:
 - Separate local folder for installers, such as `~/Demo/Installers`.
 - Separate local folder for VM storage, outside the repository.
 - Network path that allows APNs, Intune, Microsoft Graph, Defender, and Apple software update endpoints when running live validation.
+- Visual Studio Code installed inside the enrolled demo guest before capturing `Post-Enroll-Baseline` when rehearsing Demo 4.
+- Sanitized Gatekeeper fixture text under `examples/TestCases/fixtures/` for stage-safe validation without live cloud timing.
 
 Do not place `.ipsw`, `.dmg`, `.iso`, `.app`, screenshots, recordings, VM bundles, private keys, or credential files inside the repository.
 
@@ -92,6 +94,8 @@ Use lab-only cloud objects:
 Do not require the full `Microsoft.Graph` meta-module by default.
 
 The host readiness path must not require Defender for Endpoint on the host Mac. Defender validation is guest-scoped and belongs inside an enrolled disposable macOS VM.
+
+For the Gatekeeper demo, create the System Policy Control profile through Intune Settings Catalog in a lab-only assignment. A local `.mobileconfig` payload may be used only outside the repository as a verified fallback; do not commit it.
 
 ## Tenant Safety Rules
 

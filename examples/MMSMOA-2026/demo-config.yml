@@ -25,5 +25,17 @@ network:
 intune:
   tenant: ".onmicrosoft.example"
   policySetId: "synthetic-policy-set"
+  gatekeeperPolicyDisplayName: "MacLab - Gatekeeper - App Store Only"
 fidelity:
   defaultBucket: "Yellow"
+gatekeeperDemo:
+  primaryAppName: "Visual Studio Code"
+  primaryAppPath: "/Applications/Visual Studio Code.app"
+  fixtureRoot: "../TestCases/fixtures"
+  brokenTestPlan: "../TestCases/Gatekeeper-AppStoreOnly.yml"
+  recoveredTestPlan: "../TestCases/Gatekeeper-Recovered.yml"
+  brokenCheckpoint: "Broken-Policy-State"
+  rollbackCheckpoint: "Post-Enroll-Baseline"
+  recoveredCheckpoint: "Recovered-Known-Good"
+  externalBlockedDialogAssetName: "mms-demo4-vscode-blocked-dialog"
+  externalRecoveredLaunchAssetName: "mms-demo4-vscode-recovered-launch"

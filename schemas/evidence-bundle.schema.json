@@ -270,6 +270,12 @@
           "items": {
             "type": "string"
           }
+        },
+        "message": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },

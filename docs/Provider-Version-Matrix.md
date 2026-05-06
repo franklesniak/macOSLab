@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Defines the Provider Version Matrix that each evidence-producing workflow records for host, guest, provider, media, and validation context.
 - **Related:** [Apple Silicon Constraints](Apple-Silicon-Constraints.md), [Hypervisor Decision Guide](Hypervisor-Decision-Guide.md), [Fidelity Boundaries](Fidelity-Boundaries.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md)
 
@@ -101,3 +101,5 @@ If a provider cannot expose a field, record `unknown` or `manual-step-required`;
 ## Review Rule
 
 A change ticket or demo summary should include the Provider Version Matrix alongside the test result. Without the matrix, the result is a local observation, not durable evidence.
+
+For Demo 4 Gatekeeper evidence, add the fixture set or policy-set label in the surrounding evidence summary or change-ticket note, for example "Gatekeeper-AppStoreOnly captured on guest 26.4.1 build 25E253." Do not add ad hoc fields to the schema-bound `providerVersionMatrix` object unless the schema is updated in the same change.

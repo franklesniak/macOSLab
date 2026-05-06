@@ -1,0 +1,2 @@
+assessments enabled
+System Policy Control: App Store only

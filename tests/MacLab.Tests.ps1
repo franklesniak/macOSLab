@@ -129,7 +129,7 @@ Describe 'MacLab public command metadata' {
                 Remove-MacLabVm -Provider Parallels -Name 'demo-01' -WhatIf
             },
             {
-                Invoke-MacPolicyValidation -Provider Parallels -Name 'demo-01' -TestPlan './examples/TestCases/Compliance-SmokeTest.yml' -WhatIf
+                Invoke-MacPolicyValidation -Provider Parallels -Name 'demo-01' -TestPlan './examples/TestCases/Gatekeeper-AppStoreOnly.yml' -WhatIf
             },
             {
                 Export-MacLabEvidence -RunId '2026-05-mms-demo4-001' -OutputPath './_bundle' -WhatIf

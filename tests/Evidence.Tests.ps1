@@ -27,7 +27,10 @@ Describe 'MacLab evidence redaction' {
                 personalRecoveryKey = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX'
                 graphToken = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.signature'
                 intuneDeviceIdRedacted = '00000000-0000-4000-8000-000000000000'
-                notes = 'Synthetic local path /Users/example/MacLab and email admin@example.invalid.'
+                notes = 'Synthetic local path /Users/example/MacLab, email admin@example.invalid, and Developer ID Application: Example Vendor (TEAMID1234).'
+                payloadUUID = '33333333-3333-4333-8333-333333333333'
+                profileIdentifier = 'com.contoso.real.tenant.systempolicy'
+                codeSigningTeamId = 'TEAMID1234'
                 providerVersionMatrix = [pscustomobject]@{
                     hostMacOS = '26.4.1'
                     hostMacOSBuild = '25E253'
@@ -75,7 +78,29 @@ Describe 'MacLab evidence redaction' {
             $strJson | Should -Not -Match '00:1C:42'
             $strJson | Should -Not -Match 'admin@example'
             $strJson | Should -Not -Match '/Users/example'
+            $strJson | Should -Not -Match 'TEAMID1234'
+            $strJson | Should -Not -Match 'com\.contoso\.real\.tenant\.systempolicy'
             $script:objSyntheticEvidence.personalRecoveryKey | Should -Be 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX'
+        }
+
+        It 'keeps committed Gatekeeper fixtures free of Team IDs, profile UUIDs, and home paths' {
+            $strSourceRoot = Split-Path -Path $script:MacLabModuleRoot -Parent
+            $strRepositoryRoot = Split-Path -Path (Split-Path -Path $strSourceRoot -Parent) -Parent
+            $strFixtureRoot = Join-Path -Path $strRepositoryRoot -ChildPath 'examples/TestCases/fixtures'
+            $arrGatekeeperFixture = @(
+                Get-ChildItem -LiteralPath $strFixtureRoot -Filter 'gatekeeper-*.txt'
+                Get-ChildItem -LiteralPath $strFixtureRoot -Filter 'profiles-system-policy-control-redacted.txt'
+                Get-ChildItem -LiteralPath $strFixtureRoot -Filter 'app-launch-vscode-*.txt'
+            )
+
+            $arrGatekeeperFixture.Count | Should -BeGreaterThan 0
+            foreach ($objFixture in $arrGatekeeperFixture) {
+                $strContent = Get-Content -LiteralPath $objFixture.FullName -Raw
+
+                $strContent | Should -Not -Match '\([A-Z0-9]{10}\)'
+                $strContent | Should -Not -Match '\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\b'
+                $strContent | Should -Not -Match '/Users/[^/\s]+'
+            }
         }
 
         It 'is idempotent' {

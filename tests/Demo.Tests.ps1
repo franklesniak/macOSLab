@@ -20,13 +20,15 @@ Describe 'MMSMOA demo scripts' {
         $objMedia.Artifacts[0].Prepared | Should -BeTrue
     }
 
-    It 'Demo4 writes redacted fixture evidence' {
-        $strScriptPath = Join-Path -Path $script:strRepositoryRoot -ChildPath 'examples/MMSMOA-2026/Demo4-IntuneValidation.ps1'
+    It 'Demo4 writes redacted Gatekeeper fixture evidence' {
+        $strScriptPath = Join-Path -Path $script:strRepositoryRoot -ChildPath 'examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1'
         $strEvidenceRoot = Join-Path -Path $TestDrive -ChildPath 'evidence'
 
         $objEvidence = & $strScriptPath -Name 'demo-01' -OutputPath $strEvidenceRoot
 
         $objEvidence.redactionApplied | Should -BeTrue
+        $objEvidence.snapshot | Should -Be 'Broken-Policy-State'
+        ($objEvidence.tests | Where-Object { $_.kind -eq 'GatekeeperAssessment' }).expectedFailure | Should -BeTrue
         Test-Path -LiteralPath (Join-Path -Path $strEvidenceRoot -ChildPath "$($objEvidence.runId)/evidence.json") -PathType Leaf | Should -BeTrue
     }
 

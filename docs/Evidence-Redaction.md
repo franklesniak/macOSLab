@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Documents `Protect-MacLabEvidence` behavior, sensitive field names, value-shape redaction, and verification expectations for macOSLab evidence.
 - **Related:** [macOSLab Repository Specification](spec/macOSLab-repository-spec.md), [Evidence and CAB](Evidence-and-CAB.md), [Evidence bundle schema](../schemas/evidence-bundle.schema.json), [Phase 7 TODO](../TODO-Phase-07-Evidence-Pipeline.md)
 
@@ -22,7 +22,7 @@ The repository MUST NOT introduce a `Redact-MacLabEvidence` helper because `Reda
 
 Redaction is triggered by field names and value shapes.
 
-Field-name redaction covers recovery keys, tokens, client secrets, passwords, license strings, tenant identifiers, device identifiers, Defender organization and machine identifiers, EDR device tags, serial numbers, UUIDs, MAC addresses, local usernames, email addresses, UPNs, and cloud configuration or policy-set IDs.
+Field-name redaction covers recovery keys, tokens, client secrets, passwords, license strings, tenant identifiers, device identifiers, Defender organization and machine identifiers, EDR device tags, serial numbers, UUIDs, MAC addresses, local usernames, email addresses, UPNs, profile identifiers, payload UUIDs, code-signing Team IDs, and cloud configuration or policy-set IDs.
 
 Value-shape redaction covers:
 
@@ -33,6 +33,7 @@ Value-shape redaction covers:
 - MAC addresses;
 - email addresses;
 - `/Users/<name>` local path segments.
+- Gatekeeper code-signing authority strings that include a 10-character Team ID in a Developer ID Application or Developer ID Installer context.
 
 Callers MAY pass additional field names to `Protect-MacLabEvidence -AdditionalSensitiveFieldName` when a test plan introduces a new local identifier.
 
@@ -52,3 +53,6 @@ Pester tests cover:
 - idempotent repeated redaction;
 - structured JSON remaining parseable after redaction;
 - evidence export preserving redaction.
+- Gatekeeper fixture scans that fail if committed fixtures contain Team IDs, profile UUIDs, or local home paths.
+
+Gatekeeper screenshots and recordings are local stage assets only. The repository may keep a generic text reference that a VS Code block dialog was captured during rehearsal, but it MUST NOT commit the screenshot, recording, exact personal file path, Team ID, tenant identifier, profile UUID, device identifier, UPN, or app bundle.

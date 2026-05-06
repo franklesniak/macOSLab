@@ -5,7 +5,7 @@
     Author = 'Frank Lesniak'
     CompanyName = 'Frank Lesniak'
     Copyright = '(c) 2026 Frank Lesniak. MIT License.'
-    Description = 'Reproducible Apple-silicon macOS VM lab for risk-free Intune policy testing. Pin macOS media, build snapshots, enroll, validate FileVault/Defender/PPPC, fail safely, roll back, and export redacted evidence.'
+    Description = 'Reproducible Apple-silicon macOS VM lab for risk-free Intune policy testing. Pin macOS media, build snapshots, enroll, validate FileVault/Defender/PPPC/Gatekeeper, fail safely, roll back, and export redacted evidence.'
     PowerShellVersion = '7.4'
     CompatiblePSEditions = @('Core')
     FunctionsToExport = @(

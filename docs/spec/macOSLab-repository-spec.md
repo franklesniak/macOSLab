@@ -5,7 +5,7 @@
 
 - **Status:** Draft for owner approval
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Human-readable implementation specification for creating the public `franklesniak/macOSLab` repository from the [`franklesniak/copilot-repo-template`](https://github.com/franklesniak/copilot-repo-template). It defines repository identity, authority hierarchy, safety rules, functional requirements, file layout, PowerShell module contracts, provider contracts, scripts, examples, documentation, tests, CI, phase gates, and definition of done.
 - **Related:** [Original prompt](../planning/macOS-imaging-08-repo-spec.md), [Bolstered outline](../planning/macOS-imaging-03a-bolstered-outline.md), [Software runbook](../planning/macos-imaging-05c-recommended-software-step-by-step-revised.md), [Repository description](../planning/macos-imaging-06a-repo-description.md), [CFP submission](../planning/macOS-imaging-01a-CFP-submission.md), [Closed questions archive](../planning/macOS-imaging-08d-closed-questions-archive.md), [Architecture decision records](../planning/macOS-imaging-08e-ADRs.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md), [PowerShell Writing Style](../../.github/instructions/powershell.instructions.md)
 
@@ -26,7 +26,7 @@ The repository MUST help a user:
 3. Create or register macOS VMs through a provider abstraction.
 4. Capture and restore named checkpoints.
 5. Enroll VMs into Intune for lab-only validation.
-6. Validate FileVault, Defender, PPPC/TCC, and compliance signals within documented fidelity limits.
+6. Validate FileVault, Defender, PPPC/TCC, Gatekeeper/System Policy Control, and compliance signals within documented fidelity limits.
 7. Export redacted evidence suitable for demos, change review, and audit-style review.
 8. Explain clearly what the VM lab can prove and what still needs physical Mac sign-off.
 
@@ -41,7 +41,7 @@ This repository is intended to be:
 - Parallels first, UTM second, and Tart optional/stubbed unless owner-approved later.
 - Evidence-first and redaction-first.
 - VM-first and hardware-last: VMs speed up iteration, but physical Macs remain required for Red-bucket and some Yellow-bucket outcomes.
-- Phase-gated so the owner can approve each step before the agent continues.
+- Phase-gated as implementation checkpoints, with the agent continuing through locally verifiable non-destructive work until the owner-validation boundary.
 
 ## 3. Reader Guide
 
@@ -121,7 +121,7 @@ Before the future agent begins work, the owner SHOULD initial each box that matc
 | Visibility | Public |
 | Default branch | `main` |
 | License | MIT, with copyright line `Copyright (c) 2026 Frank Lesniak` |
-| GitHub description | `Reproducible Apple-silicon macOS VM lab starter kit, automated with PowerShell 7.4+. Pin macOS media, build snapshots in Parallels or UTM, enroll into Intune, validate FileVault/Defender/PPPC, fail safely, roll back, and export redacted evidence.` |
+| GitHub description | `Reproducible Apple-silicon macOS VM lab starter kit, automated with PowerShell 7.4+. Pin macOS media, build snapshots in Parallels or UTM, enroll into Intune, validate FileVault/Defender/PPPC/Gatekeeper, fail safely, roll back, and export redacted evidence.` |
 | GitHub topics | `macos`, `apple-silicon`, `intune`, `powershell`, `pwsh`, `parallels-desktop`, `utm`, `vm-lab`, `policy-testing`, `filevault`, `defender-for-endpoint`, `pppc`, `tcc`, `mdm`, `microsoft-graph`, `pester`, `endpoint-management`, `change-management`, `rollback`, `evidence` |
 | Initial release tag | `v0.1.0-mmsmoa-preview`, cut after Phase 9 with owner approval |
 
@@ -401,8 +401,8 @@ This compatibility boundary applies to Parallels, UTM when running macOS guests 
 
 | Color | Meaning | Examples |
 | --- | --- | --- |
-| Green | The VM lab is sufficient evidence on its own. | Script syntax, package install behavior, Intune assignment logic, profile receipt, basic PPPC payload behavior, Defender health checks, rollback routines, evidence export. |
-| Yellow | VM is good for iteration, but physical hardware sign-off is still required. | FileVault rollout behavior, recovery-key process end to end, compliance experience under realistic timing, user prompts, UI flows, performance-sensitive Defender behavior. |
+| Green | The VM lab is sufficient evidence on its own. | Script syntax, package install behavior, Intune assignment logic, profile receipt, Gatekeeper/System Policy Control receipt, `spctl` assessment, app launch block/recovery in the guest, basic PPPC payload behavior, Defender health checks, rollback routines, evidence export. |
+| Yellow | VM is good for iteration, but physical hardware sign-off is still required. | FileVault rollout behavior, recovery-key process end to end, compliance experience under realistic timing, user prompts, UI flows, fleet rollout impact, performance-sensitive Defender behavior. |
 | Red | The VM cannot validate this; physical hardware or production-like enrollment is required. | ADE/ABM zero-touch enrollment, serial-number-dependent workflows, Platform SSO sign-in/unlock, Touch ID, Secure Enclave-dependent behavior, final executive pilot sign-off. |
 
 ### 10.1 Cmdlet Honesty Rules
@@ -544,6 +544,7 @@ The repository MUST validate Defender for Endpoint on macOS as more than an app 
 - Docs and examples include package install, system extension approval, network extension approval when used, Full Disk Access/PPPC delivery, onboarding, and `mdatp health`.
 - Defender docs include step-by-step Intune setup for macOS Defender deployment so the owner/demo tenant can be rebuilt or validated without relying on memory.
 - The default demo path deploys Defender through Intune after enrollment; a preinstalled-Defender fallback may exist only for rehearsal or live-cloud timing backup and must be labeled as a fallback.
+- Defender remains required validation content and backup proof, but the live Demo 4 break-and-rollback path is Gatekeeper/System Policy Control.
 - Evidence records Defender version and health output after redaction.
 - Provider rollback result is included in the evidence model.
 
@@ -560,6 +561,21 @@ The repository MUST explain PPPC/TCC validation as a precision problem.
 - Evidence can include profile receipt and targeted behavior checks.
 
 **Verification:** Docs review and example test-case review.
+
+### MLAB-REQ-010A: Gatekeeper/System Policy Control Validation
+
+The repository MUST include Gatekeeper/System Policy Control as a first-class validation scenario.
+
+**Acceptance Criteria:**
+
+- Demo 4 defaults to Gatekeeper/System Policy Control blocking Visual Studio Code through an App-Store-only policy.
+- Intune Settings Catalog is documented as the preferred rehearsal delivery path.
+- Direct or local profile installation is documented only as a verified fallback or payload-mechanics probe.
+- Split validation plans exist for `Broken-Policy-State` and post-rollback recovery.
+- Evidence includes Gatekeeper assessment, System Policy Control profile receipt, app launch block, rollback recovery, and the cloud-assignment caveat.
+- Fixtures are sanitized and contain no Team IDs, tenant identifiers, device IDs, UPNs, profile UUIDs, local home paths, screenshots, recordings, app bundles, or sample `.mobileconfig`.
+
+**Verification:** Pester tests validate Gatekeeper plan parsing, expected-failure behavior, fixture evidence references, and redaction or fixture-scan coverage.
 
 ### MLAB-REQ-011: Evidence as a First-Class Output
 
@@ -799,8 +815,10 @@ macOSLab/
 │   │   ├── Demo1-Media.ps1
 │   │   ├── Demo2-Parallels.ps1
 │   │   ├── Demo3-UTM.ps1
-│   │   └── Demo4-IntuneValidation.ps1
+│   │   └── Demo4-GatekeeperRollback.ps1
 │   ├── TestCases/
+│   │   ├── Gatekeeper-AppStoreOnly.yml
+│   │   ├── Gatekeeper-Recovered.yml
 │   │   ├── Compliance-SmokeTest.yml
 │   │   ├── Defender-Validation.yml
 │   │   ├── FileVault-Validation.yml
@@ -1298,7 +1316,7 @@ Every script MUST:
 - `Demo1-Media.ps1`
 - `Demo2-Parallels.ps1`
 - `Demo3-UTM.ps1`
-- `Demo4-IntuneValidation.ps1`
+- `Demo4-GatekeeperRollback.ps1`
 
 `demo-config.yml` MUST use placeholders and include at minimum:
 
@@ -1330,8 +1348,18 @@ network:
 intune:
   tenant: '<lab>.onmicrosoft.example'
   policySetId: '<policy-set-version>'
+  gatekeeperPolicyDisplayName: 'MacLab - Gatekeeper - App Store Only'
 fidelity:
   defaultBucket: Yellow
+gatekeeperDemo:
+  primaryAppName: 'Visual Studio Code'
+  primaryAppPath: '/Applications/Visual Studio Code.app'
+  fixtureRoot: '../TestCases/fixtures'
+  brokenTestPlan: '../TestCases/Gatekeeper-AppStoreOnly.yml'
+  recoveredTestPlan: '../TestCases/Gatekeeper-Recovered.yml'
+  brokenCheckpoint: 'Broken-Policy-State'
+  rollbackCheckpoint: 'Post-Enroll-Baseline'
+  recoveredCheckpoint: 'Recovered-Known-Good'
 ```
 
 For the owner/demo host, `preparedArtifactPath` is `~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw` and `preparedArtifactSha256` is `8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32`. Demo scripts MUST verify that prepared artifact before any VM creation or registration step. They MUST NOT start another `mist download` when the prepared artifact exists and matches the expected checksum. `Demo1-Media.ps1` MUST treat a verified prepared artifact as a completed media step for the MMS conference demo path, not as a reason to re-download.
@@ -1351,6 +1379,8 @@ The expected checksum remains `8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f8
 - `FileVault-Validation.yml`
 - `Defender-Validation.yml`
 - `PPPC-Validation.yml`
+- `Gatekeeper-AppStoreOnly.yml`
+- `Gatekeeper-Recovered.yml`
 - `Compliance-SmokeTest.yml`
 
 Each test plan declares `name`, `version`, `description`, `fidelity`, supported providers, required checkpoint, steps, and expectations.
@@ -1391,7 +1421,7 @@ Import-Module ./src/Modules/MacLab/MacLab.psd1
 Get-MacLabMedia -Version '<macOS-version>' -Build '<macOS-build>'
 New-MacLabVm -Provider Parallels -Name 'demo-01' -MediaId '<macOS-version>-<macOS-build>'
 Checkpoint-MacLabVm -Provider Parallels -Name 'demo-01' -CheckpointName 'Pre-Enroll'
-Invoke-MacPolicyValidation -Provider Parallels -Name 'demo-01' -TestPlan ./examples/TestCases/Compliance-SmokeTest.yml
+Invoke-MacPolicyValidation -Provider Parallels -Name 'demo-01' -TestPlan ./examples/TestCases/Gatekeeper-AppStoreOnly.yml
 ```
 
 ## 20. Tests and CI
@@ -1405,6 +1435,7 @@ Invoke-MacPolicyValidation -Provider Parallels -Name 'demo-01' -TestPlan ./examp
 | `tests/Providers.UTM.Tests.ps1` | UTM/`utmctl` detection, version parsing, Apple Virtualization enforcement, manual-step-required errors for unsupported primitives. |
 | `tests/Validation.FileVault.Tests.ps1` | Synthetic recovery-key redaction by name and shape, JWT redaction, refusal to write unredacted evidence, FileVault plan parse, Yellow fidelity, cloud warning. |
 | `tests/Validation.Defender.Tests.ps1` | Defender plan parse, synthetic `mdatp health` parsing, missing system extension as evidence `Fail`, Graph token redaction. |
+| `tests/Validation.Gatekeeper.Tests.ps1` | Gatekeeper split-plan parse, System Policy Control profile fixture, `spctl` accept/reject fixture parsing, expected app-launch failure, Team ID/profile redaction. |
 
 Default tests MUST NOT require real Parallels, UTM, Tart, Apple ID, Microsoft 365 tenant, Microsoft Graph endpoint, Defender installation, or a real macOS VM.
 
@@ -1605,8 +1636,8 @@ The agent MUST pause earlier only when a requirement is ambiguous, required evid
 **Deliverables:**
 
 - `Invoke-MacPolicyValidation`
-- Four YAML test plans.
-- FileVault, Defender, PPPC, and Intune docs.
+- Six YAML test plans, including split Gatekeeper broken/recovered plans.
+- FileVault, Defender, PPPC, Gatekeeper/System Policy Control, and Intune docs.
 - Validation tests.
 - `TODO-Phase-08-Validation-Loop.md` with Defender `mdatp health` output-shape verification, unless that task is completed and closed in the same phase.
 
@@ -1622,12 +1653,12 @@ The agent MUST pause earlier only when a requirement is ambiguous, required evid
 
 - `scripts/Invoke-MMSDemo.ps1`
 - `Demo1-Media.ps1`
-- `Demo4-IntuneValidation.ps1`
+- `Demo4-GatekeeperRollback.ps1`
 - `demo-config.yml`
 - `docs/Demo-Runbook.md`
 - `docs/Troubleshooting.md`
 
-**Acceptance:** Owner completes a dry run of apply, break, rollback, evidence export. Demo media steps verify and reuse the prepared IPSW without starting a new download.
+**Acceptance:** Owner completes a dry run of apply, Gatekeeper app block, rollback, VS Code relaunch, and evidence export. Demo media steps verify and reuse the prepared IPSW without starting a new download.
 
 **Gate:** Pause at the owner-validation boundary. Do not tag `v0.1.0-mmsmoa-preview` until the owner approves the live dry run and release action.
 
@@ -1775,11 +1806,18 @@ Every evidence record produced by `Invoke-MacPolicyValidation` and bundled by `E
       "evidenceRefs": ["mdatp-health.json"]
     },
     {
-      "name": "Compliance smoke test",
-      "kind": "ComplianceState",
+      "name": "VS Code blocked by App-Store-only policy",
+      "kind": "GatekeeperAssessment",
       "result": "Fail",
       "expectedFailure": true,
-      "evidenceRefs": ["graph-compliance-snapshot.json"]
+      "evidenceRefs": ["fixtures/gatekeeper-vscode-rejected.txt"]
+    },
+    {
+      "name": "VS Code accepted after rollback",
+      "kind": "GatekeeperAssessment",
+      "result": "Pass",
+      "expectedFailure": false,
+      "evidenceRefs": ["fixtures/gatekeeper-vscode-accepted.txt"]
     },
     {
       "name": "Rollback restored known-good VM checkpoint",

@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Defines the five-checkpoint model, restore warnings, cloud cleanup posture, and checkpoint readiness expectations for `macOSLab`.
 - **Related:** [Fidelity Boundaries](Fidelity-Boundaries.md), [Provider Version Matrix](Provider-Version-Matrix.md), [Prerequisites](Prereqs.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md)
 
@@ -17,9 +17,9 @@ Snapshots are the reason the lab is fast, but they are also where local state an
 | --- | --- |
 | `Clean-OS` | Freshly installed guest, Setup Assistant complete, no demo software, never enrolled. |
 | `Pre-Enroll` | `Clean-OS` plus Intune Company Portal at the sign-in screen; not enrolled. |
-| `Post-Enroll-Baseline` | Fully enrolled, recently synced, deterministic healthy baseline. |
-| `Broken-Policy-State` | Deterministic intentionally broken state for the engineered demo failure. |
-| `Recovered-Known-Good` | Post-rollback healthy state, captured after cloud cleanup or reconciliation. |
+| `Post-Enroll-Baseline` | Fully enrolled, recently synced, deterministic healthy baseline. For Demo 4, Visual Studio Code is installed and launches successfully here. |
+| `Broken-Policy-State` | Deterministic intentionally broken state for the engineered demo failure. For Demo 4, the Gatekeeper/System Policy Control profile blocks VS Code. |
+| `Recovered-Known-Good` | Post-rollback healthy state, captured after cloud cleanup or reconciliation. For Demo 4, `spctl` accepts VS Code and the app launches again. |
 
 Alternative checkpoint names are not allowed in v1 unless a caller explicitly opts into non-canonical names for local experimentation.
 
@@ -50,6 +50,8 @@ Checkpoint capture should prefer a stopped guest. Snapshotting a running or paus
 ## Cloud Cleanup Posture
 
 V1 local rollback does not delete or retire cloud records. Cloud cleanup remains report-only unless a later owner-approved Phase 10 change adds mutation. A valid report-only cleanup result may identify candidate Intune, Entra, and Defender records, explain why they may be stale, and show portal paths or Graph commands for manual cleanup.
+
+For the Gatekeeper stage path, disconnect VM networking immediately before restoring `Post-Enroll-Baseline` so the bad Intune assignment cannot immediately reapply during the local recovery proof. Capture `Post-Enroll-Baseline` itself in the normal enrolled and network-capable state.
 
 ## Readiness Checks
 

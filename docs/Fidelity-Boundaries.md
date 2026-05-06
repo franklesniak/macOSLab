@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Defines the VM Fidelity Traffic Light, cmdlet honesty rules, cloud-state warning, and change-ticket wording for `macOSLab`.
 - **Related:** [Apple Silicon Constraints](Apple-Silicon-Constraints.md), [Snapshot Strategy](Snapshot-Strategy.md), [Provider Version Matrix](Provider-Version-Matrix.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md)
 
@@ -15,8 +15,8 @@ The lab is useful because it is honest. A macOS VM can prove many automation and
 
 | Color | Meaning | Examples |
 | --- | --- | --- |
-| Green | VM evidence is sufficient on its own. | Script syntax, package install behavior, Intune assignment logic, profile receipt, basic PPPC payload behavior, Defender health checks, rollback routines, evidence export. |
-| Yellow | VM evidence is useful for iteration, but physical hardware sign-off remains required. | FileVault rollout behavior, recovery-key process end to end, compliance experience under realistic timing, user prompts, UI flows, performance-sensitive Defender behavior. |
+| Green | VM evidence is sufficient on its own. | Script syntax, package install behavior, Intune assignment logic, profile receipt, Gatekeeper/System Policy Control receipt, `spctl` assessment, app launch block/recovery in the guest, basic PPPC payload behavior, Defender health checks, rollback routines, evidence export. |
+| Yellow | VM evidence is useful for iteration, but physical hardware sign-off remains required. | FileVault rollout behavior, recovery-key process end to end, compliance experience under realistic timing, user prompts, UI flows, fleet inventory, production rollout impact, performance-sensitive Defender behavior. |
 | Red | The VM cannot validate the outcome. | ADE/ABM zero-touch enrollment, serial-number-dependent workflows, Platform SSO sign-in/unlock, Touch ID, Secure Enclave-dependent behavior, final executive pilot sign-off. |
 
 ## Cmdlet Honesty Rules

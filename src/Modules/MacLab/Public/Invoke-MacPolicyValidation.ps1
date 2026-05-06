@@ -29,7 +29,7 @@ function Invoke-MacPolicyValidation {
     # Optional Microsoft Graph scopes required by the plan.
     #
     # .EXAMPLE
-    # Invoke-MacPolicyValidation -Provider Parallels -Name 'demo-01' -TestPlan ./examples/TestCases/Compliance-SmokeTest.yml
+    # Invoke-MacPolicyValidation -Provider Parallels -Name 'demo-01' -TestPlan ./examples/TestCases/Gatekeeper-AppStoreOnly.yml
     # # Runs validation and emits redacted evidence.
     #
     # .INPUTS
@@ -39,7 +39,7 @@ function Invoke-MacPolicyValidation {
     # [pscustomobject]. Redacted evidence.
     #
     # .NOTES
-    # Version: 0.1.20260505.0
+    # Version: 0.1.20260506.0
     # Positional parameters are not supported.
     #
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium', PositionalBinding = $false)]
@@ -184,6 +184,64 @@ function Invoke-MacPolicyValidation {
         [pscustomobject]$hasHealth
     }
 
+    function Get-MacLabFixtureContent {
+        param([string]$Path)
+
+        $strFixturePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+        if (-not (Test-Path -LiteralPath $strFixturePath -PathType Leaf)) {
+            throw "Fixture was not found: ${strFixturePath}"
+        }
+
+        [System.IO.File]::ReadAllText($strFixturePath)
+    }
+
+    function ConvertFrom-MacLabGatekeeperStatusText {
+        param([string]$Path)
+
+        $strContent = Get-MacLabFixtureContent -Path $Path
+        $objAssessmentEnabled = $null
+        if ($strContent -match '(?im)\bassessments?\s+enabled\b') {
+            $objAssessmentEnabled = $true
+        } elseif ($strContent -match '(?im)\bassessments?\s+disabled\b') {
+            $objAssessmentEnabled = $false
+        }
+
+        [pscustomobject]@{
+            assessmentEnabled = $objAssessmentEnabled
+        }
+    }
+
+    function ConvertFrom-MacLabSpctlAssessText {
+        param([string]$Path)
+
+        $strContent = Get-MacLabFixtureContent -Path $Path
+        $strAssessment = 'Unknown'
+        if ($strContent -match '(?im):\s*accepted\b|\baccepted\b') {
+            $strAssessment = 'Accepted'
+        } elseif ($strContent -match '(?im):\s*rejected\b|\brejected\b') {
+            $strAssessment = 'Rejected'
+        }
+
+        [pscustomobject]@{
+            assessment = $strAssessment
+        }
+    }
+
+    function Test-MacLabSystemPolicyControlProfileText {
+        param([string]$Path)
+
+        $strContent = Get-MacLabFixtureContent -Path $Path
+        if ($strContent -match 'com\.apple\.systempolicy\.control') {
+            return $true
+        }
+
+        if ($strContent -match '(?m)\bEnableAssessment\b' -or $strContent -match '(?m)\bAllowIdentifiedDevelopers\b') {
+            return $true
+        }
+
+        return $false
+    }
+
     function Get-MacLabValidationProperty {
         param(
             [object]$InputObject,
@@ -231,16 +289,80 @@ function Invoke-MacPolicyValidation {
     $strPlanRoot = Split-Path -Path ($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($TestPlan)) -Parent
     $arrEvidenceTest = @(
         foreach ($hasTest in @($objPlan.tests)) {
+            $boolDeclarativeResult = $hasTest.Contains('result')
             $strResult = if ($hasTest.Contains('result')) { $hasTest['result'] } else { 'Pass' }
             $arrEvidenceRef = if ($hasTest.Contains('evidenceRefs')) { @($hasTest['evidenceRefs']) } else { @() }
+            $strMessage = if ($hasTest.Contains('message')) { $hasTest['message'] } else { $null }
+            $strFixturePath = $null
+            if ($hasTest.Contains('fixture')) {
+                $strFixturePath = Join-Path -Path $strPlanRoot -ChildPath $hasTest['fixture']
+                $null = Get-MacLabFixtureContent -Path $strFixturePath
+                $arrEvidenceRef = @($arrEvidenceRef + $hasTest['fixture'])
+            }
 
             if ($hasTest['kind'] -eq 'DefenderHealth' -and $hasTest.Contains('fixture')) {
-                $strFixturePath = Join-Path -Path $strPlanRoot -ChildPath $hasTest['fixture']
                 $objHealth = ConvertFrom-MacLabDefenderHealthText -Path $strFixturePath
                 if ($objHealth.healthy -eq $false) {
                     $strResult = 'Fail'
                 }
-                $arrEvidenceRef = @($arrEvidenceRef + $hasTest['fixture'])
+            }
+
+            if ($hasTest['kind'] -eq 'GatekeeperStatus' -and $hasTest.Contains('fixture')) {
+                $objGatekeeperStatus = ConvertFrom-MacLabGatekeeperStatusText -Path $strFixturePath
+                if ($hasTest.Contains('expectedAssessmentEnabled')) {
+                    $boolExpectedAssessmentEnabled = [bool]$hasTest['expectedAssessmentEnabled']
+                    if ($objGatekeeperStatus.assessmentEnabled -ne $boolExpectedAssessmentEnabled) {
+                        $strResult = 'Fail'
+                    } elseif (-not $boolDeclarativeResult) {
+                        $strResult = 'Pass'
+                    }
+                }
+
+                if (-not $strMessage) {
+                    $strMessage = if ($objGatekeeperStatus.assessmentEnabled -eq $true) {
+                        'Gatekeeper assessment is enabled.'
+                    } elseif ($objGatekeeperStatus.assessmentEnabled -eq $false) {
+                        'Gatekeeper assessment is disabled.'
+                    } else {
+                        'Gatekeeper assessment state could not be determined from fixture.'
+                    }
+                }
+            }
+
+            if ($hasTest['kind'] -eq 'GatekeeperAssessment' -and $hasTest.Contains('fixture')) {
+                $objAssessment = ConvertFrom-MacLabSpctlAssessText -Path $strFixturePath
+                if ($hasTest.Contains('expectedAssessment')) {
+                    $strExpectedAssessment = [string]$hasTest['expectedAssessment']
+                    if ($objAssessment.assessment -ne $strExpectedAssessment) {
+                        $strResult = 'Fail'
+                    } elseif (-not $boolDeclarativeResult) {
+                        $strResult = 'Pass'
+                    }
+                }
+
+                if (-not $strMessage) {
+                    $strMessage = "spctl assessment result was $($objAssessment.assessment)."
+                }
+            }
+
+            if ($hasTest['kind'] -eq 'SystemPolicyControlProfile' -and $hasTest.Contains('fixture')) {
+                $boolProfilePresent = Test-MacLabSystemPolicyControlProfileText -Path $strFixturePath
+                if ($hasTest.Contains('expectedProfilePresent')) {
+                    $boolExpectedProfilePresent = [bool]$hasTest['expectedProfilePresent']
+                    if ($boolProfilePresent -ne $boolExpectedProfilePresent) {
+                        $strResult = 'Fail'
+                    } elseif (-not $boolDeclarativeResult) {
+                        $strResult = 'Pass'
+                    }
+                }
+
+                if (-not $strMessage) {
+                    $strMessage = if ($boolProfilePresent) {
+                        'System Policy Control profile evidence is present.'
+                    } else {
+                        'System Policy Control profile evidence is absent.'
+                    }
+                }
             }
 
             [pscustomobject]@{
@@ -249,6 +371,7 @@ function Invoke-MacPolicyValidation {
                 result = $strResult
                 expectedFailure = if ($hasTest.Contains('expectedFailure')) { [bool]$hasTest['expectedFailure'] } else { $false }
                 evidenceRefs = [object[]]$arrEvidenceRef
+                message = $strMessage
             }
         }
     )

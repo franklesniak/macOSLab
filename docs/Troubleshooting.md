@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Safe troubleshooting table for macOSLab demo preparation and rehearsal.
 - **Related:** [Demo Runbook](Demo-Runbook.md), [Prereqs](Prereqs.md), [Evidence Redaction](Evidence-Redaction.md)
 
@@ -18,6 +18,8 @@
 | `prlctl` is missing | Parallels Desktop CLI is not installed or not in PATH | Run `Get-Command prlctl` | Use fixture-backed evidence or the UTM manual path until Parallels is installed |
 | Parallels VM is not isolated | Provider defaults re-enabled host sharing | Run `Get-MacLabVm -Provider Parallels -Name <vm>` and inspect `Isolation` | Re-run provider hardening on a disposable VM before checkpointing |
 | UTM start prints `Operation not available` | VM may already be started | Run `Get-MacLabVm -Provider UTM -Name <vm>` | Trust final status, not only the command message |
+| VS Code is blocked in Demo 4 | App-Store-only System Policy Control profile is active | Run `spctl --status` and `spctl --assess -vv "/Applications/Visual Studio Code.app"` inside the guest | Treat this as expected in `Broken-Policy-State`; capture fixture evidence and prepare rollback |
+| VS Code remains blocked after rollback | Bad profile re-applied, rollback restored the wrong checkpoint, or Gatekeeper cache/state was not reset as rehearsed | Disconnect networking, restore `Post-Enroll-Baseline`, run `profiles show -type configuration`, then re-run `spctl --assess -vv "/Applications/Visual Studio Code.app"` | Stop and diagnose before the talk; do not claim rollback works until the app launches again |
 | Defender health is unhealthy | System extension, network extension, onboarding, or Full Disk Access is missing | Run `mdatp health` inside the guest | Use the Intune setup steps in `docs/Defender.md`; keep host Defender absence as intentional |
 | Compliance evidence shows a failure | The demo plan may model an engineered failure | Check `expectedFailure` in `evidence.json` | Use the CAB summary wording; do not treat expected failure as a run failure |
 | Secret appears in evidence | Redaction gap or raw capture used directly | Run evidence through `Protect-MacLabEvidence` and inspect JSON | Stop using the raw capture, rotate affected values if real, and keep only redacted evidence |

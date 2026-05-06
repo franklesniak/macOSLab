@@ -1,11 +1,11 @@
 #requires -Version 7.4
 
 # .SYNOPSIS
-# Runs the MMSMOA fixture-backed Intune validation demo step.
+# Runs the MMSMOA fixture-backed Gatekeeper rollback demo step.
 #
 # .DESCRIPTION
-# Runs the Compliance-SmokeTest validation plan, emits redacted evidence, and
-# keeps Graph and live-cloud calls out of default local validation.
+# Runs the Gatekeeper App-Store-only validation plan, emits redacted evidence,
+# and keeps Graph and live-cloud calls out of default local validation.
 #
 # .PARAMETER Provider
 # Hypervisor provider represented by the evidence.
@@ -23,8 +23,8 @@
 # Microsoft Graph scopes declared for the fixture plan.
 #
 # .EXAMPLE
-# ./examples/MMSMOA-2026/Demo4-IntuneValidation.ps1 -Name demo-01
-# # Runs fixture-backed validation and writes redacted evidence.
+# ./examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1 -Name demo-01
+# # Runs fixture-backed Gatekeeper validation and writes redacted evidence.
 #
 # .INPUTS
 # None.
@@ -33,7 +33,7 @@
 # [pscustomobject]. Redacted evidence.
 #
 # .NOTES
-# Version: 0.1.20260505.0
+# Version: 0.1.20260506.0
 # Positional parameters are not supported.
 #
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium', PositionalBinding = $false)]
@@ -49,7 +49,7 @@ param(
 
     [string]$OutputPath = './_evidence',
 
-    [string[]]$GraphScope = @('DeviceManagementManagedDevices.Read.All')
+    [string[]]$GraphScope = @()
 )
 
 Set-StrictMode -Version Latest
@@ -58,12 +58,12 @@ $ErrorActionPreference = 'Stop'
 $strScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $strRepositoryRoot = Split-Path -Path (Split-Path -Path $strScriptRoot -Parent) -Parent
 $strModuleManifestPath = Join-Path -Path $strRepositoryRoot -ChildPath 'src/Modules/MacLab/MacLab.psd1'
-$strDefaultTestPlan = Join-Path -Path $strRepositoryRoot -ChildPath 'examples/TestCases/Compliance-SmokeTest.yml'
+$strDefaultTestPlan = Join-Path -Path $strRepositoryRoot -ChildPath 'examples/TestCases/Gatekeeper-AppStoreOnly.yml'
 $strResolvedTestPlan = if ($TestPlan) { $TestPlan } else { $strDefaultTestPlan }
 
 Import-Module -Name $strModuleManifestPath -Force
 
-if (-not $PSCmdlet.ShouldProcess($Name, 'Run MMSMOA Intune validation demo step')) {
+if (-not $PSCmdlet.ShouldProcess($Name, 'Run MMSMOA Gatekeeper rollback demo step')) {
     return
 }
 

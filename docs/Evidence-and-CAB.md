@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Describes the evidence-bundle shape, summary files, Provider Version Matrix, and CAB-facing usage boundary for macOSLab validation runs.
 - **Related:** [macOSLab Repository Specification](spec/macOSLab-repository-spec.md), [Evidence Redaction](Evidence-Redaction.md), [Provider Version Matrix](Provider-Version-Matrix.md), [Evidence bundle schema](../schemas/evidence-bundle.schema.json)
 
@@ -38,6 +38,20 @@ The CAB-facing artifact is the redacted bundle, not the raw capture folder. The 
 - whether physical Mac sign-off remains required.
 
 The evidence bundle does not prove cloud rollback. It MUST keep the cloud-state warning visible: VM rollback does not rewind Intune, Entra, Defender portal state, audit logs, or reporting history.
+
+## Gatekeeper Evidence Example
+
+For the Demo 4 Gatekeeper pivot, the CAB-facing summary should be explicit that the failed app launch is intentional:
+
+```text
+Policy: MacLab - Gatekeeper - App Store Only
+Checkpoint: Broken-Policy-State
+Expected failure: Visual Studio Code is rejected by System Policy Control
+Recovery proof: Post-Enroll-Baseline restores `spctl --assess` acceptance and app launch
+Cloud caveat: Intune assignment remains until removed or narrowed
+```
+
+Use the redacted schema example at [schemas/examples/evidence-bundle/valid/gatekeeper-appstore-only.json](../schemas/examples/evidence-bundle/valid/gatekeeper-appstore-only.json) as the durable shape. Do not attach screenshots, recordings, app bundles, Team IDs, tenant IDs, device IDs, UPNs, or recovery keys to the public bundle.
 
 ## Export
 

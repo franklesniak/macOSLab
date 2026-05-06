@@ -1,0 +1,8 @@
+Profile display name: MacLab - Gatekeeper - App Store Only
+PayloadType: com.apple.systempolicy.control
+PayloadIdentifier: com.example.maclab.systempolicycontrol
+PayloadUUID: <redacted-payload-uuid>
+EnableAssessment: true
+AllowIdentifiedDevelopers: false
+Installed by: MDM
+Local user path: <redacted-home>

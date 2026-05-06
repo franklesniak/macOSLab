@@ -1,0 +1,4 @@
+/Applications/Visual Studio Code.app: rejected
+source=System Policy Control
+origin=Developer ID Application: Example Software Publisher (<redacted-team-id>)
+reason=Application is not from the Mac App Store under the staged App-Store-only policy.

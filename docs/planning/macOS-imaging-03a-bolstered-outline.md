@@ -5,7 +5,7 @@
 
 - **Status:** Draft
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Talk-development working artifact for the MMSMOA 2026 session: "Don't Brick the CEO's Mac: MMSMOA 2026 Session Plan and Speaker Runbook". Captures interim concepting, prioritization, outline, or runbook content for that session; not a final published deliverable.
 - **Related:** [macOSLab repository specification](../spec/macOSLab-repository-spec.md), [Architecture decision records](macOS-imaging-08e-ADRs.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
 
@@ -211,6 +211,7 @@ The canonical risk map for this session — referenced throughout the rest of th
 | FileVault | Unlock, recovery, escrow, user prompts. | Executive lockout, urgent helpdesk escalation, security visibility. |
 | PPPC/TCC | Required tools cannot access protected data. | Broken screen sharing, recording, accessibility, backup, EDR, or remote support workflows. |
 | Defender | System extension, network extension, Full Disk Access, onboarding. | Security gap, false-positive noise, SOC escalation, unhealthy endpoint posture. |
+| App execution control | Gatekeeper/System Policy Control blocks legitimate signed/notarized apps when over-tightened. | Users cannot launch required tools such as Visual Studio Code. |
 | Compliance/CA | Device marked noncompliant or access blocked. | Users lose access to Outlook, SharePoint, Teams, approval apps, or business workflows. |
 
 Optional 10-second calibration:
@@ -270,7 +271,14 @@ The core workflow is:
 enroll -> apply policy -> validate -> intentionally fail -> collect evidence -> roll back -> prove known-good
 ```
 
-The proof points should be:
+The live break-and-rollback proof point is Gatekeeper/System Policy Control:
+
+- Known-good VM has Visual Studio Code installed and launched.
+- Lab-only Intune Settings Catalog policy enables Gatekeeper assessment and disables identified developers.
+- VS Code is rejected in `Broken-Policy-State`.
+- Rollback to `Post-Enroll-Baseline` restores `spctl` acceptance and app launch.
+
+Supporting proof points remain:
 
 - FileVault: policy assignment, local `fdesetup status`, escrow/recovery-key evidence, redacted proof, and hardware sign-off boundary.
 - Defender: system extension, network extension, Full Disk Access/PPPC, onboarding, `mdatp health`, and evidence export.
@@ -439,8 +447,8 @@ Use this as a memorable credibility slide.
 
 | Color | Meaning | Examples |
 | --- | --- | --- |
-| Green | Good VM tests. | Script syntax, package install behavior, Intune assignment logic, profile receipt, basic PPPC payload behavior, Defender health checks, rollback routines, evidence export. |
-| Yellow | Good VM iteration, then physical hardware sign-off. | FileVault rollout behavior, recovery-key process, compliance experience, user prompts, performance-sensitive Defender behavior. |
+| Green | Good VM tests. | Script syntax, package install behavior, Intune assignment logic, profile receipt, Gatekeeper/System Policy Control receipt, `spctl` assessment, app launch block/recovery in the guest, basic PPPC payload behavior, Defender health checks, rollback routines, evidence export. |
+| Yellow | Good VM iteration, then physical hardware sign-off. | FileVault rollout behavior, recovery-key process, compliance experience, user prompts, fleet rollout impact, performance-sensitive Defender behavior. |
 | Red | Physical hardware or production-like enrollment required. | ADE/ABM zero-touch flows, serial-number-dependent workflows, Platform SSO sign-in/unlock experience, Touch ID, Secure Enclave-dependent behavior, physical Wi-Fi behavior, final executive pilot sign-off. |
 
 The point:
@@ -897,7 +905,7 @@ Checkpoint-MacLabVm `
 
 Invoke-MacPolicyValidation `
   -Name 'mms-fv-01' `
-  -TestPlan './examples/TestCases/MMS-Demo4.yml'
+  -TestPlan './examples/TestCases/Gatekeeper-AppStoreOnly.yml'
 
 Restore-MacLabVmCheckpoint `
   -Name 'mms-fv-01' `
@@ -1080,40 +1088,49 @@ Recovery path:
 - Show a pre-created UTM VM.
 - Move on rather than debugging UTM live.
 
-### Demo 4: Intune Validation Loop, 57:00-70:00
+### Demo 4: Gatekeeper Rollback Loop, 57:00-70:00
 
-Goal: prove risk-free policy testing.
+Goal: prove risk-free policy testing with a coherent app-break and rollback story.
 
 Start state:
 
 - VM at `Post-Enroll-Baseline`.
 - Device already enrolled in the demo tenant.
+- Visual Studio Code installed, accepted by `spctl`, and launched successfully.
 - Recent sync completed.
-- Lab-only policies assigned.
 - Evidence script ready.
 - Evidence output redaction already tested.
 
+Stage setup:
+
+> In production, this is an Intune Settings Catalog profile. For stage reliability, the evidence you are about to see was captured from the VM during rehearsal so we are not waiting on live Intune timing.
+
+The policy model is System Policy Control/Gatekeeper:
+
+- Enable Assessment: enabled.
+- Allow Identified Developers: disabled.
+
 Primary live flow:
 
-1. Show enrollment state.
-2. Run baseline evidence script.
-3. Show FileVault policy evidence.
-4. Show Defender health evidence.
-5. Trigger or reveal a controlled failure.
-6. Collect failure evidence.
-7. Restore snapshot.
-8. Rerun evidence script.
-9. Show return to known good.
-10. State clearly what cloud cleanup is still required.
+1. Show enrollment and baseline app-launch state.
+2. Show the lab-only Intune Settings Catalog policy or the slide equivalent.
+3. Restore or reveal `Broken-Policy-State`.
+4. Run the Gatekeeper App-Store-only validation plan.
+5. Show VS Code rejected by `spctl` and the captured block-dialog reference.
+6. Disconnect VM networking as the stage control.
+7. Restore `Post-Enroll-Baseline`.
+8. Run the recovered validation plan.
+9. Show `spctl` accepts VS Code and the app launches.
+10. State clearly that the Intune assignment still needs cleanup before production expansion.
 
 Example commands:
 
 ```powershell
 Invoke-MacPolicyValidation `
   -Name 'mms-parallels-01' `
-  -TestPlan './examples/TestCases/FileVault-Defender-Smoke.yml' `
-  -OutputPath './_evidence/runs/mms-demo4-before' `
-  -RedactSecrets
+  -TestPlan './examples/TestCases/Gatekeeper-AppStoreOnly.yml' `
+  -OutputPath './_evidence/runs/mms-demo4-gatekeeper-before' `
+  -RedactSecrets:$true
 
 Restore-MacLabVmCheckpoint `
   -Provider Parallels `
@@ -1122,61 +1139,44 @@ Restore-MacLabVmCheckpoint `
 
 Invoke-MacPolicyValidation `
   -Name 'mms-parallels-01' `
-  -TestPlan './examples/TestCases/FileVault-Defender-Smoke.yml' `
-  -OutputPath './_evidence/runs/mms-demo4-after' `
-  -RedactSecrets
+  -TestPlan './examples/TestCases/Gatekeeper-Recovered.yml' `
+  -OutputPath './_evidence/runs/mms-demo4-gatekeeper-after' `
+  -RedactSecrets:$true
 ```
 
-Minimum evidence to show. The list below is intended as terminal output during the live demo. The slide companion is a condensed six-line version highlighting MDM enrollment, FileVault evidence (with redaction note), Defender health, the intentional compliance failure, the rollback result, and the cloud-cleanup warning. The full bundle is reflected in the JSON example in the GitHub Starter Kit section.
+Minimum evidence to show:
 
 ```text
 PASS  MDM enrollment profile present
-PASS  Device name matches lab naming convention
-PASS  FileVault policy detected
-PASS  fdesetup status captured
-PASS  FileVault escrow evidence captured
-PASS  FileVault recovery key value redacted
-PASS  Defender system extension present
-PASS  Defender network extension state captured
-PASS  Defender Full Disk Access profile present
-PASS  mdatp health captured
-FAIL  Compliance smoke test in intentional broken state
-PASS  Rollback restored known-good VM checkpoint
-WARN  Cloud state cleanup still required
-PASS  Evidence bundle exported
+PASS  Gatekeeper assessment enabled
+PASS  System Policy Control profile detected
+FAIL  VS Code blocked by App-Store-only policy (expected failure)
+PASS  Blocking dialog captured
+PASS  Evidence redaction applied
+PASS  Rollback restored Post-Enroll-Baseline
+PASS  VS Code accepted after rollback
+WARN  Intune cloud assignment would still need cleanup before production expansion
 ```
 
 Controlled failure options:
 
 | Option | Reliability | Notes |
 | --- | --- | --- |
-| Pre-created `Broken-Policy-State` checkpoint | Highest | Best stage path. Explain exactly what is broken. |
-| Lab-only compliance policy with deterministic failure | Medium | Good if sync is behaving. Avoid waiting on CA. |
-| Live policy reassignment | Lower | Good for workshops, risky for core session. |
-| Real Conditional Access block | Lowest | Prefer screenshots or recording unless fully isolated. |
+| Pre-created `Broken-Policy-State` Gatekeeper checkpoint | Highest | Best stage path. Explain exactly what is broken. |
+| Live lab-only Settings Catalog assignment | Medium | Compelling if started as a background thread and not used as the success dependency. |
+| Lab-only compliance policy with deterministic failure | Backup | Keep only as supporting proof if Gatekeeper rehearsal fails. |
+| Defender unhealthy fixture | Backup | Keep for accepted-takeaway support, not the live failure. |
 
-Recommended failure:
+Transition line:
 
-- Use a deterministic compliance or Defender-health test failure.
-- Keep FileVault and Defender evidence in the same validation run.
-- Explain where physical hardware validation begins.
-
-Narration points:
-
-- Intune state is eventually consistent.
-- The lab proves policy delivery, device-side behavior, rollback, and evidence collection.
-- Hardware/security-model-dependent behavior still requires physical Mac sign-off.
-- Rollback is useful only if cloud cleanup is understood.
-- VM rollback does not erase Intune/Entra/Defender audit history or instantly reverse portal state.
+> The accepted session promise includes FileVault and Defender, and we will show what evidence looks like for both. The live break-and-rollback path is Gatekeeper because it is the cleanest way to show the pattern without pretending cloud timing is instant.
 
 Recovery playbook:
 
-- If enrollment is slow, pivot to pre-synced state.
-- If compliance lags, show local evidence and return later.
-- If Intune is unavailable, use the break-glass recording.
-- If rollback fails, show snapshot tree and restore from `Pre-Enroll`.
+- If live Intune timing is slow, say the checkpoint pivot line and use `Broken-Policy-State`.
+- If VS Code does not block after rehearsal, adjust wording to "the policy blocks the next newly installed or updated legitimate app" before the talk.
+- If rollback fails, stop and diagnose before the session; do not claim the rollback restores app launch until `spctl` accepts VS Code.
 - If a secret appears on screen, stop, switch to redacted screenshots, and continue calmly.
-- Stay calm. The whole topic is safe failure.
 
 ## Wrap-Up: 70:00-75:00
 
@@ -1191,6 +1191,8 @@ Show a prebuilt triage table.
 | Recovery key not visible. | Escrow not complete, device not corporate, role permissions, or wrong report path. | Encryption report, device ownership, RBAC, policy timing. |
 | Recovery key appears on screen. | Evidence redaction failed. | Stop showing live output; switch to redacted screenshot or sanitized JSON. |
 | Defender installed but unhealthy. | System extension, network extension, Full Disk Access, or onboarding missing. | `mdatp health`, system extension list, PPPC profile. |
+| VS Code is blocked. | Gatekeeper/System Policy Control App-Store-only policy is active. | `spctl --status`, `spctl --assess -vv`, profile receipt. |
+| VS Code stays blocked after rollback. | Bad policy reapplied or the wrong checkpoint was restored. | Disconnect networking, restore `Post-Enroll-Baseline`, re-run `spctl --assess`. |
 | Rollback causes duplicate/stale devices. | VM identity rolled back while cloud state moved forward. | Report-only cloud cleanup routine, then manual reconciliation. |
 | Clones behave strangely. | MAC address, name, or identity collision. | Naming convention, clone settings, DHCP, device record. |
 | Old guest no longer runs after host upgrade. | Host/provider compatibility changed. | Host version, provider release notes, restore image support. |
@@ -1209,6 +1211,7 @@ Explicit dragons to name:
 - Evidence redaction and recovery-key handling.
 - PPPC/TCC prompt interpretation.
 - Defender system extension and network extension approvals.
+- Gatekeeper/System Policy Control app-execution controls.
 - Disk and snapshot sprawl.
 
 ### Repo Handoff and Q&A Rules, 73:00-75:00
@@ -1322,12 +1325,14 @@ Final line:
 | 17 | Demo 1 title card. | 31:00 |
 | 18 | Demo 2 title card. | 38:00 |
 | 19 | Demo 3 title card. | 50:00 |
-| 20 | Demo 4 title card. | 57:00 |
-| 21 | FileVault and Defender evidence model. | During Demo 4 |
-| 22 | Dragons checklist. | 70:00 |
-| 23 | Repo tree and Start Here. | 73:00 |
-| 24 | Q&A buckets. | 75:00 |
-| 25 | Monday plan and final reminder. | 102:00 |
+| 20 | Demo 4 setup: audit finding leads to Gatekeeper hardening. | 57:00 |
+| 21 | System Policy Control model: App Store only vs. identified developers. | 58:30 |
+| 22 | Demo 4 evidence: VS Code blocked, `spctl` rejects, rollback restores. | During Demo 4 |
+| 23 | FileVault and Defender proof boundaries: still required, not the live failure. | 68:00 |
+| 24 | Dragons checklist updated for Gatekeeper and cloud state. | 70:00 |
+| 25 | Repo tree and Start Here. | 73:00 |
+| 26 | Q&A buckets. | 75:00 |
+| 27 | Monday plan and final reminder. | 102:00 |
 
 ## Windows-Admin Translation Cheat Sheet
 
@@ -1343,6 +1348,7 @@ Put this on one slide and ship it as `docs/Windows-Admin-Cheat-Sheet.md`.
 | ConfigMgr collection / Intune group | Intune assignment group/filter | Keep lab rings isolated. |
 | Event Viewer / Get-WinEvent | `log show`, profile output, app logs | Use PowerShell to collect both worlds. |
 | Defender health on Windows | `mdatp health` on macOS | Health evidence is more useful than "app exists." |
+| AppLocker / WDAC / SmartScreen | Gatekeeper/System Policy Control and `spctl` | App execution policy can block legitimate signed/notarized apps when over-tightened. |
 | Pester tests | Pester tests for Mac lab readiness and policy validation | Same testing idiom. |
 | Change-ticket evidence | Redacted JSON/CSV/screenshots/log bundle | Make proof portable without leaking secrets. |
 
@@ -1398,10 +1404,12 @@ The repo should be real, runnable, and usable after the session.
     Demo1-Media.ps1
     Demo2-Parallels.ps1
     Demo3-UTM.ps1
-    Demo4-IntuneValidation.ps1
+    Demo4-GatekeeperRollback.ps1
   TestCases/
     FileVault-Validation.yml
     Defender-Validation.yml
+    Gatekeeper-AppStoreOnly.yml
+    Gatekeeper-Recovered.yml
     Compliance-SmokeTest.yml
     PPPC-Validation.yml
   utm/
@@ -1480,6 +1488,8 @@ Ship these even if everything else is rough:
 | --- | --- |
 | `FileVault-Validation.yml` | Policy receipt, local status capture, escrow evidence path, rollback note, and redacted recovery-key proof. |
 | `Defender-Validation.yml` | System extension, network extension, Full Disk Access, onboarding, `mdatp health`. |
+| `Gatekeeper-AppStoreOnly.yml` | System Policy Control profile receipt, `spctl` reject, VS Code block dialog reference, expected failure. |
+| `Gatekeeper-Recovered.yml` | Rollback proof, `spctl` accept, VS Code launch recovery, cloud-assignment warning. |
 | `PPPC-Validation.yml` | Bundle ID/code requirement/profile receipt/app behavior. |
 | `Compliance-SmokeTest.yml` | Fast deterministic pass/fail loop before risky tests. |
 
@@ -1506,7 +1516,8 @@ Ship these even if everything else is rough:
     { "name": "FileVault escrow evidence captured", "result": "Pass" },
     { "name": "FileVault recovery key value redacted", "result": "Pass" },
     { "name": "Defender health captured", "result": "Pass" },
-    { "name": "Compliance smoke test", "result": "Fail", "expectedFailure": true },
+    { "name": "VS Code blocked by App-Store-only policy", "result": "Fail", "expectedFailure": true },
+    { "name": "VS Code accepted after rollback", "result": "Pass" },
     { "name": "Rollback restored known-good VM checkpoint", "result": "Pass" },
     { "name": "Report-only cloud cleanup routine documented", "result": "Warn" }
   ]
@@ -1733,7 +1744,7 @@ Answer:
 8. The hypervisor matrix is a real operating-model comparison.
 9. The fidelity traffic light is present.
 10. Snapshot cleanup is documented.
-11. Demo 4 says rollback restores the VM, not Intune/Entra/Defender cloud state.
+11. Demo 4 says rollback restores the VM, not Intune/Entra/Defender cloud state or the Intune assignment.
 12. The Windows-admin translation cheat sheet exists in the deck and the repo, and has its own minute on stage.
 13. The repo URL resolves.
 14. `Test-LabReadiness.ps1` returns green.
@@ -1742,11 +1753,12 @@ Answer:
 17. At least three handoff lines have been rehearsed.
 18. There is at least one seed question ready for Q&A.
 19. The final line is memorized.
-20. All angle-bracket placeholders in the deck and demo configs have been replaced with the pinned values for the event. The full set is `<macOS-version>`, `<macOS-build>`, `<host-macOS-version>`, `<parallels-version>`, `<utm-version>`, `<powershell-version>`, `<defender-version>`, and `<policy-set-version>`.
-21. All screenshots, recordings, logs, and evidence examples have been redacted.
-22. Tenant names, tenant domains, UPNs, device IDs, serial numbers, recovery keys, tokens, and secrets are masked anywhere they appear.
-23. All `.md` filename references in the runbook and any derivative artifacts render as plain inline code, not as auto-converted hyperlinks.
-24. The redaction helper in the module is named `Protect-MacLabEvidence.ps1` (approved verb), and PowerShell tooling reports no verb warnings on module import or analysis.
+20. Gatekeeper fixtures and local visual assets have been checked for Team IDs, profile UUIDs, tenant identifiers, UPNs, device IDs, screenshots, recordings, and app bundles.
+21. All angle-bracket placeholders in the deck and demo configs have been replaced with the pinned values for the event. The full set is `<macOS-version>`, `<macOS-build>`, `<host-macOS-version>`, `<parallels-version>`, `<utm-version>`, `<powershell-version>`, `<defender-version>`, and `<policy-set-version>`.
+22. All screenshots, recordings, logs, and evidence examples have been redacted.
+23. Tenant names, tenant domains, UPNs, device IDs, serial numbers, recovery keys, tokens, and secrets are masked anywhere they appear.
+24. All `.md` filename references in the runbook and any derivative artifacts render as plain inline code, not as auto-converted hyperlinks.
+25. The redaction helper in the module is named `Protect-MacLabEvidence.ps1` (approved verb), and PowerShell tooling reports no verb warnings on module import or analysis.
 
 ## Source Notes to Re-Check Before the Event
 

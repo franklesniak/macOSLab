@@ -5,7 +5,7 @@
 
 - **Status:** Draft for owner review
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Architecture and planning decisions for the future `macOSLab` repository specification. This file records accepted decisions and conditional follow-up decisions that affect implementation, phase gates, or repository policy.
 - **Related:** [macOSLab repository specification](../spec/macOSLab-repository-spec.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Original prompt](macOS-imaging-08-repo-spec.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
 
@@ -471,3 +471,34 @@ The expected v1 owner/demo path is `~/Demo/Installers/UniversalMac_26.4.1_25E253
 - Always call `mist download` during demos. Rejected because the artifact is already verified and the owner explicitly prohibited new downloads.
 - Move the artifact immediately to a repository path. Rejected because `.ipsw` files must never be committed and the current cache path is already usable.
 - Copy the artifact to a separate demo folder by default. Deferred because copying an 18 GB file adds time and storage use without a current need.
+
+## ADR-0016: Use Gatekeeper/System Policy Control as the Live Demo 4 Failure
+
+- **Status:** Accepted
+- **Date:** 2026-05-06
+
+### Context
+
+The accepted session contract still requires FileVault and Defender validation content, but the previous live-failure story centered on Defender health or compliance drift. That made the rollback narrative less coherent because Defender portal timing, health-settling behavior, and cloud reporting can continue after a local VM restore.
+
+Gatekeeper/System Policy Control gives the demo a cleaner operator story: a Windows-first admin responds to an app-execution audit finding, over-tightens the macOS policy to App-Store-only behavior, blocks a legitimate signed/notarized app such as Visual Studio Code, catches the issue in the lab, captures evidence, and rolls back before production users are affected.
+
+### Decision
+
+Demo 4 MUST use Gatekeeper/System Policy Control as the live break-and-rollback scenario. The preferred delivery path is an Intune Settings Catalog profile scoped to the lab-only device group with Gatekeeper assessment enabled and identified developers disabled. The stage path MAY initiate live Intune delivery as a background thread, but the success path MUST be checkpointed and fixture-backed.
+
+The repository MUST keep FileVault and Defender as required validation guides, test plans, and backup proof paths. It MUST NOT pivot the live Demo 4 failure back to Defender-unhealthy.
+
+### Consequences
+
+- The Demo 4 script is named `Demo4-GatekeeperRollback.ps1`.
+- Gatekeeper uses split validation plans: `Gatekeeper-AppStoreOnly.yml` for `Broken-Policy-State` and `Gatekeeper-Recovered.yml` for the post-rollback proof.
+- No sample `.mobileconfig`, screenshot, recording, app bundle, Team ID, tenant ID, UPN, device ID, profile UUID, or recovery key is committed.
+- Direct local profile installation remains a verified fallback only, not the canonical story.
+- The demo must say that VM rollback restores the VM, not Intune, Entra, Defender portal state, audit logs, assignments, or cloud reporting.
+
+### Alternatives Considered
+
+- Keep Defender unhealthy as the live failure. Rejected because the timing and rollback story are weaker.
+- Use a live compliance or Conditional Access failure. Rejected for the core path because cloud timing and access propagation are not dependable stage dependencies.
+- Commit a sample System Policy Control `.mobileconfig`. Rejected because the talk should point admins to Intune Settings Catalog and the repo must not collect profile identifiers or payload material from a real tenant.

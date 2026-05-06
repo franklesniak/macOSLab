@@ -34,7 +34,7 @@
 # [pscustomobject]. Demo step summary records.
 #
 # .NOTES
-# Version: 0.1.20260505.0
+# Version: 0.1.20260506.0
 # Positional parameters are not supported.
 #
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium', PositionalBinding = $false)]
@@ -60,7 +60,7 @@ $strScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $strRepositoryRoot = Split-Path -Path $strScriptRoot -Parent
 $strDemoRoot = Join-Path -Path $strRepositoryRoot -ChildPath 'examples/MMSMOA-2026'
 $strDemo1Path = Join-Path -Path $strDemoRoot -ChildPath 'Demo1-Media.ps1'
-$strDemo4Path = Join-Path -Path $strDemoRoot -ChildPath 'Demo4-IntuneValidation.ps1'
+$strDemo4Path = Join-Path -Path $strDemoRoot -ChildPath 'Demo4-GatekeeperRollback.ps1'
 
 if (-not $PSCmdlet.ShouldProcess($Demo, 'Run MMSMOA demo orchestrator')) {
     return

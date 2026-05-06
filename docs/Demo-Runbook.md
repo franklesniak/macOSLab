@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** MMSMOA demo runbook for media verification, provider paths, validation evidence, recovery pivots, and owner dry-run boundaries.
 - **Related:** [Start Here](Start-Here.md), [Troubleshooting](Troubleshooting.md), [Evidence and CAB](Evidence-and-CAB.md), [Snapshot Strategy](Snapshot-Strategy.md)
 
@@ -51,7 +51,7 @@ Before traveling or presenting:
 5. Do not sign in to Company Portal yet.
 6. Shut down the guest.
 7. Capture the `Pre-Enroll` checkpoint.
-8. Start from `Pre-Enroll` on reliable network, complete Company Portal enrollment, wait for Intune sync and Defender policy delivery, then capture `Post-Enroll-Baseline`.
+8. Start from `Pre-Enroll` on reliable network, complete Company Portal enrollment, install and launch Visual Studio Code, wait for Intune sync and baseline policy delivery, then capture `Post-Enroll-Baseline`.
 9. Use `Post-Enroll-Baseline` as the default live demo starting point.
 
 Use live enrollment during the talk only as an optional walkthrough. If the network is slow, say: "Enrollment is cloud-timed, so the stage path starts from a prepared enrolled checkpoint and the evidence records what changed."
@@ -61,11 +61,58 @@ Use live enrollment during the talk only as an optional walkthrough. If the netw
 1. Demo 1: run `examples/MMSMOA-2026/Demo1-Media.ps1`.
 2. Demo 2: run `examples/MMSMOA-2026/Demo2-Parallels.ps1` during owner live dry run only.
 3. Demo 3: use `examples/MMSMOA-2026/Demo3-UTM.ps1` after manually creating the documented UTM VM.
-4. Demo 4: run `examples/MMSMOA-2026/Demo4-IntuneValidation.ps1` for fixture-backed validation evidence.
+4. Demo 4: run `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1` for fixture-backed Gatekeeper/System Policy Control evidence.
+
+## Demo 4 Gatekeeper Path
+
+Demo 4 is a Gatekeeper rollback story, not a Defender-unhealthy story. The preferred rehearsal path is an Intune Settings Catalog profile scoped to the lab-only device group:
+
+- Platform: macOS.
+- Profile type: Settings catalog.
+- Category: System Policy Control/Gatekeeper.
+- Enable Assessment: enabled.
+- Allow Identified Developers: disabled.
+
+Stage the policy or restore the prepared `Broken-Policy-State`, then run:
+
+```powershell
+Invoke-MacPolicyValidation `
+  -Name 'mms-parallels-01' `
+  -TestPlan './examples/TestCases/Gatekeeper-AppStoreOnly.yml' `
+  -OutputPath './_evidence/runs/mms-demo4-gatekeeper-before' `
+  -RedactSecrets:$true
+
+Restore-MacLabVmCheckpoint `
+  -Provider Parallels `
+  -Name 'mms-parallels-01' `
+  -CheckpointName 'Post-Enroll-Baseline'
+
+Invoke-MacPolicyValidation `
+  -Name 'mms-parallels-01' `
+  -TestPlan './examples/TestCases/Gatekeeper-Recovered.yml' `
+  -OutputPath './_evidence/runs/mms-demo4-gatekeeper-after' `
+  -RedactSecrets:$true
+```
+
+Before the rollback proof, disconnect VM networking so the bad Intune assignment cannot immediately reapply while the audience watches the local recovery. Do not capture `Post-Enroll-Baseline` with networking disconnected; only disconnect as a stage control immediately before restore.
+
+Audience-visible summary:
+
+```text
+PASS  MDM enrollment profile present
+PASS  Gatekeeper assessment enabled
+PASS  System Policy Control profile detected
+FAIL  VS Code blocked by App-Store-only policy (expected failure)
+PASS  Blocking dialog captured
+PASS  Evidence redaction applied
+PASS  Rollback restored Post-Enroll-Baseline
+PASS  VS Code accepted after rollback
+WARN  Intune cloud assignment would still need cleanup before production expansion
+```
 
 ## Recovery Pivots
 
-If live cloud timing is slow, switch to the fixture-backed validation plan and say: "The local VM rollback is deterministic; cloud state keeps moving, so the evidence bundle records that boundary instead of pretending rollback rewinds the service."
+If live cloud timing is slow, switch to the fixture-backed Gatekeeper validation plan and say: "This is exactly why the lab uses checkpoints. Intune timing is part of the system, not a personal failing, so I am going to use the checkpointed broken state captured from this VM during rehearsal and show the evidence."
 
 If the VM provider is not ready, use the prepared screenshots or recording and keep the command prompt visible only for redacted evidence commands.
 

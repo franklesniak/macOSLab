@@ -23,7 +23,7 @@ function Protect-MacLabEvidence {
     # [pscustomobject]. Redacted evidence clone.
     #
     # .NOTES
-    # Version: 0.1.20260505.0
+    # Version: 0.1.20260506.0
     # Private helper. Positional parameters are not supported.
     #
     [CmdletBinding(PositionalBinding = $false)]
@@ -65,13 +65,18 @@ function Protect-MacLabEvidence {
             'orgId',
             'password',
             'personalRecoveryKey',
+            'payloadIdentifier',
+            'payloadUUID',
             'policySetId',
+            'profileIdentifier',
+            'profileId',
             'recoveryKey',
             'refreshToken',
             'secret',
             'serialNumber',
             'tenantId',
             'tenantIdentifier',
+            'teamId',
             'token',
             'upn',
             'userName',
@@ -112,6 +117,16 @@ function Protect-MacLabEvidence {
             $strValue = [regex]::Replace($strValue, $strPattern, '***REDACTED***', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
         }
 
+        $strValue = [regex]::Replace(
+            $strValue,
+            '(Developer ID (?:Application|Installer):[^\r\n(]*\()([A-Z0-9]{10})(\))',
+            '$1***REDACTED***$3'
+        )
+        $strValue = [regex]::Replace(
+            $strValue,
+            '(Authority=Developer ID (?:Application|Installer):[^\r\n(]*\()([A-Z0-9]{10})(\))',
+            '$1***REDACTED***$3'
+        )
         $strValue = [regex]::Replace($strValue, '/Users/[^/\s]+', '/Users/***REDACTED***')
 
         if ($strValue.Length -gt 200 -and $strValue -match '^[A-Za-z0-9+/=_-]{200,}$') {

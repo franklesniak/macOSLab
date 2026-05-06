@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Canonical first-read guide for Windows-first Microsoft endpoint administrators starting with `macOSLab`.
 - **Related:** [README](../README.md), [Prerequisites](Prereqs.md), [Fidelity Boundaries](Fidelity-Boundaries.md), [Snapshot Strategy](Snapshot-Strategy.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md)
 
@@ -13,7 +13,7 @@
 
 ## Who This Is For
 
-Use this kit if you manage Microsoft Intune, Defender for Endpoint, FileVault, PPPC/TCC, or compliance policy for Macs and want a repeatable local validation path.
+Use this kit if you manage Microsoft Intune, Defender for Endpoint, FileVault, PPPC/TCC, Gatekeeper/System Policy Control, or compliance policy for Macs and want a repeatable local validation path.
 
 This kit assumes you are comfortable with PowerShell, GitHub, and Microsoft endpoint concepts. It does not assume deep macOS automation experience.
 
@@ -38,17 +38,21 @@ Use the VM lab for faster iteration, then use physical hardware where the fideli
 4. Read [Snapshot-Strategy.md](Snapshot-Strategy.md) so checkpoint names and cloud-state warnings are clear before you enroll a VM.
 5. Read [Fidelity-Boundaries.md](Fidelity-Boundaries.md) before turning VM evidence into a change ticket.
 
-The first validation target is a lab-only compliance smoke test against a disposable VM. The first expected evidence artifact is a redacted JSON record under the evidence output root configured by the test plan.
+The first risky-policy sample is a lab-only Gatekeeper/System Policy Control validation against a disposable VM. The broken-state plan proves an App-Store-only policy blocks Visual Studio Code, and the recovered plan proves rollback restores the known-good app-launch state. The first expected evidence artifact is a redacted JSON record under the evidence output root configured by the test plan.
 
 ## First Command
 
-After Phase 2 implements the module skeleton, the first command should be:
+Start by importing the module from the repository root:
 
 ```powershell
 Import-Module ./src/Modules/MacLab/MacLab.psd1
 ```
 
-Before Phase 2, use this repository as documentation and planning material only. Do not treat missing module paths as an installation failure until the module phase has landed.
+Then run fixture-backed validation before attempting live provider or cloud work:
+
+```powershell
+Invoke-MacPolicyValidation -Provider Parallels -Name 'demo-01' -TestPlan ./examples/TestCases/Gatekeeper-AppStoreOnly.yml
+```
 
 ## What To Read Next
 

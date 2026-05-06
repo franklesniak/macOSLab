@@ -6,7 +6,7 @@
 
 - **Status:** Active
 - **Owner:** Repository Maintainers
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Schema conventions and the macOSLab evidence-bundle schema used by validation evidence and exports.
 - **Related:** [JSON authoring standards](../.github/instructions/json.instructions.md), [YAML authoring standards](../.github/instructions/yaml.instructions.md), [Phase 7 TODO](../TODO-Phase-07-Evidence-Pipeline.md)
 
@@ -25,6 +25,8 @@ The valid examples are checked by the `Validate evidence-bundle valid examples` 
 The repository specification defines the evidence-bundle shape in Section 25 of [macOSLab Repository Specification](../docs/spec/macOSLab-repository-spec.md#25-evidence-bundle-schema). The committed schema extends that contract with Phase 7 owner decisions: normalized provider version matrix fields, host/guest compatibility classification, provider manual-step gaps, provider isolation state, and redaction-required fields.
 
 The evidence schema validates durable redacted evidence summaries. It does not permit raw recovery keys, tokens, tenant identifiers, device IDs, MAC addresses, VM UUIDs, license strings, or local private host data.
+
+The valid examples include a Gatekeeper/System Policy Control evidence bundle for the Demo 4 App-Store-only failure path. That example keeps the app block as structured fixture evidence and does not commit screenshots, recordings, app bundles, Team IDs, tenant identifiers, device identifiers, UPNs, or profile UUIDs.
 
 ## Authoring Rules
 

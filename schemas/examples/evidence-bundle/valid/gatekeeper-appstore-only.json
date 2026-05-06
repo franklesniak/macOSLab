@@ -1,0 +1,73 @@
+{
+  "$schemaVersion": "1.0.0",
+  "runId": "2026-05-gatekeeper-appstore-only-001",
+  "createdAt": "2026-05-06T00:00:00Z",
+  "vmName": "mms-parallels-01",
+  "provider": "Parallels",
+  "providerVersion": "Parallels Desktop 26.3.2-57398",
+  "snapshot": "Broken-Policy-State",
+  "fidelity": "Green",
+  "hardwareSignoffRequired": false,
+  "providerVersionMatrix": {
+    "hostMacOS": "26.4.1",
+    "hostMacOSBuild": "25E253",
+    "guestMacOS": "26.4.1",
+    "guestBuild": "25E253",
+    "hostGuestCompatibility": "same-major-supported",
+    "parallelsVersion": "26.3.2-57398",
+    "utmVersion": null,
+    "tartVersion": null,
+    "powerShellVersion": "7.4.0",
+    "pesterVersion": "5.7.1",
+    "defenderVersion": null,
+    "intunePolicySetId": "***REDACTED***",
+    "providerManualStepGaps": [],
+    "providerIsolationState": {
+      "hostSharingDisabled": true,
+      "sharedClipboardDisabled": true,
+      "sharedApplicationsDisabled": true,
+      "smartMountDisabled": true,
+      "cameraSharingDisabled": true,
+      "bluetoothSharingDisabled": true,
+      "hostLocationSharingDisabled": true
+    }
+  },
+  "intuneDeviceName": "MMS-MACLAB-001",
+  "intuneDeviceIdRedacted": "***REDACTED***",
+  "tenantSuffixOnly": ".onmicrosoft.example",
+  "redactionApplied": true,
+  "redactionVersion": "1.0.0",
+  "cloudStateWarning": "VM rollback does not rewind Intune, Entra, Defender portal state, audit logs, or reporting history.",
+  "tests": [
+    {
+      "name": "Gatekeeper assessment enabled",
+      "kind": "GatekeeperStatus",
+      "result": "Pass",
+      "expectedFailure": false,
+      "evidenceRefs": [
+        "fixtures/gatekeeper-status-appstore-only.txt"
+      ],
+      "message": "Gatekeeper assessment is enabled."
+    },
+    {
+      "name": "System Policy Control profile detected",
+      "kind": "SystemPolicyControlProfile",
+      "result": "Pass",
+      "expectedFailure": false,
+      "evidenceRefs": [
+        "fixtures/profiles-system-policy-control-redacted.txt"
+      ],
+      "message": "System Policy Control profile evidence is present."
+    },
+    {
+      "name": "VS Code blocked by App-Store-only policy",
+      "kind": "GatekeeperAssessment",
+      "result": "Fail",
+      "expectedFailure": true,
+      "evidenceRefs": [
+        "fixtures/gatekeeper-vscode-rejected.txt"
+      ],
+      "message": "VS Code rejected by App-Store-only System Policy Control policy."
+    }
+  ]
+}

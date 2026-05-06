@@ -480,7 +480,7 @@ Update:
 - `examples/MMSMOA-2026/demo-config.yml`
 - `scripts/Invoke-MMSDemo.ps1` if it needs an explicit Demo 4 test plan override
 
-Rename `examples/MMSMOA-2026/Demo4-IntuneValidation.ps1` to `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1`. This is now an owner decision. Update references in docs, tests, demo config, and `scripts/Invoke-MMSDemo.ps1` in the same implementation pass so stale names do not survive.
+Use `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1` as the Demo 4 script name. This is now an owner decision. Update references in docs, tests, demo config, and `scripts/Invoke-MMSDemo.ps1` in the same implementation pass so stale names do not survive.
 
 The config should include:
 
@@ -833,7 +833,7 @@ This section records the pivot disposition for every file tracked before this pl
 | `examples/MMSMOA-2026/Demo1-Media.ps1` | No change expected. |
 | `examples/MMSMOA-2026/Demo2-Parallels.ps1` | No change expected. |
 | `examples/MMSMOA-2026/Demo3-UTM.ps1` | No change expected. |
-| `examples/MMSMOA-2026/Demo4-IntuneValidation.ps1` | Rename to `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1`, then update default test plan and narration for Gatekeeper/System Policy Control evidence. |
+| `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1` | Use this as the Demo 4 script, then update default test plan and narration for Gatekeeper/System Policy Control evidence. |
 | `examples/MMSMOA-2026/demo-config.yml` | Add Gatekeeper demo settings, app paths, fixture root, checkpoint names, and sanitized Intune policy/profile display names. |
 | `examples/TestCases/Compliance-SmokeTest.yml` | Keep as supporting deterministic validation; stop using it as the central Demo 4 failure unless needed as backup. |
 | `examples/TestCases/Defender-Validation.yml` | Keep for accepted-takeaway coverage and backup proof. |
@@ -951,7 +951,7 @@ These are required after the repo changes are implemented and before conference/
 | Which delivery mechanism is canonical for the demo? | Resolved: Intune Settings Catalog delivery during rehearsal, with checkpointed/fixture-backed evidence on stage. |
 | Is local CLI profile installation required? | No. It is useful only as a fallback or payload-mechanics probe, and only if verified on the target VM. |
 | Should a live Intune deployment be initiated on stage? | Yes, if treated as a background thread with a hard checkpoint fallback. Start the assignment/sync, let it cook, then use live state only if it lands in time. |
-| Should `Demo4-IntuneValidation.ps1` be renamed? | Resolved: yes. Rename it to `Demo4-GatekeeperRollback.ps1` and update all references in the same implementation pass. |
+| Should the Demo 4 script use the Gatekeeper rollback name? | Resolved: yes. Use `Demo4-GatekeeperRollback.ps1` and update all references in the same implementation pass. |
 | Should a sample `.mobileconfig` be committed? | Resolved: no. It is not central to the repository purpose or talk narrative. Use Intune Settings Catalog as the canonical policy authoring surface. |
 | Should the live path install or wait for the profile during the session? | Do not make live arrival the critical path. Initiate the Intune deployment as a background stage thread, then use checkpointed state and sanitized evidence for the payoff if timing does not cooperate. |
 | Should Firefox be shown live? | Resolved: no. Do not make Firefox part of the required stage path, repo fixtures, or acceptance criteria. Keep it only as a private emergency fallback if VS Code proves unreliable in rehearsal. |
@@ -961,7 +961,7 @@ These are required after the repo changes are implemented and before conference/
 
 ### Demo 4 Rename Decision
 
-Rename `examples/MMSMOA-2026/Demo4-IntuneValidation.ps1` to `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1`. The new name is specific, stage-readable, and matches the pivoted Demo 4 purpose: Gatekeeper breaks a legitimate app, and rollback restores the known-good state.
+Use `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1`. The name is specific, stage-readable, and matches the pivoted Demo 4 purpose: Gatekeeper breaks a legitimate app, and rollback restores the known-good state.
 
 ## Source Recheck List
 

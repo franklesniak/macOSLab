@@ -1,0 +1,2 @@
+VS Code launch succeeded after restoring Post-Enroll-Baseline with networking disconnected for the rollback proof.
+No screenshot, recording, app bundle, tenant identifier, user identifier, or device identifier is committed.

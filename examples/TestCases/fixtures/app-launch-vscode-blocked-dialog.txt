@@ -1,0 +1,2 @@
+VS Code block dialog captured during rehearsal.
+The committed fixture intentionally avoids exact macOS dialog wording and stores no screenshot or recording.

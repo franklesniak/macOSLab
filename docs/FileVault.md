@@ -5,13 +5,13 @@
 
 - **Status:** Active
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Documents FileVault validation evidence boundaries for macOSLab.
 - **Related:** [Evidence Redaction](Evidence-Redaction.md), [Evidence and CAB](Evidence-and-CAB.md), [FileVault validation plan](../examples/TestCases/FileVault-Validation.yml)
 
 ## Validation Model
 
-FileVault validation proves policy receipt, local encryption state, and escrow-path evidence without exposing a recovery key. VM evidence can support the workflow, but physical Mac sign-off remains required for production confidence.
+FileVault validation proves policy receipt, local encryption state, and escrow-path evidence without exposing a recovery key. VM evidence can support the workflow, but physical Mac sign-off remains required for production confidence. FileVault remains required session content even though the live Demo 4 break-and-rollback failure is Gatekeeper/System Policy Control.
 
 The minimum evidence path is:
 

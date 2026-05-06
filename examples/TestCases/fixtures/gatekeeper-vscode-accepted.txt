@@ -1,0 +1,3 @@
+/Applications/Visual Studio Code.app: accepted
+source=Notarized Developer ID
+origin=Developer ID Application: Example Software Publisher (<redacted-team-id>)

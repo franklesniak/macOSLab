@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** User-facing overview for `franklesniak/macOSLab`, including the fastest safe starting path, project boundaries, current phase status, validation commands, deferred work, and license information.
 - **Related:** [Start Here](docs/Start-Here.md), [Prerequisites](docs/Prereqs.md), [macOSLab repository specification](docs/spec/macOSLab-repository-spec.md), [macOSLab ADRs](docs/planning/macOS-imaging-08e-ADRs.md)
 
@@ -14,13 +14,15 @@
 [![Markdown lint](https://github.com/franklesniak/macOSLab/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/franklesniak/macOSLab/actions/workflows/markdownlint.yml)
 [![Data CI](https://github.com/franklesniak/macOSLab/actions/workflows/data-ci.yml/badge.svg)](https://github.com/franklesniak/macOSLab/actions/workflows/data-ci.yml)
 
-`macOSLab` is a PowerShell 7.4+ starter kit for building reproducible Apple-silicon macOS VM labs for Microsoft Intune policy testing. It helps endpoint administrators pin macOS media, build lab VMs, create rollback checkpoints, validate FileVault/Defender/PPPC outcomes, and export redacted evidence before risky policy changes reach production users.
+`macOSLab` is a PowerShell 7.4+ starter kit for building reproducible Apple-silicon macOS VM labs for Microsoft Intune policy testing. It helps endpoint administrators pin macOS media, build lab VMs, create rollback checkpoints, validate FileVault/Defender/PPPC/Gatekeeper outcomes, and export redacted evidence before risky policy changes reach production users.
 
 This repository is not a production Mac management platform, not legal advice, not a replacement for physical Mac sign-off, and not a place to store tenant data or recovery keys. VM evidence accelerates iteration; it does not prove Red-bucket outcomes such as ADE/ABM zero-touch enrollment, Platform SSO sign-in/unlock, Touch ID, Secure Enclave-dependent behavior, or executive pilot readiness.
 
 ## Fastest Safe Start
 
 Start at [docs/Start-Here.md](docs/Start-Here.md), then read [docs/Prereqs.md](docs/Prereqs.md) before running any provider or cloud workflow. The implementation is delivered in phase checkpoints; the coding agent can continue through locally verifiable, non-destructive phases and pauses at the owner-validation boundary before live demo validation, release, branch protection, destructive provider/cloud actions, or optional Phase 10 expansion.
+
+For the MMSMOA demo path, Demo 4 uses a Gatekeeper/System Policy Control pivot: a lab-only Intune Settings Catalog policy makes Visual Studio Code fail under App-Store-only execution rules, the fixture-backed validation captures that expected failure, and rollback proves the known-good VM state. FileVault and Defender remain required validation guides and backup proof paths, but they are not the live break-and-rollback failure.
 
 The intended v1 command path is:
 
@@ -29,10 +31,10 @@ Import-Module ./src/Modules/MacLab/MacLab.psd1
 Get-MacLabMedia -Version '<macOS-version>' -Build '<macOS-build>'
 New-MacLabVm -Provider Parallels -Name 'demo-01' -MediaId '<macOS-version>-<macOS-build>'
 Checkpoint-MacLabVm -Provider Parallels -Name 'demo-01' -CheckpointName 'Pre-Enroll'
-Invoke-MacPolicyValidation -Provider Parallels -Name 'demo-01' -TestPlan ./examples/TestCases/Compliance-SmokeTest.yml
+Invoke-MacPolicyValidation -Provider Parallels -Name 'demo-01' -TestPlan ./examples/TestCases/Gatekeeper-AppStoreOnly.yml
 ```
 
-Until later phases add the module and scripts, treat that snippet as the stable target interface rather than a promise that the commands are already implemented.
+The default local tests use fixtures and mocks; they do not require a real VM, Microsoft Graph, Intune tenant, Defender installation, or provider tooling.
 
 ## What Ships First
 

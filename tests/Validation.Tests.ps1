@@ -72,6 +72,51 @@ Describe 'Invoke-MacPolicyValidation' {
         ($objEvidence | ConvertTo-Json -Depth 20) | Should -Not -Match '"edr_machine_id"\s*:\s*"[0-9a-f]{40}"'
     }
 
+    It 'Records Gatekeeper App-Store-only fixture output as an expected app-launch failure' {
+        $strPlanPath = Join-Path -Path $script:strRepositoryRoot -ChildPath 'examples/TestCases/Gatekeeper-AppStoreOnly.yml'
+
+        $objEvidence = Invoke-MacPolicyValidation `
+            -Provider Parallels `
+            -Name 'demo-01' `
+            -TestPlan $strPlanPath `
+            -Confirm:$false
+
+        $objGatekeeperResult = $objEvidence.tests |
+            Where-Object { $_.kind -eq 'GatekeeperAssessment' } |
+            Select-Object -First 1
+        $objProfileResult = $objEvidence.tests |
+            Where-Object { $_.kind -eq 'SystemPolicyControlProfile' } |
+            Select-Object -First 1
+
+        $objEvidence.snapshot | Should -Be 'Broken-Policy-State'
+        $objGatekeeperResult.result | Should -Be 'Fail'
+        $objGatekeeperResult.expectedFailure | Should -BeTrue
+        $objGatekeeperResult.evidenceRefs | Should -Contain 'fixtures/gatekeeper-vscode-rejected.txt'
+        $objGatekeeperResult.message | Should -Match 'VS Code rejected'
+        $objProfileResult.result | Should -Be 'Pass'
+        Test-Json -Json ($objEvidence | ConvertTo-Json -Depth 20) -Schema $script:strSchema | Should -BeTrue
+    }
+
+    It 'Records Gatekeeper recovered fixture output as accepted after rollback' {
+        $strPlanPath = Join-Path -Path $script:strRepositoryRoot -ChildPath 'examples/TestCases/Gatekeeper-Recovered.yml'
+
+        $objEvidence = Invoke-MacPolicyValidation `
+            -Provider Parallels `
+            -Name 'demo-01' `
+            -TestPlan $strPlanPath `
+            -Confirm:$false
+
+        $objGatekeeperResult = $objEvidence.tests |
+            Where-Object { $_.kind -eq 'GatekeeperAssessment' } |
+            Select-Object -First 1
+
+        $objEvidence.snapshot | Should -Be 'Post-Enroll-Baseline'
+        $objGatekeeperResult.result | Should -Be 'Pass'
+        $objGatekeeperResult.expectedFailure | Should -BeFalse
+        $objGatekeeperResult.evidenceRefs | Should -Contain 'fixtures/gatekeeper-vscode-accepted.txt'
+        Test-Json -Json ($objEvidence | ConvertTo-Json -Depth 20) -Schema $script:strSchema | Should -BeTrue
+    }
+
     It 'Fails closed when required Graph scopes are missing' {
         $strPlanPath = Join-Path -Path $script:strRepositoryRoot -ChildPath 'examples/TestCases/Compliance-SmokeTest.yml'
 

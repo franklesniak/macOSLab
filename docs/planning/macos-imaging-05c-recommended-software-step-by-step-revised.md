@@ -5,7 +5,7 @@
 
 - **Status:** Draft
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
+- **Last Updated:** 2026-05-06
 - **Scope:** Talk-development working artifact for the MMSMOA 2026 session: "Step-by-Step Acquisition & Installation Instructions". Captures interim concepting, prioritization, outline, or runbook content for that session; not a final published deliverable.
 - **Related:** [macOSLab repository specification](../spec/macOSLab-repository-spec.md), [Architecture decision records](macOS-imaging-08e-ADRs.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
 
@@ -30,6 +30,8 @@ Use these fixed decisions while following the runbook:
 - Keep `SECURITY.md` unchanged by default in the generated repo. Do not rewrite it.
 - `Reset-IntuneMacLabDevice.ps1` is report-only in v1. It identifies candidate stale cloud records and manual cleanup steps; it does not retire, soft-delete, or hard-delete Intune, Entra, or Defender records.
 - Do not commit example screenshots to the public v1 repo. Keep rehearsal/deck screenshots local unless later Phase 10 work explicitly approves checked-in visual artifacts.
+- Demo 4 is Gatekeeper/System Policy Control blocking Visual Studio Code, then rollback. Defender remains required validation content and backup proof, but do not pivot the live failure back to Defender-unhealthy.
+- Do not commit a sample Gatekeeper `.mobileconfig`. Use Intune Settings Catalog as the canonical policy authoring surface; keep any local profile payload only as an uncommitted fallback after verifying the exact target-VM `profiles` command.
 - If deferred work remains, create root per-phase TODO files such as `TODO-Phase-00-Branch-Protection.md`, `TODO-Phase-04-Media-Acquisition.md`, `TODO-Phase-05-Parallels-Provider.md`, `TODO-Phase-06-UTM-Provider.md`, `TODO-Phase-07-Evidence-Pipeline.md`, `TODO-Phase-08-Validation-Loop.md`, and `TODO-Phase-10-Deferred-Work.md`. Omit a phase TODO file only when that phase has no deferred work.
 
 ## Phase 1 — Acquire Licenses, Accounts, and Services
@@ -1053,7 +1055,8 @@ Do this **only** if your Demo 4 design assumes Defender is already present at th
    - **Intune admin center → Devices → All devices** lists this device with a recent **Last check-in** time.
    - The device shows as **Compliant** (or as the deterministic compliance state your demo expects to start from).
 6. Trigger one manual sync from Company Portal (**Devices → \[this device\] → Check Status**) and confirm it completes successfully.
-7. **Do not** apply your "risky" demo policies (FileVault / PPPC / Defender) yet. Those are the policies you will apply **live** during Demo 4. The `Post-Enroll-Baseline` snapshot is supposed to be the *clean enrolled* state you roll back **to**.
+7. Install Visual Studio Code inside the guest, launch it once, and capture a baseline acceptance check with `spctl --assess -vv "/Applications/Visual Studio Code.app"`.
+8. **Do not** apply the risky Gatekeeper/System Policy Control demo policy yet. FileVault, PPPC, and Defender policies may be present only to the extent required for their supporting evidence paths. The `Post-Enroll-Baseline` snapshot is supposed to be the clean enrolled state you roll back **to**.
 
 ### Step 37: Capture the `Post-Enroll-Baseline` snapshot
 
@@ -1071,18 +1074,18 @@ This step bakes the deterministic failure that Demo 4's apply → break → roll
 Starting from `Post-Enroll-Baseline`:
 
 1. Restore the VM from `Post-Enroll-Baseline`.
-2. Place the device into the deterministic failure state Demo 4 will reveal. Examples:
-   - a lab-only compliance policy that fails predictably
-   - Defender health degradation that the validation script reports as `FAIL`
-   - any pre-created state that makes the validation script produce the expected failure
-3. Run the validation script and confirm it reports the **intended** failure (not some unrelated breakage).
-4. Capture failure evidence (screenshots, validation output, Intune/Defender portal state) so you can prove on stage that the failure is the one you designed.
-5. Document exactly what is broken, in plain language, alongside the captured evidence. Future-you will thank present-you.
-6. **Shut the VM down cleanly.**
-7. Capture the snapshot/checkpoint using the name from Step 27:
+2. Apply the lab-only Intune Settings Catalog System Policy Control policy, or restore to the rehearsed profile-applied state:
+   - Enable Assessment: enabled.
+   - Allow Identified Developers: disabled.
+3. Run `spctl --status` and `spctl --assess -vv "/Applications/Visual Studio Code.app"` and confirm VS Code is rejected.
+4. Run `Invoke-MacPolicyValidation` with `examples/TestCases/Gatekeeper-AppStoreOnly.yml` and confirm the VS Code failure is marked `expectedFailure: true`.
+5. Capture failure evidence (validation output, profile receipt text, and local screenshot/recording of the block dialog) so you can prove on stage that the failure is the one you designed. Keep screenshots and recordings out of the repository.
+6. Document exactly what is broken, in plain language, alongside the captured evidence. Future-you will thank present-you.
+7. **Shut the VM down cleanly.**
+8. Capture the snapshot/checkpoint using the name from Step 27:
    - **Parallels:** `parallels-mac26-Broken-Policy-State`.
    - **UTM:** `utm-mac26-Broken-Policy-State`.
-8. Verify the snapshot exists.
+9. Verify the snapshot exists.
 
 > **Stage-honesty warning.** Explain this honestly on stage as a checkpointed deterministic failure. Do not pretend the failure is accidental or live service magic. The audience's trust you build by being transparent about how the demo was wired is worth more than the surprise you would get by pretending otherwise.
 
@@ -1093,11 +1096,11 @@ This step bakes the post-rollback known-good state. It exists so that the demo c
 Starting from `Broken-Policy-State`:
 
 1. Restore the VM from `Broken-Policy-State`.
-2. Run the rollback path you intend to use on stage to return the VM to a known-good state.
-3. Run the documented report-only cloud cleanup/reconciliation routine (Step 37c) so you know whether Intune, Entra, and Defender portal state still contains stale records or expected retained history.
-4. Confirm the VM is at a useful healthy baseline (enrolled, recently synced, expected compliance state).
-5. Re-run the validation script.
-6. Confirm validation reports green, with any expected cloud-state warning (audit history, compliance history, retained Defender alerts) explicitly documented as expected, not failures.
+2. Disconnect VM networking immediately before the rollback proof so Intune cannot reapply the bad Gatekeeper profile during the local recovery check.
+3. Restore `Post-Enroll-Baseline`, run `spctl --assess -vv "/Applications/Visual Studio Code.app"`, and launch Visual Studio Code.
+4. Run `Invoke-MacPolicyValidation` with `examples/TestCases/Gatekeeper-Recovered.yml`.
+5. Run the documented report-only cloud cleanup/reconciliation routine (Step 37c) so you know whether Intune, Entra, and Defender portal state still contains stale records or expected retained history.
+6. Confirm validation reports green, with any expected cloud-state warning (audit history, compliance history, retained Defender alerts, or retained Gatekeeper assignment) explicitly documented as expected, not failures.
 7. **Shut the VM down cleanly.**
 8. Capture the snapshot/checkpoint using the name from Step 27:
    - **Parallels:** `parallels-mac26-Recovered-Known-Good`.
@@ -1203,9 +1206,13 @@ For **each** hypervisor in your matrix (Parallels, and UTM if used), all five ch
   - enrolled
   - recently synced
   - deterministic baseline compliance state
+  - Visual Studio Code installed, accepted by `spctl`, and launched successfully
 - [ ] `Broken-Policy-State`
-  - validation script reports the engineered deterministic failure
+  - Gatekeeper/System Policy Control profile blocks Visual Studio Code
+  - validation script reports the engineered deterministic failure as expected
 - [ ] `Recovered-Known-Good`
+  - `spctl` accepts Visual Studio Code after rollback
+  - Visual Studio Code launches after rollback
   - validation script reports green
   - cloud cleanup/reconciliation warning is documented if applicable (expected audit/history entries are noted as expected, not as failures)
 
@@ -1214,6 +1221,7 @@ Additional snapshot/demo design verification:
 - [ ] Defender state inside `Pre-Enroll` matches your demo design (preinstalled **or** intentionally absent — chosen, not accidental)
 - [ ] You have re-captured `Post-Enroll-Baseline` close enough to the talk that Intune cloud state has not drifted away from snapshot state
 - [ ] Any VM intended for live Defender deployment starts without Defender preinstalled
+- [ ] The stage rollback path disconnects VM networking before restoring `Post-Enroll-Baseline`
 
 #### Readiness script
 
@@ -1243,6 +1251,7 @@ baseline -> reveal failure -> collect evidence -> roll back -> known good
 
 - [ ] Pre-redacted screenshots of Intune portal state exist locally for every page the demo would otherwise load live.
 - [ ] Offline screenshots and evidence examples are available for Graph and Defender proof points if used.
+- [ ] The VS Code block dialog visual asset exists locally for the deck or stage and is not committed to the repository.
 - [ ] No example screenshots are committed to the public v1 repo unless later Phase 10 work explicitly approves checked-in visual artifacts.
 
 #### Redaction and secret safety
@@ -1253,6 +1262,7 @@ baseline -> reveal failure -> collect evidence -> roll back -> known good
 - [ ] No tenant secret is visible.
 - [ ] No personal user data is visible.
 - [ ] Evidence bundles exported during rehearsal have been spot-checked for redaction.
+- [ ] Gatekeeper fixtures contain no Team IDs, profile UUIDs, local home paths, tenant identifiers, UPNs, device IDs, or secrets.
 - [ ] `Protect-MacLabEvidence.ps1` exists and is used by the evidence workflow.
 - [ ] The Intune admin center "Show recovery key" action is not invoked live on the projector.
 - [ ] Recovery-key proof uses redacted screenshots, sanitized JSON, or protected evidence output.
