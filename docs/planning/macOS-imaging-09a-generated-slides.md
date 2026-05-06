@@ -36,7 +36,7 @@ The deck obeys the following rules. They are restated here so this document stan
 - FileVault, Defender, Privacy Preferences Policy Control / Transparency, Consent, and Control (PPPC/TCC), Compliance / Conditional Access (CA), and app execution control are the five risk categories the deck visibly addresses.
 - No live demo depends on venue Wi-Fi, fresh Intune sync, or live cloud timing as the only success path. Every cloud-dependent moment has a checkpoint, screenshot, and recording fallback.
 - No slide, recording, or screenshot ever shows a real recovery key, tenant ID, user principal name (UPN), device ID, serial number, Team ID, profile universally unique identifier (UUID), app secret, token, or production identifier. Pre-redacted screenshots and synthetic fixture data only.
-- Every rollback slide and every FileVault slide repeats the cloud-state warning either visually or verbally: snapshot rollback restores the virtual machine (VM), not Intune, Entra, Defender portal state, audit logs, or reporting history.
+- Every rollback slide and every FileVault slide repeats the cloud-state warning either visually or verbally: snapshot rollback restores the virtual machine (VM), not Intune, Entra, Defender portal state, audit logs, or assignments.
 - Section dividers exist on purpose. They give the audience a moment to breathe, the speakers a moment to hand off, and the deck a sense of pace.
 - All slides use a consistent layout grid: title bar, content, and a footer strip showing the section name, time mark, and slide number.
 - A small recurring visual motif — the **REDACTED stripe** — appears anywhere a value is masked. It also appears, smaller and in the corner, on every rollback-related slide as a quiet reminder that cloud state does not roll back with the disk.
@@ -84,7 +84,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 - **Time on stage:** 0:00 to 0:45
 - **Driver / narrator:** Both speakers on stage; Frank opens.
-- **Visual concept:** Small expansion line above the title: CEO.* Title left-aligned, very large: **Don't Brick the CEO's Mac.** Subtitle below: *Building and Automating macOS Labs for Risk-Free Policy Testing.* Bottom-right: small headshots, names, roles, and the company affiliations as they appear on Sched. Bottom-left: the session room, day, and time. A faint **MMSMOA 2026** wordmark sits at the bottom edge.
+- **Visual concept:** Small expansion line above the title: *CEO = chief executive officer.* Title left-aligned, very large: **Don't Brick the CEO's Mac.** Subtitle below: *Building and Automating macOS Labs for Risk-Free Policy Testing.* Bottom-right: small headshots, names, roles, and the company affiliations as they appear on Sched. Bottom-left: the session room, day, and time. A faint **Midwest Management Summit at the Mall of America (MMSMOA) 2026** wordmark sits at the bottom edge.
 - **Talking points:**
   - Two-sentence introductions only. Full bios live in Sched.
   - Frank: lab automation and PowerShell ownership today.
@@ -251,7 +251,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   In the lower right, the **reproducibility icon** (two interlocking circular arrows with a fingerprint dot) sits beside a one-line callout: *"Reproducibility = same inputs, same outputs, every run."*
 - **Talking points:**
   - Reproducible means pinned version, pinned build, cached artifact, recorded checksum inside the metadata sidecar, and a stable media cache root.
-  - For Apple-silicon Mac VMs, the practical artifact is a restore image (`.ipsw` file), not a bootable installer disk image. Docs that default to the installer-disk path confuse the Apple-silicon workflow.
+  - For Apple-silicon Mac VMs, the practical artifact is an Apple restore image (`.ipsw`, often called an IPSW file), not a bootable installer disk image. Docs that default to the installer-disk path confuse the Apple-silicon workflow.
   - The current demo path reuses `~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw` and writes `~/Demo/Installers/26.4.1-25E253.metadata.json`.
   - Cache the artifact and reuse it across runs. Conference Wi-Fi is not the place to download macOS.
   - Keep media out of `./_evidence`; that tree is for validation output, not installer or restore-image storage.
@@ -278,7 +278,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 - **Memorable line:** *"A lab that cannot tell you what it cannot prove is not a safe lab."*
 - **Transition cue:** "Before we choose tools, separate the stage rig from the lab you would operate."
 
-### Slide 14 — Demo Lab vs. Operating Lab
+### Slide 14 — Stage Rig vs. Operating Lab
 
 - **Time on stage:** 14:15 to 15:30
 - **Driver / narrator:** Frank.
@@ -398,11 +398,11 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   3. **Failures are prepared.** They should look planned because they were.
   4. **Rollback restores the VM, not Intune.** This sentence is the centerpiece, set in slightly larger type with a thin border. The cloud-rollback warning composite icon sits next to it.
 
-  At the very bottom of the slide, in tiny type, the full warning sentence is printed once, verbatim, so it can be photographed: *"Snapshot rollback restores the VM. It does not rewind Intune, Entra, Defender portal state, audit logs, or reporting history."*
+  At the very bottom of the slide, in tiny type, the full warning sentence is printed once, verbatim, so it can be photographed: *"Snapshot rollback restores the VM. It does not rewind Intune, Entra, Defender portal state, audit logs, or assignments."*
 - **Talking points:**
   - "Watching a progress bar is not educational. The artifact is pinned, cached, and recorded. We will skip ahead when the educational part is over."
   - The fourth rule is the cloud-state warning we will repeat throughout.
-- **Memorable line:** *"Snapshot rollback restores the VM. It does not rewind Intune, Entra, Defender portal state, audit logs, or reporting history."*
+- **Memorable line:** *"Snapshot rollback restores the VM. It does not rewind Intune, Entra, Defender portal state, audit logs, or assignments."*
 - **Transition cue:** "Hands on the keyboard."
 
 ### Slide 23 — Section Divider: The Demos
@@ -417,7 +417,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 - **Time on stage:** 28:45 to 35:00
 - **Driver / narrator:** Frank drives; Michael narrates why build pinning matters in change control.
-- **Visual concept:** Title row: **Demo 1 — Pin and Acquire Media.** Below it, two boxes side-by-side. Left box: **What we are doing** with three short bullets: pin macOS 26.4.1 build 25E253, verify the prepared IPSW, write media metadata. Right box: **What success looks like** with three short bullets: prepared artifact reused, SHA-256 verified, `26.4.1-25E253.metadata.json` produced. At the bottom of the slide, a small terminal-style block condensed from the script output:
+- **Visual concept:** Title row: **Demo 1 — Pin and Acquire Media.** Below it, two boxes side-by-side. Left box: **What we are doing** with three short bullets: pin macOS 26.4.1 build 25E253, verify the prepared IPSW, write media metadata. Right box: **What success looks like** with three short bullets: prepared artifact reused, Secure Hash Algorithm 256-bit (SHA-256) verified, `26.4.1-25E253.metadata.json` produced. At the bottom of the slide, a small terminal-style block condensed from the script output:
 
   ```text
   ./examples/MMSMOA-2026/Demo1-Media.ps1
@@ -430,7 +430,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   The reproducibility icon sits in the lower right corner.
 - **Talking points:**
   - `Demo1-Media.ps1` calls `Get-MacLabMedia` against the prepared owner IPSW. When the SHA-256 matches, the script verifies and reuses that file instead of invoking Mist for a fresh download.
-  - The educational part is the metadata sidecar: media ID, version, build, source, artifact type, cache root, acquisition time, artifact path, SHA-256, and prepared-artifact flag.
+  - The educational part is the metadata sidecar: media identifier (ID), version, build, source, artifact type, cache root, acquisition time, artifact path, SHA-256, and prepared-artifact flag.
   - In production, this is what you commit to your lab change record: "we tested macOS X.Y.Z, build B, acquired from this source, with this checksum, on this date."
 - **Memorable line:** *"Reproducibility starts the moment you pin the build."*
 - **Transition cue:** "Pinned and cached. Now build the VM."
@@ -535,7 +535,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   - `Demo4-GatekeeperRollback.ps1 -Stage Broken` and `-Stage Recovered` call `Invoke-MacPolicyValidation`; `Write-EvidenceRecord` writes the run directory.
   - The record includes test results, expected failures, snapshot, fidelity, cloud-state warning, and the Provider Version Matrix.
   - `Export-MacLabEvidence` creates the portable directory or zip bundle and adds `MANIFEST.json` with checksums.
-  - The public bundle references fixture evidence and test-plan shape. It does not carry screenshots, recordings, app bundles, tenant IDs, device IDs, UPNs, Team IDs, or recovery keys.
+  - The public bundle references fixture evidence and test-plan shape. It does not carry screenshots, recordings, app bundles, tenant identifiers (tenant IDs), device identifiers (device IDs), user principal names (UPNs), Apple developer Team IDs, or recovery keys.
 - **Memorable line:** *"Evidence beats portal confidence."*
 - **Transition cue:** "And the redaction is not optional."
 
@@ -546,7 +546,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 - **Visual concept:** Two side-by-side panels labeled **Before redaction** and **After redaction**. Both show the same synthetic JSON snippet. The left has placeholder values shaped like real ones: `personalRecoveryKey`, `graphToken`, `payloadUUID`, `/Users/example`, `admin@example.invalid`, and `Developer ID Application: Example Vendor (TEAMID1234)`. The right has those same values masked with `***REDACTED***` or `/Users/***REDACTED***`. Bottom annotation: *"Field-name match plus shape match. The write path fails closed if `redactionApplied` is not true."*
 - **Talking points:**
   - `Protect-MacLabEvidence` clones the evidence object, redacts nested fields and values, and stamps `redactionApplied: true` plus `redactionVersion: "1.0.0"`.
-  - The helper redacts by field name and by shape: recovery-key-shaped strings, JSON Web Token (JWT)-shaped strings, UUIDs, MAC addresses, email addresses, local home paths, and Gatekeeper code-signing Team IDs.
+  - The helper redacts by field name and by shape: recovery-key-shaped strings, JSON Web Token (JWT)-shaped strings, universally unique identifiers (UUIDs), media access control (MAC) addresses, email addresses, local home paths, and Gatekeeper code-signing Team IDs.
   - `Write-EvidenceRecord` re-runs redaction before writing `evidence.json`, `evidence.summary.txt`, and `provider-version-matrix.json`. `Export-MacLabEvidence` re-runs redaction again before packaging.
   - Never display a raw recovery key on a projector. Show that escrow exists. Show retrieval flow. Redact the value.
 - **Memorable line:** *"Show that the secret exists. Do not show the secret."*
@@ -753,7 +753,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 | 11 | Licensing — Two-Guest Boundary | 10:45 | Constraints |
 | 12 | Pin the Build, Cache the Artifact | 11:30 | Constraints |
 | 13 | The Fidelity Traffic Light | 12:45 | Constraints |
-| 14 | Demo Lab vs. Operating Lab | 14:15 | Constraints |
+| 14 | Stage Rig vs. Operating Lab | 14:15 | Constraints |
 | 15 | Section Divider — Choose Your Hypervisor | 15:30 | Hypervisor |
 | 16 | The Hypervisor Decision (Headline) | 15:45 | Hypervisor |
 | 17 | The Decision Matrix | 18:00 | Hypervisor |
@@ -836,7 +836,7 @@ This is the cadence track. Speakers should rehearse these lines in order, separa
 | 19 | "The boundary is not 'hide the provider.' It is 'make the safe workflow consistent and surface the differences clearly.'" |
 | 20 | "Step 12 is the difference between a repeatable lab and stale records." |
 | 21 | "Snapshot time travel is real. The cloud does not time-travel with it." |
-| 22 | "Snapshot rollback restores the VM. It does not rewind Intune, Entra, Defender portal state, audit logs, or reporting history." |
+| 22 | "Snapshot rollback restores the VM. It does not rewind Intune, Entra, Defender portal state, audit logs, or assignments." |
 | 24 | "Reproducibility starts the moment you pin the build." |
 | 25 | "Provider commands return 0. That is not the same as being safe." |
 | 26 | "The provider abstraction prevents tool differences from changing the entire workflow." |
