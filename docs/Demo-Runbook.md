@@ -107,7 +107,7 @@ PASS  Blocking dialog captured
 PASS  Evidence redaction applied
 PASS  Rollback restored Post-Enroll-Baseline
 PASS  VS Code accepted after rollback
-WARN  Intune cloud assignment would still need cleanup before production expansion
+WARN  Intune cloud assignment would still need report-only cleanup review before production expansion
 ```
 
 ## Recovery Pivots

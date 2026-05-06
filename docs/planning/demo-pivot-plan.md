@@ -405,7 +405,7 @@ PASS  Blocking dialog captured
 PASS  Evidence redaction applied
 PASS  Rollback restored Post-Enroll-Baseline
 PASS  VS Code accepted after rollback
-WARN  Intune cloud assignment would still need cleanup before production expansion
+WARN  Intune cloud assignment would still need report-only cleanup review before production expansion
 ```
 
 The key live payoff is:
@@ -715,9 +715,10 @@ The slide description must preserve the CFP contract:
 | 22 | Demo 4 evidence: VS Code blocked, `spctl` rejects, rollback restores. | During Demo 4 |
 | 23 | FileVault and Defender proof boundaries: still required, not the live failure. | 68:00 |
 | 24 | Dragons checklist updated for Gatekeeper and cloud state. | 70:00 |
-| 25 | Repo tree and `Start-Here.md`. | 73:00 |
-| 26 | Q&A buckets. | 75:00 |
-| 27 | Monday plan and final reminder. | 102:00 |
+| 25 | Repo tree and `Start-Here.md`. | 72:25 |
+| 26 | Monday plan and CFP recap. | 73:15 |
+| 27 | Q&A buckets. | 74:30 |
+| 28 | Final thank-you. | 104:30 |
 
 The artifact should include speaker lines for the delicate transition:
 

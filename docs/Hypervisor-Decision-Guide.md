@@ -5,9 +5,9 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-05
-- **Scope:** Decision guide for choosing Parallels, UTM, or Tart in the `macOSLab` v1 lab.
-- **Related:** [Prerequisites](Prereqs.md), [Apple Silicon Constraints](Apple-Silicon-Constraints.md), [Provider Version Matrix](Provider-Version-Matrix.md), [UTM macOS guest documentation](https://docs.getutm.app/guest-support/macos/), [Parallels macOS VM CLI documentation](https://docs.parallels.com/landing/parallels-desktop-developers-guide/command-line-interface-utility/manage-virtual-machines-from-cli/general-virtual-machine-management/create-a-virtual-machine)
+- **Last Updated:** 2026-05-06
+- **Scope:** Decision guide for choosing Parallels, UTM, or Tart in the `macOSLab` v1 lab, and for explaining why VMware Fusion is not a v1 macOS guest provider.
+- **Related:** [Prerequisites](Prereqs.md), [Apple Silicon Constraints](Apple-Silicon-Constraints.md), [Provider Version Matrix](Provider-Version-Matrix.md), [UTM macOS guest documentation](https://docs.getutm.app/guest-support/macos/), [Parallels macOS VM CLI documentation](https://docs.parallels.com/landing/parallels-desktop-developers-guide/command-line-interface-utility/manage-virtual-machines-from-cli/general-virtual-machine-management/create-a-virtual-machine), [Broadcom Fusion Apple silicon compatibility](https://knowledge.broadcom.com/external/article/315602/compatibility-considerations-for-arm-gue.html)
 
 Use Parallels first when you need the shortest path to the live demo. Use UTM when cost, openness, or provider-swap comparison matters more than full automation. Treat Tart as an advanced stub in v1.
 
@@ -18,6 +18,12 @@ Use Parallels first when you need the shortest path to the live demo. Use UTM wh
 | Parallels | Primary provider | Main demo path and repeatable local lab | VM creation, lifecycle, checkpoints, and restore are the intended working path | Defaults can leave host integration enabled; provider code must harden and verify final isolation state. |
 | UTM | Documented/manual provider-swap path | Secondary path, budget-sensitive labs, and provider comparison | Partial lifecycle automation where `utmctl` behavior is proven; creation and checkpoint paths are manual-step-required in v1 | Do not present UTM as full live Parallels parity. |
 | Tart | Stubbed advanced path | Later CI/runner conversation | Mutating primitives fail clearly in v1 | Full Tart parity requires later explicit owner approval. |
+
+## VMware Fusion Scope Note
+
+VMware Fusion supports Apple-silicon hosts for Arm guest operating systems, including Arm Windows and Arm Linux. It is not a v1 `macOSLab` provider because current Broadcom documentation says Arm variants of macOS are not supported in Fusion VMs on Apple silicon.
+
+Treat Fusion as a Q&A clarification, not a fourth core provider. The question is not whether Fusion supports Apple silicon; it does. The question is whether it supports the Apple-silicon macOS guest workflow this repository is built around; current Broadcom documentation says it does not.
 
 ## Parallels Default Path
 

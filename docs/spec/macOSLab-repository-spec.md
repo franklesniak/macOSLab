@@ -243,6 +243,7 @@ For macOS guests on Apple-silicon hosts, the implementation MUST treat host/gues
 - Live Conditional Access blocks as a demo dependency.
 - macOS upgrade automation, Time Machine integration, or iCloud sign-in flows.
 - Multi-user or multi-host lab orchestration.
+- VMware Fusion as a v1 macOS guest provider. Fusion supports Apple-silicon hosts for Arm guest operating systems, but current Broadcom documentation says Arm macOS guests are not supported in Fusion VMs on Apple silicon.
 - Storing or publishing real tenant data, device identifiers, recovery keys, tokens, secrets, or personal data.
 
 ## 9. Security and Redaction Requirements
@@ -919,7 +920,7 @@ The repo MUST NOT ship:
 | `Pre-Enroll` | `Clean-OS` plus Intune Company Portal at the sign-in screen; not enrolled. |
 | `Post-Enroll-Baseline` | Fully enrolled, recently synced, deterministic healthy baseline. |
 | `Broken-Policy-State` | Deterministic intentionally broken state for the engineered demo failure. |
-| `Recovered-Known-Good` | Post-rollback healthy state, captured after cloud cleanup/reconciliation. |
+| `Recovered-Known-Good` | Post-rollback healthy state, captured after report-only cloud cleanup review or manual reconciliation notes. |
 
 Alternative names are not allowed in v1.
 
@@ -1301,7 +1302,7 @@ Every script MUST:
 | `New-MacVm.ps1` | Thin wrapper around `New-MacLabVm`. |
 | `Checkpoint-MacVm.ps1` | Thin wrapper around `Checkpoint-MacLabVm`. |
 | `Restore-MacVmCheckpoint.ps1` | Thin wrapper around `Restore-MacLabVmCheckpoint`; prints cloud-state warning before and after restore. |
-| `Remove-MacVm.ps1` | Thin wrapper around `Remove-MacLabVm`; prompts about cloud cleanup planning. |
+| `Remove-MacVm.ps1` | Thin wrapper around `Remove-MacLabVm`; prompts about report-only cloud cleanup planning. |
 | `Reset-IntuneMacLabDevice.ps1` | Cloud cleanup/reconciliation routine. V1 is report-only. Report-only output identifies candidate Intune, Entra, and Defender records; explains why they may be stale; shows portal paths or Graph commands for manual cleanup; and writes redacted evidence. Soft-delete/retire or hard-delete is deferred and requires a later owner-approved Phase 10 item. |
 | `Send-LabEventToLogAnalytics.ps1` | Optional Phase 10 helper; disabled/deferred by default. |
 | `Invoke-MMSDemo.ps1` | Stage-friendly Demo 4 orchestrator with interactive gates and non-interactive rehearsal mode. For the MMS conference path, verify and reuse the prepared IPSW before any VM step and do not start a new media download when the prepared artifact exists and matches the expected checksum. |
@@ -1400,7 +1401,7 @@ Every non-trivial doc MUST include the inherited metadata block. Required docs:
 | `docs/Apple-Silicon-Constraints.md` | Virtualization framework, host/guest constraints, Apple SLA link and two-guest default posture, APNs/network caveats, physical hardware boundaries. |
 | `docs/Provider-Version-Matrix.md` | Definition and sample matrix; "works on my Mac" is not evidence. |
 | `docs/Fidelity-Boundaries.md` | Traffic Light table, cmdlet honesty rules, cloud-state warning, Yellow-result wording for change tickets. |
-| `docs/Snapshot-Strategy.md` | Five-checkpoint model, cloud cleanup, restore testing, identity-drift warnings. |
+| `docs/Snapshot-Strategy.md` | Five-checkpoint model, report-only cloud cleanup review, restore testing, identity-drift warnings. |
 | `docs/Intune-Tenant-Setup.md` | Lab tenant/user/group setup, Apple MDM Push Certificate, policies, assignments, filters, CA scope cautions. |
 | `docs/FileVault-Validation.md` | Policy assignment, `fdesetup status`, escrow evidence, redacted proof, hardware sign-off boundary. |
 | `docs/Defender-Validation.md` | Package, Intune deployment setup, system extension, network extension, PPPC/FDA, onboarding, `mdatp health`, evidence. |
@@ -1868,6 +1869,7 @@ Schema notes:
 | Tart | Optional CLI-first Apple-silicon VM tool; v1 may stub it. |
 | `Test-LabReadiness.ps1` | Canonical T-15 readiness gate. |
 | UTM | Secondary hypervisor provider using Apple Virtualization for macOS guests. |
+| VMware Fusion | VMware desktop hypervisor that supports Apple-silicon hosts for Arm guest operating systems, but is out of scope as a v1 `macOSLab` provider because current Broadcom documentation does not support Arm macOS guests in Fusion VMs on Apple silicon. |
 | VM-first, hardware-last | Iterate and gather evidence in VMs; sign off on physical hardware where required. |
 
 ## 27. Final Approval Line

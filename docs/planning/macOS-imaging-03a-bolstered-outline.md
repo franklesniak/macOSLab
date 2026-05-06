@@ -49,8 +49,8 @@ The session outline now aligns with the final `macOSLab` repository decisions:
 | Primary speaker | Frank Lesniak |
 | Co-speaker | Michael Niehaus |
 | Event | Midwest Management Summit at the Mall of America 2026 |
-| Total length | 105 minutes |
-| Core content | 75 minutes |
+| Total length | 90-105 minutes |
+| Core content | 60-75 minutes; current deck target is 74:30 |
 | Extended Q&A | 30 minutes |
 | Q&A format | Raise-hand questions; mic runner if the room is large; no live polling |
 | Primary technology | Intune |
@@ -232,6 +232,8 @@ Use this once. Do not turn the session into polling.
 | UTM | Cost-free experimentation path with Apple Virtualization and QEMU options; automation exists but does not mirror Parallels one-for-one. | Budget-sensitive labs, learning, and teams comfortable with templates/configuration artifacts. | Provider-swap demo. |
 | Tart | CLI-first Apple Silicon VM tooling built for automation, CI, and image distribution. | Teams building repeatable macOS runners or pipeline-based test loops. | Repo/Q&A/appendix path, not a third equal branch in the core. |
 
+VMware Fusion supports Apple-silicon hosts for Arm guest operating systems, including Arm Windows and Arm Linux. It is not a core provider for this session because current Broadcom documentation says Arm variants of macOS are not supported as Fusion guests on Apple silicon. Fusion may come up in Q&A as a Windows/Linux Arm option, but it is not a macOS guest lab path for this talk.
+
 Do not frame the section as "which product is best." Frame it as:
 
 > Which tool makes the safe behavior easiest for your team?
@@ -295,13 +297,13 @@ Avoid trying to show every Graph query, every profile payload, and every Intune 
 | `Pre-Enroll` | You want a clean device identity path for each enrollment test. | Best default for enrollment and MDM identity fidelity. | Slower because enrollment and sync rerun. |
 | `Post-Enroll-Baseline` | You need a fast repeated policy regression loop. | Fastest and most stage-reliable. | Intune/Entra cloud state keeps moving while the VM rolls backward. |
 | `Broken-Policy-State` | You need a deterministic demo failure. | Excellent for stage reliability. | Must be explained honestly as a checkpointed failure. |
-| `Recovered-Known-Good` | You need proof that rollback returns the VM to a useful baseline. | Makes recovery visible. | Can hide cloud cleanup problems if not documented. |
+| `Recovered-Known-Good` | You need proof that rollback returns the VM to a useful baseline. | Makes recovery visible. | Can hide cloud reconciliation problems if the report-only cleanup review is skipped. |
 
 Recommended operational rule:
 
 - Use `Pre-Enroll` as the gold-standard identity baseline.
 - Use `Post-Enroll-Baseline` for speed and demo reliability.
-- Pair post-enroll rollback with a documented cloud cleanup routine. In v1, that routine is report-only: it identifies candidate cloud records and manual cleanup steps, but it does not mutate Intune, Entra, or Defender records.
+- Pair post-enroll rollback with a documented cloud cleanup review. In v1, that review is report-only: it identifies candidate cloud records and manual cleanup steps, but it does not mutate Intune, Entra, or Defender records.
 - Teach "snapshot time travel" as a real anti-pattern.
 
 Important stage warning:
@@ -324,14 +326,14 @@ The audience should believe that even the failure was engineered.
 
 ### Repo Timing
 
-**Decision:** Publish the repo before the session, but reveal the QR/short URL near the end of the core.
+**Decision:** Publish the repo before the session, but reveal the QR code and `https://github.com/franklesniak/macOSLab` URL near the end of the core.
 
 Recommended stage pattern:
 
 1. Show the command you would run.
 2. Open a pre-cloned local copy.
 3. Show the exact demo paths.
-4. Reveal the QR/short URL at 73:00.
+4. Reveal the QR target, `https://github.com/franklesniak/macOSLab`, near the end of the core talk.
 5. Keep attention on the stage until the core content is done.
 
 Do not depend on a live `git clone` over conference Wi-Fi.
@@ -1121,7 +1123,7 @@ Primary live flow:
 7. Restore `Post-Enroll-Baseline`.
 8. Run the recovered validation plan.
 9. Show `spctl` accepts VS Code and the app launches.
-10. State clearly that the Intune assignment still needs cleanup before production expansion.
+10. State clearly that the Intune assignment still needs report-only cleanup review before production expansion.
 
 Example commands:
 
@@ -1155,7 +1157,7 @@ PASS  Blocking dialog captured
 PASS  Evidence redaction applied
 PASS  Rollback restored Post-Enroll-Baseline
 PASS  VS Code accepted after rollback
-WARN  Intune cloud assignment would still need cleanup before production expansion
+WARN  Intune cloud assignment would still need report-only cleanup review before production expansion
 ```
 
 Controlled failure options:
@@ -1178,9 +1180,9 @@ Recovery playbook:
 - If rollback fails, stop and diagnose before the session; do not claim the rollback restores app launch until `spctl` accepts VS Code.
 - If a secret appears on screen, stop, switch to redacted screenshots, and continue calmly.
 
-## Wrap-Up: 70:00-75:00
+## Wrap-Up: 71:30-74:30
 
-### Dragons Checklist, 70:00-73:00
+### Dragons Checklist and Anti-Patterns, 71:30-72:25
 
 Show a prebuilt triage table.
 
@@ -1214,12 +1216,12 @@ Explicit dragons to name:
 - Gatekeeper/System Policy Control app-execution controls.
 - Disk and snapshot sprawl.
 
-### Repo Handoff and Q&A Rules, 73:00-75:00
+### Repo Handoff, Monday Plan, and Recap, 72:25-74:30
 
 Show:
 
 - QR code.
-- Short URL.
+- URL: `https://github.com/franklesniak/macOSLab`.
 - Repo tree.
 - `docs/Start-Here.md` highlighted.
 - `examples/MMSMOA-2026` highlighted.
@@ -1236,9 +1238,11 @@ Q&A rules:
 - Follow-ups if time permits.
 - Include hypervisor and enrollment method if relevant.
 
-## Extended Q&A: 75:00-105:00
+Keep the CFP recap slide in the core talk. It repeats the four accepted takeaways with green checkmarks and one-line delivery notes.
 
-### Mechanics, 75:00-78:00
+## Extended Q&A: 74:30-104:30
+
+### Mechanics, 74:30-77:30
 
 Leave the Q&A bucket slide up.
 
@@ -1261,7 +1265,7 @@ Six buckets. Few enough that the slide is a real menu rather than a wall of text
 | Evidence and change-board outputs | What do I attach to a change ticket? What does Log Analytics ingestion look like? How do I redact recovery-key proof safely? |
 | CI, Tart, and inventory adjacencies | When do I move beyond desktop labs? Should I bridge any of this into ConfigMgr inventory? |
 
-### Structured Answer Framework, 78:00-102:00
+### Structured Answer Framework, 77:30-104:30
 
 Use this pattern:
 
@@ -1285,18 +1289,9 @@ Use these if needed:
 - "Who has a change board that wants more than 'the portal says assigned'?"
 - "Who is trying to decide whether Tart belongs in a CI path?"
 
-### Close-Out, 102:00-105:00
+### Final Thank-You, 104:30-105:00
 
-End with the Monday plan:
-
-1. Clone the repo.
-2. Build one VM.
-3. Take a `Pre-Enroll` snapshot.
-4. Enroll into a lab scope.
-5. Test one risky policy.
-6. Export redacted evidence.
-7. Roll back.
-8. Clean up the cloud record.
+End with the QR code, speaker names, and one sentence of thanks.
 
 Final line:
 
@@ -1330,9 +1325,10 @@ Final line:
 | 22 | Demo 4 evidence: VS Code blocked, `spctl` rejects, rollback restores. | During Demo 4 |
 | 23 | FileVault and Defender proof boundaries: still required, not the live failure. | 68:00 |
 | 24 | Dragons checklist updated for Gatekeeper and cloud state. | 70:00 |
-| 25 | Repo tree and Start Here. | 73:00 |
-| 26 | Q&A buckets. | 75:00 |
-| 27 | Monday plan and final reminder. | 102:00 |
+| 25 | Repo tree and Start Here. | 72:25 |
+| 26 | Monday plan and CFP recap. | 73:15 |
+| 27 | Q&A buckets. | 74:30 |
+| 28 | Final thank-you. | 104:30 |
 
 ## Windows-Admin Translation Cheat Sheet
 
@@ -1669,7 +1665,7 @@ Answer:
 
 Answer:
 
-> No. Snapshot rollback restores the VM state. It does not erase Intune, Entra, Defender portal state, audit logs, or reporting history. The starter kit treats cloud cleanup as part of the lab lifecycle because otherwise you create haunted device objects.
+> No. Snapshot rollback restores the VM state. It does not erase Intune, Entra, Defender portal state, audit logs, or reporting history. The starter kit treats report-only cloud cleanup review as part of the lab lifecycle because otherwise you create stale cloud records that no longer match the restored VM.
 
 ### "Can you show the FileVault recovery key?"
 
@@ -1686,11 +1682,11 @@ Answer:
 - Freeze demo tenant policies.
 - Update placeholder build values throughout the deck and demo configs to your actual pinned build.
 - Publish repo privately or publicly enough to validate links.
-- Run full 105-minute rehearsal.
+- Run a full 75-minute core rehearsal plus a 30-minute Q&A drill.
 - Record Demo 4 success path.
 - Rehearse the break-glass narration over the recording at least once.
 - Validate screenshots.
-- Validate QR code and short URL.
+- Validate QR code and `https://github.com/franklesniak/macOSLab`.
 - Confirm both speakers know handoffs.
 - Confirm evidence redaction behavior.
 - Confirm no full recovery key, token, secret, or private tenant detail appears in any public artifact.
@@ -1702,7 +1698,7 @@ Answer:
 - Confirm all checkpoints.
 - Export evidence from a clean run.
 - Test hotspot or fallback network.
-- Confirm repo short URL.
+- Confirm repo URL.
 - Re-run `Test-LabReadiness.ps1`.
 - Rehearse failure pivots.
 - Re-check Parallels, UTM, Tart, Apple, and Microsoft documentation for any changed behavior or version notes.

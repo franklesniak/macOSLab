@@ -20,7 +20,7 @@ This document defines every slide in the deck, in stage order. Each slide entry 
 - **Memorable line** is the single sentence that should make it into attendees' notes.
 - **Transition cue** is the bridge to the next slide, often a planned handoff line.
 
-After the slide-by-slide section, three appendices appear:
+After the slide-by-slide section, the appendices include:
 
 - A **summary slide index** for fast lookup.
 - A **backup slides** catalog for Q&A and recovery paths.
@@ -32,6 +32,7 @@ After the slide-by-slide section, three appendices appear:
 The deck obeys the following rules. They are restated here so this document stands on its own:
 
 - The session is framed as Intune risk reduction. Virtualization is the substrate, not the topic.
+- The core talk targets **74:30** and may be compressed to 60 minutes by trimming optional wrap-up beats and using backup slides during Q&A. The extended Q&A gets a dedicated 30-minute block, followed by a 30-second thank-you.
 - FileVault, Defender, PPPC/TCC, Compliance/CA, and app execution control are the five risk categories the deck visibly addresses.
 - No live demo depends on venue Wi-Fi, fresh Intune sync, or live cloud timing as the only success path. Every cloud-dependent moment has a checkpoint, screenshot, and recording fallback.
 - No slide, recording, or screenshot ever shows a real recovery key, tenant ID, UPN, device ID, serial number, Team ID, profile UUID, app secret, token, or production identifier. Pre-redacted screenshots and synthetic fixture data only.
@@ -90,7 +91,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   - Michael: Intune, enrollment, and policy behavior ownership today.
   - "We picked two speakers because no single answer fully resolves a Mac question. Interrupt each other on purpose."
 - **Memorable line:** *"Two speakers, one safety net."*
-- **Transition cue:** "Before we go anywhere technical, here is why anyone in this room should care about the next 105 minutes."
+- **Transition cue:** "Before we go anywhere technical, here is why anyone in this room should care about the next 75 minutes plus Q&A."
 
 ### Slide 2 — The CEO Mac Hook
 
@@ -128,16 +129,17 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 - **Time on stage:** 4:15 to 4:45
 - **Driver / narrator:** Frank.
-- **Visual concept:** A single vertical timeline on the left edge of the slide, with seven labeled stops. Each stop has the section name and a time-of-day band in small type. The timeline has a small "you are here" marker pointing at item 1. The right two-thirds of the slide are intentionally empty so the eye stays on the timeline.
+- **Visual concept:** A single vertical timeline on the left edge of the slide, with eight labeled stops. Each stop has the section name and a time-of-day band in small type. The timeline has a small "you are here" marker pointing at item 1. The right two-thirds of the slide are intentionally empty so the eye stays on the timeline.
   1. **Why this matters: risk map and Windows translation** (≈4 to 8 min)
   2. **Constraints that drive lab design** (≈8 to 15 min)
   3. **Choosing a hypervisor: Parallels and UTM** (≈15 to 21 min)
   4. **The PowerShell automation layer** (≈21 to 29 min)
-  5. **Live demos: pin, build, swap, break, roll back, prove** (≈29 to 70 min)
-  6. **Wrap-up: dragons, the kit, the Monday plan** (≈70 to 75 min)
-  7. **Extended Q&A** (≈75 to 105 min)
+  5. **Live demos: pin, build, swap, break, roll back, prove** (≈29 to 71:30 min)
+  6. **Wrap-up: dragons, the kit, the Monday plan, recap** (≈71:30 to 74:30 min)
+  7. **Extended Q&A** (≈74:30 to 104:30 min)
+  8. **Thank-you and close** (last 30 seconds)
 - **Talking points:**
-  - "Most of the time goes to the demos. The first 30 minutes set you up to read those demos correctly."
+  - "Most of the core talk goes to the demos. The first 30 minutes set you up to read those demos correctly."
   - "We are going to keep moving. If you have a question and we are not on it, hold it for the Q&A buckets at the end."
 - **Memorable line:** None.
 - **Transition cue:** "Risk map first. What can actually go wrong on a managed Mac?"
@@ -174,9 +176,9 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 - **Time on stage:** 7:15 to 8:00
 - **Driver / narrator:** Frank; Michael chimes in on BitLocker → FileVault and Defender Windows → Defender macOS.
-- **Visual concept:** Three-column table with header **What Windows admins know / macOS lab equivalent / Point to make**. Eleven rows in compact sans-serif. Footer note in small type: *"This slide is also `docs/Windows-Admin-Cheat-Sheet.md` in the repo. Do not copy it. Clone the kit."*
+- **Visual concept:** Three-column table with header **What Windows admins know / macOS lab equivalent / Point to make**. Show six high-signal rows only: BitLocker → FileVault, Hyper-V checkpoints → Parallels/UTM snapshots, Group Policy / `gpupdate` → Intune sync and compliance re-evaluation, AppLocker / WDAC / SmartScreen → Gatekeeper and `spctl`, Defender health → `mdatp health`, and Pester tests → Pester tests. Footer note in small type: *"The full cheat sheet is `docs/Windows-Admin-Cheat-Sheet.md` in the repo. Do not copy it. Clone the kit."*
 - **Talking points:**
-  - Walk only three or four rows out loud. The slide signals coverage; the repo carries the detail.
+  - Walk only three rows out loud. The slide signals the translation pattern; the repo carries the full table.
   - Highlight: BitLocker recovery to FileVault recovery. Event Viewer to `log show` plus profile output. AppLocker / WDAC to Gatekeeper.
   - Promise: this table reappears in the repo so you do not have to remember it.
 - **Memorable line:** *"You do not need new instincts. You need a translator."*
@@ -198,7 +200,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 - **Driver / narrator:** Michael drives; Frank asks the Windows-admin translation questions.
 - **Visual concept:** Side-by-side comparison panels. Left panel labeled **Windows lab mental model** with a small stack: hardware → Hyper-V/VMware → guest, and bullet annotations *"Any guest. Bridged everywhere. Snapshot anything."* Right panel labeled **Apple Silicon reality** with: hardware → host macOS → Apple Virtualization framework → macOS guest, and annotations *"macOS guests on Apple Silicon use Apple's Virtualization framework. Same-major host/guest is the safest default. Some host integrations do not apply."* A small footnote ribbon underneath both panels reads: *"Not a 'Macs are weird' slide. An architecture slide."*
 - **Talking points:**
-  - On Apple Silicon, virtualized macOS guests run on Apple's Virtualization framework. Parallels, UTM in Apple-virt mode, and Tart all sit on top of it.
+  - On Apple Silicon, virtualized macOS guests run on Apple's Virtualization framework. Parallels, UTM for macOS guests, and Tart all sit on top of it.
   - The host macOS version constrains which guest macOS versions are practically supported. Same-major host and guest is the path with the strongest vendor guidance today.
   - This is not a "Macs are weird" slide. It is an architecture slide. Apple intentionally designed virtualization this way.
 - **Memorable line:** *"Treat your lab Mac like a build server. Do not auto-upgrade it the day before a regression cycle."*
@@ -211,7 +213,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 - **Visual concept:** A single Apple-branded host illustration (generic Mac silhouette, not a branded image) with two small "macOS VM" boxes hovering above it. A faint third VM box is shown crossed out, with a small "+ legal review" annotation pointing at it. Footer: *"Not legal advice. Verify your organization's interpretation."*
 - **Talking points:**
   - Apple's macOS software license permits limited additional virtual instances of macOS on Apple-branded hardware for permitted purposes.
-  - The commonly used boundary is up to two concurrent macOS guests per Apple-branded host.
+  - For this deck and starter kit, design around no more than two concurrent macOS guests per Apple-branded host unless your organization verifies a different license posture.
   - "Permitted purposes" matters. Software development, testing during development, macOS Server, and personal non-commercial use are typical examples in the SLA.
   - This is friendlier than Windows licensing in some respects. It does not mean every enterprise automatically gets unlimited macOS test VMs for any purpose.
   - If you need wider coverage, the answer is more hosts, not bigger hosts.
@@ -243,9 +245,9 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 - **Time on stage:** 12:30 to 14:30
 - **Driver / narrator:** Michael; Frank reinforces the Red bucket.
 - **Visual concept:** The slide is a literal traffic light on the left third. Three large circles, top red, middle yellow, bottom green, with the active circle at any given moment subtly glowing. To the right, three labeled blocks aligned to the lights:
-  - **Green (VM is sufficient on its own):** script syntax; Intune assignment logic; profile receipt; Gatekeeper and `spctl` assessment; app launch block and recovery in the guest; basic PPPC payload behavior; Defender health checks; rollback routines; evidence export.
-  - **Yellow (VM iteration, then physical sign-off):** FileVault rollout behavior; recovery-key process end to end; user prompts; UI flow; fleet rollout impact; performance-sensitive Defender behavior.
-  - **Red (physical hardware required):** ADE / ABM zero-touch; serial-number-dependent flows; Platform SSO sign-in and unlock; Touch ID; Secure Enclave-dependent behavior; final executive pilot sign-off.
+  - **Green (VM is sufficient on its own):** profile receipt; Gatekeeper and `spctl` assessment; Defender health checks; rollback routines; evidence export.
+  - **Yellow (VM iteration, then physical sign-off):** FileVault rollout behavior; recovery-key process end to end; user prompts; performance-sensitive Defender behavior.
+  - **Red (physical hardware required):** ADE / ABM zero-touch; Platform SSO sign-in and unlock; Touch ID; Secure Enclave-dependent behavior; final executive pilot sign-off.
 
   Beneath the traffic light, three small "where it lives" tags: *"Demo 4 (Gatekeeper) is Green. FileVault rollout is Yellow. Executive pilot sign-off is Red."* These tags anchor the abstract model to specific demos the audience is about to see.
 - **Talking points:**
@@ -293,6 +295,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   - Parallels is the polished primary path because the demo gear has to be reliable on stage.
   - UTM is a serious option, especially when there is no tool budget. It is not a toy.
   - Tart is the future-CI conversation, not today's primary path.
+  - VMware Fusion is not in the core comparison because current Broadcom documentation does not support Arm macOS as a Fusion guest on Apple silicon. It can still matter for Windows or Linux Arm VMs; it is not the macOS guest lab path for this talk.
 - **Memorable line:** *"Choose the tool that makes the safe behavior easiest for your team."*
 - **Transition cue:** "Now the specifics."
 
@@ -300,10 +303,11 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 - **Time on stage:** 18:00 to 21:00
 - **Driver / narrator:** Frank drives; Michael keeps it Intune-relevant.
-- **Visual concept:** Compact three-column matrix with row labels in the leftmost column. Rows: **Cost / Admin UX / Automation surface / Snapshots and clones / Stage reliability / Procurement story / CI path.** Each cell is 4 to 8 words. Use checkmark, dash, and asterisk symbols sparingly to denote "strong / partial / future." Bottom-right: a small icon legend.
+- **Visual concept:** Compact three-column matrix with row labels in the leftmost column. Rows: **Cost / Admin UX / Automation surface / Snapshots and clones / Provider guardrails / Stage reliability / Procurement story / CI path.** Each cell is 4 to 8 words. Use checkmark, dash, and asterisk symbols sparingly to denote "strong / partial / future." Bottom-right: a small icon legend.
 - **Talking points (drive 3 to 4 rows max out loud):**
-  - Cost: Parallels is paid; UTM is free; Tart is Fair Source with a free-tier CPU-core limit.
+  - Cost: Parallels is paid; UTM is free; Tart is Fair Source with published free-tier limits. Orchard adds its own worker limit.
   - Automation surface: `prlctl` is strong for many lifecycle ops; `utmctl` exists but is partial; Tart is automation-first.
+  - Provider guardrails: same-major host/guest compatibility and isolation verification are part of the tool decision, not fine print.
   - Stage reliability: Parallels is the safest live demo bet today.
   - Procurement story: Parallels is an easier line item; UTM lives in the "no budget" world; Tart is a roadmap conversation.
 - **Memorable line:** *"Parallels for polish. UTM when budget is the constraint. Tart when automation is the goal."*
@@ -333,7 +337,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 - **Time on stage:** 23:00 to 24:30
 - **Driver / narrator:** Frank.
-- **Visual concept:** A horizontal pipeline with twelve numbered steps in two rows of six. The steps: 1. Pin build → 2. Acquire artifact → 3. Create or register VM → 4. Apply sizing → 5. Start → 6. Snapshot → 7. Enroll → 8. Apply policy → 9. Validate (or fail) → 10. Collect evidence → 11. Roll back → 12. Clean local and cloud state. Each step has a tiny icon. The 11 → 12 link is highlighted in yellow with a small annotation: *"Cloud state does not roll back."* In the lower right, a small loop arrow labeled *"iterate"* connects step 12 back to step 7, reinforcing that this is a cycle, not a one-shot.
+- **Visual concept:** A horizontal pipeline with twelve numbered steps in two rows of six. The steps: 1. Pin build → 2. Acquire artifact → 3. Create or register VM → 4. Apply sizing → 5. Start → 6. Snapshot → 7. Enroll → 8. Apply policy → 9. Validate (or fail) → 10. Collect evidence → 11. Roll back → 12. Clean local state and reconcile cloud records. Each step has a tiny icon. The 11 → 12 link is highlighted in yellow with a small annotation: *"Cloud state does not roll back."* In the lower right, a small loop arrow labeled *"iterate"* connects step 12 back to step 7, reinforcing that this is a cycle, not a one-shot.
 - **Talking points:**
   - The whole demo is this loop. We will show steps 2 and 3 in Demo 1, steps 3 through 6 in Demo 2, the same loop on a different provider in Demo 3, and steps 7 through 12 in Demo 4.
   - Step 12 is the part most labs skip. It is where haunted device objects come from.
@@ -350,7 +354,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   - Five names, five jobs. We use the same vocabulary in the runbook, the cmdlets, and the docs.
   - Pre-Enroll is the gold-standard identity baseline. Post-Enroll-Baseline is the speed baseline.
   - Broken-Policy-State is engineered, not improvised. Stage failures should look planned because they are.
-  - Recovered-Known-Good is captured after cloud cleanup, not just after the rollback.
+  - Recovered-Known-Good is captured after rollback plus the report-only cloud cleanup review or manual reconciliation notes, not just after the local restore.
 - **Memorable line:** *"Snapshot time travel is real. The cloud does not time-travel with it."*
 - **Transition cue:** "Which brings us to demo rules."
 
@@ -387,6 +391,9 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
   ```text
   Get-MacLabMedia -Version <macOS-version> -Build <macOS-build> -Source Mist
+  CACHE  prepared IPSW found
+  PASS   SHA-256 verified
+  SKIP   live download
   ```
 
   The reproducibility icon sits in the lower right corner.
@@ -403,7 +410,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 - **Driver / narrator:** Frank drives; Michael explains why snapshot discipline matters.
 - **Visual concept:** Same two-box layout as Demo 1. Left: **What we are doing** with three bullets: create or register the VM from cached media; apply sizing profile; create `Pre-Enroll` checkpoint. Right: **What success looks like** with three bullets: VM registered with isolation enforced; checkpoint visible in `prlctl`; provider version recorded in evidence. Small footer line: *"Provider hardening verified after creation, not assumed from exit code."* The cloud-rollback warning composite sits in the lower right corner because the next minute will reference rollback discipline.
 - **Talking points:**
-  - We disable host integration features intentionally: clipboard, shared folders, Coherence. They blur identity boundaries.
+  - We disable host integration features intentionally: clipboard, shared folders, shared applications, host location, and device sharing where the provider exposes controls. They blur identity boundaries.
   - We verify the final VM configuration. Provider commands can succeed and still leave host integrations enabled.
   - The snapshot is the safety net. Everything downstream depends on it.
 - **Memorable line:** *"Provider commands return 0. That is not the same as being safe."*
@@ -416,7 +423,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 - **Visual concept:** Title row: **Demo 3 — Provider Swap to UTM.** Below: a small "before / after" diagram showing the same `Invoke-MacPolicyValidation` call running against `-Provider Parallels` and then `-Provider UTM`. The two invocations are visually identical except for the provider name, with a thin highlight on the differing parameter to show the audience exactly what changed. Footer: *"UTM is partial automation in v1. We tell you which steps are manual."*
 - **Talking points:**
   - The point is not "UTM is as good as Parallels." The point is that the workflow survives a provider change.
-  - Some UTM lifecycle steps are manual today. The kit makes those gaps explicit instead of hiding them.
+  - UTM can carry useful lifecycle automation, but v1 treats creation, checkpointing, IP discovery, and destructive cleanup as unsupported or manual-step-required unless later evidence proves a safe path.
   - This is the slide where Tart gets a one-liner cameo: *"If you want this in CI, Tart is the conversation. We have stubbed it in v1."*
 - **Memorable line:** *"The provider abstraction prevents tool differences from changing the entire workflow."*
 - **Transition cue:** "Now we get to break a Mac on purpose."
@@ -446,6 +453,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   - Two settings. Big behavioral impact.
   - The category is "System Policy Control" but most of the audience knows it as Gatekeeper.
   - Notarization is not enough. The policy explicitly excludes identified developers.
+  - Live Intune delivery can be started in the background, but the stage success path is checkpointed and fixture-backed.
 - **Memorable line:** *"Two switches in Settings Catalog can lock the CEO out of Visual Studio Code."*
 - **Transition cue:** "Here it goes."
 
@@ -467,15 +475,16 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   - PASS  Evidence redaction applied
   - PASS  Rollback restored Post-Enroll-Baseline
   - PASS  VS Code accepted after rollback
-  - WARN  Intune cloud assignment still requires cleanup
+  - WARN  Intune cloud assignment still requires report-only cleanup review
 
   The cloud-rollback warning composite sits in the lower-right corner.
 - **Talking points (live demo cadence):**
   - Show baseline state. VS Code launches. All green. Move the state-machine dot to **Baseline**.
   - Restore `Broken-Policy-State`. VS Code is rejected by `spctl`. The expected FAIL appears. Move the dot to **Broken**.
+  - If live Intune timing is slow, say so and use the checkpointed broken state captured during rehearsal.
   - Disconnect VM networking. This is the stage control. Explain why out loud. Move the dot to **Rolling Back**.
   - Restore `Post-Enroll-Baseline`. VS Code launches again. The PASS row appears. Move the dot to **Recovered**.
-  - End on the WARN. Cleanup is a real step, not an asterisk.
+  - End on the WARN. Report-only cleanup review and manual reconciliation are real steps, not an asterisk.
 - **Memorable line:** *"This is the first place that policy was allowed to fail. It is also the only place it should have failed."*
 - **Transition cue:** "Here is what you would attach to a change ticket."
 
@@ -508,7 +517,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 ### Slide 31 — FileVault Evidence Model
 
-- **Time on stage:** 69:30 to 71:00
+- **Time on stage:** 69:30 to 70:45
 - **Driver / narrator:** Michael.
 - **Visual concept:** A vertical evidence-checklist card with seven rows:
   1. Policy assignment captured.
@@ -530,7 +539,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 ### Slide 32 — Defender Evidence Model
 
-- **Time on stage:** 71:00 to 72:30
+- **Time on stage:** 70:45 to 71:30
 - **Driver / narrator:** Michael.
 - **Visual concept:** Same vertical evidence-checklist treatment as Slide 31, with seven Defender-specific rows:
   1. Package installed.
@@ -538,13 +547,14 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   3. Network extension approved (when used).
   4. Full Disk Access / PPPC delivered.
   5. Onboarding completed.
-  6. `mdatp health` captured (redacted).
+  6. `mdatp health` captured as sanitized key/value output.
   7. Rollback result captured.
 
   Right edge: fidelity tag **Green** for the health checks themselves; **Yellow** for performance-sensitive behavior.
 - **Talking points:**
   - Defender on macOS is not just "install the app." The profiles are the deployment.
   - `mdatp health` is the closest thing to a health receipt. Capture it.
+  - Do not assume JSON unless the installed Defender version has been verified to emit valid JSON.
   - "Looks installed but is not healthy" is the most common Defender macOS failure mode.
   - Same break-and-rollback loop applies. A misconfigured PPPC payload is exactly the kind of thing the lab catches before production.
 - **Memorable line:** *"Defender on macOS is not an app install. It is a profile contract."*
@@ -552,7 +562,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 ### Slide 33 — Section Divider: Wrap-Up
 
-- **Time on stage:** 72:30 to 72:40
+- **Time on stage:** 71:30 to 71:35
 - **Driver / narrator:** Frank.
 - **Visual concept:** Full-bleed dark slide. **Wrap-Up: Dragons, the Repo, and Monday Morning.** No subtitle. No progress bar.
 - **Memorable line:** None.
@@ -560,19 +570,18 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 ### Slide 34 — Dragons Checklist
 
-- **Time on stage:** 72:40 to 73:25
+- **Time on stage:** 71:35 to 72:05
 - **Driver / narrator:** Both speakers, alternating two highlights each. Do not read the whole table.
 - **Visual concept:** Compact three-column triage table, dense type. Columns: **Symptom / Likely cause / First check.** Twelve rows from the runbook. Each row has a tiny one-icon left edge: caution-triangle for VM/lifecycle issues, cloud-clock for cloud timing, ghost for stale identity, lock for credentials and recovery. Footer line: *"Full table in `docs/Troubleshooting.md`."*
 - **Talking points:**
-  - We name the dragons before Q&A names them for us.
-  - Two highlights: "VM enrolls but policy never arrives" is almost always APNs, sync, or assignment scope. "VS Code stays blocked after rollback" is the wrong checkpoint or a bad policy reapplied.
-  - The repo carries the rest.
+  - Name two dragons only: "VM enrolls but policy never arrives" is usually APNs, sync, or assignment scope; "VS Code stays blocked after rollback" is the wrong checkpoint or a bad policy reapplied.
+  - The repo carries the rest, and Q&A is where the dragons get names.
 - **Memorable line:** *"Most macOS Intune mysteries are APNs, sync, scope, or a haunted device object."*
 - **Transition cue:** "Speaking of haunted device objects."
 
 ### Slide 35 — The Memorable Anti-Patterns
 
-- **Time on stage:** 73:25 to 74:05
+- **Time on stage:** 72:05 to 72:25
 - **Driver / narrator:** Frank.
 - **Visual concept:** A 2×3 grid of six small "card" tiles, each with an icon and a name:
   - **Portal Faith** with a checkbox icon. *"Trusting 'assigned' without device-side evidence."*
@@ -584,17 +593,16 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
   A footer line in small caps: *"Naming the failure mode is half the fix."*
 - **Talking points:**
-  - These are the six anti-patterns we see most often. They are funnier than they should be because we have all done at least one.
-  - Use the names. They make code review and change reviews more efficient because everyone knows what you mean.
-  - When someone in a hallway conversation says "that sounds like Portal Faith," you have already saved an hour of debugging.
+  - Read only the names. The audience can photograph the definitions.
+  - If behind on time, skip this slide and use it as a Q&A backup.
 - **Memorable line:** *"Name the anti-pattern, and you have half-fixed it."*
 - **Transition cue:** "OK. The kit."
 
 ### Slide 36 — The Repo, on Monday Morning
 
-- **Time on stage:** 74:05 to 74:35
+- **Time on stage:** 72:25 to 73:15
 - **Driver / narrator:** Frank.
-- **Visual concept:** **Right half of the slide:** a very large QR code, sized so that an attendee in the back row can scan it from a phone camera, with the short URL beneath it in clear sans-serif type and a one-line tagline below: *"Public, MIT, Apple-silicon Macs."* **Left half:** a clean repo-tree drawing showing the top-level folders (`src/`, `scripts/`, `examples/`, `docs/`, `tests/`) with `docs/Start-Here.md` highlighted. Below the tree, a one-line "your first command" snippet:
+- **Visual concept:** **Right half of the slide:** a very large QR code, sized so that an attendee in the back row can scan it from a phone camera. The QR target and displayed URL are **`https://github.com/franklesniak/macOSLab`**. Below the URL, show the tagline: *"Public, MIT, Apple-silicon Macs."* **Left half:** a clean repo-tree drawing showing the top-level folders (`src/`, `scripts/`, `examples/`, `docs/`, `tests/`) with `docs/Start-Here.md` highlighted. Below the tree, a one-line "your first command" snippet:
 
   ```text
   Import-Module ./src/Modules/MacLab/MacLab.psd1
@@ -610,7 +618,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 ### Slide 37 — The Monday Morning Plan
 
-- **Time on stage:** 74:35 to 75:00
+- **Time on stage:** 73:15 to 73:45
 - **Driver / narrator:** Frank.
 - **Visual concept:** Eight numbered cards in two rows of four, each with a single sentence and a small icon. The cards are deliberately styled to look like a printable checklist that attendees can screenshot and follow.
   1. **Clone the repo.** (download icon)
@@ -620,9 +628,9 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   5. **Test one risky policy.** (caution-triangle icon)
   6. **Export redacted evidence.** (REDACTED-stripe receipt icon)
   7. **Roll back.** (curved arrow icon)
-  8. **Clean up the cloud record.** (ghost-with-broom icon)
+  8. **Review the cloud cleanup report.** (cloud-clock icon)
 
-  Below the grid, in slightly larger type: *"Your first Monday is one VM, one policy, one evidence bundle, one rollback."*
+  Below the grid, in slightly larger type: *"Your first Monday is one VM, one policy, one evidence bundle, one rollback, and one cleanup review."*
 - **Talking points:**
   - Do not try to build your whole Mac program by Friday.
   - Pick one risky policy. Run the loop once. The second loop is much easier.
@@ -632,7 +640,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 ### Slide 38 — Recap
 
-- **Time on stage:** 75:00 to 75:45
+- **Time on stage:** 73:45 to 74:30
 - **Driver / narrator:** Both speakers alternate. Frank reads 1 and 3. Michael reads 2 and 4.
 - **Visual concept:** Header at the top: **Recap.** Below, the same four numbered takeaway cards from Slide 3, in the same vertical stack and order, with one change: each card has a green checkmark (✓) added to its left margin and a one-line attribution in smaller type beneath the takeaway citing where in the talk it was delivered. The fourth card's left-edge stripe is half-transparent, matching Slide 3.
   1. ✓ **Analyze the virtualization constraints of Apple Silicon and select the appropriate hypervisor (Parallels vs. UTM) that aligns with your budget and automation needs.**
@@ -652,7 +660,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 ### Slide 39 — Q&A Buckets
 
-- **Time on stage:** 75:45 to ~104:00. Lives on screen for the entire extended Q&A.
+- **Time on stage:** 74:30 to 104:30. Lives on screen for the entire extended Q&A.
 - **Driver / narrator:** Both speakers, routing by domain.
 - **Visual concept:** Six cards arranged 3×2, each with an icon and a short label:
   - **Lab construction and lifecycle** with a building-blocks icon.
@@ -681,7 +689,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 
 ### Slide 40 — Final Thank-You
 
-- **Time on stage:** 104:00 to 105:00
+- **Time on stage:** 104:30 to 105:00
 - **Driver / narrator:** Both speakers.
 - **Visual concept:** Centered, large type: **Thank you.** Below: speaker names, the QR code one more time, and the single line *"Pin. Build. Break. Roll back. Prove it."* No social handles unless explicitly approved.
 - **Talking points:**
@@ -726,22 +734,22 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 | 29 | Anatomy of an Evidence Bundle | 67:00 | Demos |
 | 30 | Redaction in Action | 68:30 | Demos |
 | 31 | FileVault Evidence Model | 69:30 | Demos |
-| 32 | Defender Evidence Model | 71:00 | Demos |
-| 33 | Section Divider — Wrap-Up | 72:30 | Wrap |
-| 34 | Dragons Checklist | 72:40 | Wrap |
-| 35 | The Memorable Anti-Patterns | 73:25 | Wrap |
-| 36 | The Repo, on Monday Morning | 74:05 | Wrap |
-| 37 | The Monday Morning Plan | 74:35 | Wrap |
-| 38 | Recap | 75:00 | Wrap |
-| 39 | Q&A Buckets | 75:45 | Q&A |
-| 40 | Final Thank-You | 104:00 | Close |
+| 32 | Defender Evidence Model | 70:45 | Demos |
+| 33 | Section Divider — Wrap-Up | 71:30 | Wrap |
+| 34 | Dragons Checklist | 71:35 | Wrap |
+| 35 | The Memorable Anti-Patterns | 72:05 | Wrap |
+| 36 | The Repo, on Monday Morning | 72:25 | Wrap |
+| 37 | The Monday Morning Plan | 73:15 | Wrap |
+| 38 | Recap | 73:45 | Wrap |
+| 39 | Q&A Buckets | 74:30 | Q&A |
+| 40 | Final Thank-You | 104:30 | Close |
 
 ## Backup Slides
 
 These are designed to live behind the main deck and surface only during Q&A or as a checkpoint fallback. Each is a single slide.
 
 - **B1 — FileVault Escrow Retrieval Path (Redacted Screenshots).** Three pre-redacted mock-ups of the Intune retrieval flow showing the path without showing the value. Use if a Q&A question asks "show me the recovery-key page."
-- **B2 — `mdatp health` Sample Output.** Synthetic, sanitized JSON. Use if Defender Q&A goes deep.
+- **B2 — `mdatp health` Sample Output.** Synthetic, sanitized key/value output. Use JSON only if the installed Defender version has been verified to emit valid JSON. Use if Defender Q&A goes deep.
 - **B3 — UTM Template / Configuration Artifact.** A clean code listing of the JSON descriptor. Use if anyone asks "what does the UTM provider see?"
 - **B4 — Provider Version Matrix Example.** A real-shaped sample matrix with placeholder versions. Use if anyone asks "what do you record per run?"
 - **B5 — Report-Only Cloud Cleanup Walkthrough.** A bulleted list of the candidate Intune, Entra, and Defender records the script flags, with the explicit note "v1 is report-only."
@@ -752,6 +760,7 @@ These are designed to live behind the main deck and surface only during Q&A or a
 - **B10 — The Three Hardware Profiles.** Three named example lab Macs with sizing notes (cores, RAM, SSD, expected concurrent guests, expected coverage of macOS major versions). Use if hardware Q&A goes specific.
 - **B11 — APNs and Corporate Network Realities.** A single page on the SSL-inspection-breaks-MDM failure mode, with the practical "look at your TLS-inspecting proxy before you blame Apple" line. Use if a network question lands.
 - **B12 — Why Two Speakers.** One slide for any question about the MMS two-speaker format. Briefly explains how Frank and Michael split ownership: lab automation and PowerShell on one side, Intune and policy behavior on the other. Useful if asked "why do you both present?"
+- **B13 — Why Not VMware Fusion?** One slide with the concise distinction: Fusion supports Apple-silicon hosts for Arm Windows and Arm Linux guests, but current Broadcom documentation does not support Arm macOS as a Fusion guest on Apple silicon. Use if someone asks why Fusion is not a provider column.
 
 ## Visual / Production Notes
 
@@ -760,7 +769,7 @@ These are designed to live behind the main deck and surface only during Q&A or a
 - **Reserve the redaction-stripe treatment for actual redaction or the cloud-rollback warning.** Do not decorate other slides with it. When attendees see the black bar, they should think "secret was here, now redacted" or "this slide depicts a rollback."
 - **Section dividers exist on purpose.** They are the only slides without a body. Resist the urge to fill them. Slide 8 carries one small boundary footnote because the constraints section opens with an honesty contract; this is the only divider that does so.
 - **Slide 28 is a frame, not a slide.** During rehearsal, time the right-edge PASS / FAIL / WARN reveals to the actual demo cadence so the slide feels like it is tracking the live run. Move the state-machine dot in the upper-right corner manually with the speaker remote; it is independent of the live window. If the recording fallback is used (B8), the slide can advance independently of the recording.
-- **Slide 36's QR code is the largest visual element on its slide.** Do not let any decoration crowd it. The single most important attendee outcome is that the QR scans cleanly from a phone in the back row.
+- **Slide 36's QR code is the largest visual element on its slide.** It points to `https://github.com/franklesniak/macOSLab`. Do not let any decoration crowd it. The single most important attendee outcome is that the QR scans cleanly from a phone in the back row.
 - **Slide 38 (Recap) must mirror Slide 3 (Session Takeaways) exactly in layout.** Same vertical stack, same order, same numbering, same wording. The only differences are the green checkmarks and the one-line attribution beneath each takeaway. Visual consistency is what makes the checkmark moment land.
 - **Slide 39 (Q&A Buckets) lives on screen for thirty minutes.** Treat the Structured Answer Framework callout as part of the slide, not as a footnote, because attendees will read it more than once.
 - **Icons referenced in this document (ghost, calendar pages, traffic light, and so on) must be original or open-license vector art.** Do not lift Apple, Microsoft, Parallels, UTM, Tart, or product logos as decoration. Logos may appear only on the explicit decision-matrix slides where the tool name is the content, and only as wordmark text, not branded assets.
@@ -813,7 +822,7 @@ Every transition has a planned line. The script below is the working set. It is 
 
 | From → To | Planned handoff |
 | --- | --- |
-| 1 → 2 | "Before we go anywhere technical, here is why anyone in this room should care about the next 105 minutes." |
+| 1 → 2 | "Before we go anywhere technical, here is why anyone in this room should care about the next 75 minutes plus Q&A." |
 | 2 → 3 | "Here is what we want you to walk out of this room with." |
 | 3 → 4 | "Here is the route we will take to get there." |
 | 4 → 5 | "Risk map first. What can actually go wrong on a managed Mac?" |
@@ -851,15 +860,3 @@ Every transition has a planned line. The script below is the working set. It is 
 | 36 → 37 | "Here is what we want you to do with it." |
 | 37 → 38 | "Quick recap before we open it up." |
 | 38 → 39 | "Hands up. We will route by domain." |
-
-## Source Notes to Re-Verify Before Locking the Deck
-
-- Apple's current macOS software license language and the practical two-guest boundary phrasing.
-- Parallels Desktop's current Apple-silicon macOS Arm VM compatibility statements (same-major host/guest guidance).
-- UTM's current Apple Virtualization-only stance for macOS guests on Apple Silicon.
-- Tart and Orchard's current free-tier limits (100 CPU-core, 4-worker) and license file URLs.
-- Microsoft Learn's current Defender for macOS deployment topology (system extension, network extension, PPPC).
-- Microsoft Learn's current Intune macOS Settings Catalog behavior for System Policy Control and Gatekeeper, including profile delivery timing on enrolled devices.
-- The current `mist-cli` syntax for listing and downloading restore images.
-- The current `prlctl` snapshot and isolation flag set; verify that the chosen Parallels Desktop version still exposes the isolation switches the deck names.
-- Current PowerShell approved-verbs list. Confirm that `Protect` remains preferred over `Redact`.
