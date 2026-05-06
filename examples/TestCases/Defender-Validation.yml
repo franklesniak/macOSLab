@@ -17,10 +17,13 @@ tests:
     expectedFailure: false
     evidenceRefs:
       - "docs/Defender.md"
-  - name: "Defender health captured from guest"
+  - name: "Defender unhealthy pre-approval state captured from guest"
     kind: "DefenderHealth"
     result: "Pass"
     expectedFailure: true
     fixture: "fixtures/mdatp-health-unhealthy.txt"
-    evidenceRefs:
-      - "fixtures/mdatp-health-unhealthy.txt"
+  - name: "Defender healthy baseline captured from guest"
+    kind: "DefenderHealth"
+    result: "Pass"
+    expectedFailure: false
+    fixture: "fixtures/mdatp-health-healthy.txt"

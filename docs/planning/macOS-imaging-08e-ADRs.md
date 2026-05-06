@@ -371,6 +371,8 @@ The owner does not want Microsoft Defender for Endpoint installed on the daily-u
 
 Owner-supplied Defender evidence from a lab macOS environment showed `mdatp` at `/usr/local/bin/mdatp`, product version `101.26032.0016`, and `mdatp health` output as key/value text. A file named `mdatp-health.raw.json` contained the same key/value text and was not parseable JSON. The unhealthy sample included missing active event provider, network event provider not running, and Full Disk Access not granted, while still showing useful positive signals such as licensed state, engine load, cloud enabled, real-time protection, definition updates, and tamper protection.
 
+Later owner-supplied working Defender evidence from the enrolled guest showed `healthy: true`, real-time protection available through the endpoint security extension, network event collection through the network filter extension, Full Disk Access enabled, MDM-managed Defender settings, and app version `101.26032.0016`. The raw capture included real organization, machine, EDR, and cloud configuration identifiers, so only sanitized facts and fixtures may be committed.
+
 ### Decision
 
 Defender validation in v1 is guest-scoped. The host readiness path MUST NOT require Microsoft Defender for Endpoint on the owner's host Mac.
@@ -381,13 +383,13 @@ Defender fixtures and evidence MUST redact organization IDs, machine GUIDs, EDR 
 
 The default demo path deploys Defender through Intune after enrollment. A preinstalled-Defender fallback MAY be used for rehearsal or live-cloud timing backup, but it must be labeled as a fallback so the demo does not accidentally hide the Intune deployment behavior being validated.
 
-The owner's tenant does not currently have the Intune-based macOS Defender deployment configured. Phase 8 documentation MUST provide step-by-step setup instructions for the Intune macOS Defender deployment path before the demo depends on it.
+Phase 8 documentation MUST keep step-by-step setup instructions for the Intune macOS Defender deployment path so the working guest state can be rebuilt and validated before rehearsal.
 
 ### Consequences
 
 - The owner's host remains clean while the lab still validates Defender behavior where it matters: inside the managed guest.
 - The parser and tests must handle key/value health output instead of assuming JSON.
-- Fixture design must include both unhealthy pre-approval states and healthy post-approval/onboarded states.
+- Fixture design includes both unhealthy pre-approval states and healthy post-approval/onboarded states.
 - Demo planning must include enough tenant setup detail for the owner to configure the Intune-based deployment from scratch.
 
 ### Alternatives Considered

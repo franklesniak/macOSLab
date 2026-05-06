@@ -31,6 +31,31 @@ mv "<current-ipsw-path>" "$HOME/Demo/Installers/UniversalMac_26.4.1_25E253_Resto
 shasum -a 256 "$HOME/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw"
 ```
 
+## Conference Pre-Stage
+
+Enrollment is a pre-stage task for the dependable demo path. Do not make live Company Portal enrollment a required stage dependency because conference network and cloud policy timing are outside the VM rollback boundary.
+
+Before traveling or presenting:
+
+1. Download the Company Portal installer while the network is reliable:
+
+   ```bash
+   mkdir -p "$HOME/Demo/Installers"
+   curl -L -o "$HOME/Demo/Installers/CompanyPortal-Installer.pkg" "https://go.microsoft.com/fwlink/?linkid=853070"
+   ls -lh "$HOME/Demo/Installers/CompanyPortal-Installer.pkg"
+   ```
+
+2. Keep the cached `.pkg` outside the repository. Do not commit the installer.
+3. Boot the disposable guest VM on reliable network.
+4. Install Company Portal inside the guest from [Enroll My Mac](https://go.microsoft.com/fwlink/?linkid=853070) or from the cached installer during pre-stage.
+5. Do not sign in to Company Portal yet.
+6. Shut down the guest.
+7. Capture the `Pre-Enroll` checkpoint.
+8. Start from `Pre-Enroll` on reliable network, complete Company Portal enrollment, wait for Intune sync and Defender policy delivery, then capture `Post-Enroll-Baseline`.
+9. Use `Post-Enroll-Baseline` as the default live demo starting point.
+
+Use live enrollment during the talk only as an optional walkthrough. If the network is slow, say: "Enrollment is cloud-timed, so the stage path starts from a prepared enrolled checkpoint and the evidence records what changed."
+
 ## Demo Flow
 
 1. Demo 1: run `examples/MMSMOA-2026/Demo1-Media.ps1`.

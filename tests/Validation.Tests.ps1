@@ -43,11 +43,33 @@ Describe 'Invoke-MacPolicyValidation' {
             -TestPlan $strPlanPath `
             -Confirm:$false
 
-        $objDefenderResult = $objEvidence.tests | Where-Object { $_.kind -eq 'DefenderHealth' } | Select-Object -First 1
+        $objDefenderResult = $objEvidence.tests |
+            Where-Object { $_.name -eq 'Defender unhealthy pre-approval state captured from guest' } |
+            Select-Object -First 1
 
         $objDefenderResult.result | Should -Be 'Fail'
         $objDefenderResult.expectedFailure | Should -BeTrue
         ($objEvidence | ConvertTo-Json -Depth 20) | Should -Not -Match '00000000-0000-4000-8000-000000000000'
+    }
+
+    It 'Records Defender healthy fixture output as a passing baseline assertion' {
+        $strPlanPath = Join-Path -Path $script:strRepositoryRoot -ChildPath 'examples/TestCases/Defender-Validation.yml'
+
+        $objEvidence = Invoke-MacPolicyValidation `
+            -Provider Parallels `
+            -Name 'demo-01' `
+            -TestPlan $strPlanPath `
+            -Confirm:$false
+
+        $objDefenderResult = $objEvidence.tests |
+            Where-Object { $_.name -eq 'Defender healthy baseline captured from guest' } |
+            Select-Object -First 1
+
+        $objDefenderResult.result | Should -Be 'Pass'
+        $objDefenderResult.expectedFailure | Should -BeFalse
+        $objDefenderResult.evidenceRefs | Should -Contain 'fixtures/mdatp-health-healthy.txt'
+        ($objEvidence | ConvertTo-Json -Depth 20) | Should -Not -Match '"org_id"\s*:\s*"[0-9a-f-]{36}"'
+        ($objEvidence | ConvertTo-Json -Depth 20) | Should -Not -Match '"edr_machine_id"\s*:\s*"[0-9a-f]{40}"'
     }
 
     It 'Fails closed when required Graph scopes are missing' {

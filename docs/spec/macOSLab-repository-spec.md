@@ -542,7 +542,7 @@ The repository MUST validate Defender for Endpoint on macOS as more than an app 
 **Acceptance Criteria:**
 
 - Docs and examples include package install, system extension approval, network extension approval when used, Full Disk Access/PPPC delivery, onboarding, and `mdatp health`.
-- Defender docs include step-by-step Intune setup for macOS Defender deployment because the owner/demo tenant does not currently have that deployment configured.
+- Defender docs include step-by-step Intune setup for macOS Defender deployment so the owner/demo tenant can be rebuilt or validated without relying on memory.
 - The default demo path deploys Defender through Intune after enrollment; a preinstalled-Defender fallback may exist only for rehearsal or live-cloud timing backup and must be labeled as a fallback.
 - Evidence records Defender version and health output after redaction.
 - Provider rollback result is included in the evidence model.

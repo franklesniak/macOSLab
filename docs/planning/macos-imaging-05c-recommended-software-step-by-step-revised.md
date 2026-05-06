@@ -1027,6 +1027,7 @@ Do this **only** if your Demo 4 design assumes Defender is already present at th
 2. Launch Defender once.
 3. Approve any first-run permission prompts that you can approve without enrolling. Leave anything that requires MDM-pushed PPPC payloads alone — those are part of the demo.
 4. Capture `mdatp version` and `mdatp health` output after install. Do not assume a file named `.json` is parseable JSON; owner evidence showed `mdatp health` output as key/value text even when saved to a `.json` filename. Record whether the installed `mdatp` build supports a true JSON output mode, and sanitize organization, machine, EDR, tenant, device, user, and cloud identifiers before using the output as evidence fixtures.
+5. For the current working baseline, the repo carries a sanitized healthy fixture at `examples/TestCases/fixtures/mdatp-health-healthy.txt`. Use that fixture shape as the expected evidence model, but re-capture live guest health before the final dry run.
 
 ### Step 35: Capture the `Pre-Enroll` snapshot
 

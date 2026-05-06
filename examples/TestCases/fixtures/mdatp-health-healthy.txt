@@ -1,0 +1,40 @@
+healthy: true
+health_issues: []
+licensed: true
+engine_version: 1.1.26040.3000
+engine_load_status: Engine load succeeded
+app_version: 101.26032.0016
+org_id: ***REDACTED***
+log_level: info
+machine_guid: ***REDACTED***
+release_ring: Production
+cloud_enabled: true [managed]
+cloud_automatic_sample_submission_consent: safe [managed]
+cloud_diagnostic_enabled: false
+cloud_pin_certificate_thumbs: false
+passive_mode_enabled: false [managed]
+behavior_monitoring: disabled
+real_time_protection_enabled: true [managed]
+real_time_protection_available: true
+real_time_protection_subsystem: endpoint_security_extension
+network_events_subsystem: network_filter_extension
+device_control_enforcement_level: audit
+tamper_protection: block [managed]
+automatic_definition_update_enabled: true [managed]
+definitions_updated: May 05, 2026 at 12:02:44 PM
+definitions_updated_minutes_ago: 146
+definitions_version: 1.449.462.0
+definitions_status: up_to_date
+edr_early_preview_enabled: disabled
+edr_device_tags: []
+edr_group_ids: ***REDACTED***
+edr_configuration_version: ***REDACTED***
+edr_machine_id: ***REDACTED***
+managed_by: MDM
+conflicting_applications: []
+network_protection_status: stopped
+network_protection_enforcement_level: disabled
+data_loss_prevention_status: disabled
+full_disk_access_enabled: true
+troubleshooting_mode: false
+ecs_configuration_ids: ***REDACTED***

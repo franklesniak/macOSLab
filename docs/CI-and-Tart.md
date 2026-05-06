@@ -17,7 +17,7 @@ The default MMSMOA demo path uses Parallels for live automation. UTM is a docume
 
 ## License Boundary
 
-The Tart and Orchard public repositories currently publish Fair Source License 0.9 license files. Owner-supplied documentation describes the Tart free tier as 100 CPU cores and Orchard as 4 Orchard Workers. The Orchard license file defines the relevant user concept as a device running macOS.
+The [Tart licensing page](https://tart.run/licensing/) says Tart Virtualization and Orchard Orchestration are licensed under Fair Source License. It describes the free tier as 100 CPU cores for Tart and 4 Orchard Workers for Orchard. The same page links to the free-tier license text in the [Tart repository](https://github.com/cirruslabs/tart/blob/main/LICENSE) and [Orchard repository](https://github.com/cirruslabs/orchard/blob/main/LICENSE).
 
 This repository does not provide legal advice. Users MUST verify Tart, Orchard, Apple, and organizational license suitability before using Tart or Orchard in their own environment.
 
