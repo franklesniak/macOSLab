@@ -34,9 +34,14 @@ The Demo 4 risky-policy sample uses Intune Settings Catalog as the preferred reh
 - Devices > Configuration > Create > New policy.
 - Platform: macOS.
 - Profile type: Settings catalog.
-- Category: System Policy Control/Gatekeeper.
-- Enable Assessment: enabled.
-- Allow Identified Developers: disabled.
+- Settings picker category: System Policy Control.
+- Subcategory: System Policy Control.
+- Select `Allow Identified Developers` and `Enable Assessment`.
+- Leave `Enable XProtect Malware Upload` unselected for the default demo path.
+- Configure `Enable Assessment` as `True`.
+- Configure `Allow Identified Developers` as `False`.
+- Optional subcategory: System Policy Managed.
+- Optional setting: configure `Disable Override` as `True` when the tenant UI exposes it.
 
 The repository does not commit a sample `.mobileconfig`. A local profile install may be useful only as a verified fallback or payload-mechanics probe on the actual demo VM.
 

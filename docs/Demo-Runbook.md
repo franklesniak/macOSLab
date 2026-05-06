@@ -107,9 +107,14 @@ Demo 4 is a Gatekeeper rollback story, not a Defender-unhealthy story. The prefe
 
 - Platform: macOS.
 - Profile type: Settings catalog.
-- Category: System Policy Control/Gatekeeper.
-- Enable Assessment: enabled.
-- Allow Identified Developers: disabled.
+- Settings picker category: System Policy Control.
+- Subcategory: System Policy Control.
+- Select `Allow Identified Developers` and `Enable Assessment`.
+- Leave `Enable XProtect Malware Upload` unselected.
+- Configure `Enable Assessment` as `True`.
+- Configure `Allow Identified Developers` as `False`.
+- Optional subcategory: System Policy Managed.
+- Optional setting: configure `Disable Override` as `True` when the tenant UI exposes it.
 
 Validate the broken state:
 
