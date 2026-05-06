@@ -14,8 +14,13 @@
 Run the readiness gate before the talk:
 
 ```powershell
-./scripts/Test-LabReadiness.ps1 -PreparedArtifactPath ~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw -PreparedArtifactSha256 8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32
+./scripts/Test-LabReadiness.ps1 `
+  -Provider Parallels `
+  -MediaPath ~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw `
+  -MediaSha256 8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32
 ```
+
+On a first-time host setup before the canonical checkpoints exist, use the same command with `-SkipCheckpointCheck`. Remove `-SkipCheckpointCheck` for final rehearsal and before the talk.
 
 Any failed required check is a stop condition for live VM work. Use fixture-backed evidence or recordings instead.
 
