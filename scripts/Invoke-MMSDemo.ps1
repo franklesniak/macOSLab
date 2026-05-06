@@ -94,7 +94,7 @@ if ($Demo -in @('All', 'UTM')) {
 }
 
 if ($Demo -in @('All', 'Validation')) {
-    $objEvidence = & $strDemo4Path -Name $VmName -OutputPath $EvidenceRoot
+    $objEvidence = & $strDemo4Path -Stage Broken -Name $VmName -OutputPath $EvidenceRoot
     [pscustomobject]@{
         Demo = 'Validation'
         Status = 'Complete'

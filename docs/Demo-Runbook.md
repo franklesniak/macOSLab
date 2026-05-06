@@ -60,8 +60,41 @@ Use live enrollment during the talk only as an optional walkthrough. If the netw
 
 1. Demo 1: run `examples/MMSMOA-2026/Demo1-Media.ps1`.
 2. Demo 2: run `examples/MMSMOA-2026/Demo2-Parallels.ps1` during owner live dry run only.
-3. Demo 3: use `examples/MMSMOA-2026/Demo3-UTM.ps1` after manually creating the documented UTM VM.
-4. Demo 4: run `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1` for fixture-backed Gatekeeper/System Policy Control evidence.
+3. Demo 4 start: run `examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1 -Stage StartCloudSync` as the stage checklist, then start the live Intune policy sync.
+4. Demo 3: use `examples/MMSMOA-2026/Demo3-UTM.ps1` after manually creating the documented UTM VM while the policy sync bakes.
+5. Demo 4 resume: return once, use the live broken state only if the policy landed cleanly, and otherwise use `Broken-Policy-State`.
+
+## Demo 4 Start: Live Intune Stage Thread
+
+Use this as an audience-visible bonus path, not as the only success path. The stage payoff MUST still use checkpointed and fixture-backed evidence if cloud timing does not cooperate.
+
+Run the checklist helper:
+
+```powershell
+./examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1 `
+  -Stage StartCloudSync `
+  -Name 'mms-parallels-01'
+```
+
+1. Start from the prepared enrolled Demo 4 VM at `Post-Enroll-Baseline`.
+2. Confirm Visual Studio Code launches before the break policy lands.
+3. Assign or sync the lab-only Gatekeeper policy.
+4. In Company Portal, run **Check Status**.
+5. Leave the VM alone while Demo 3 runs.
+
+## Demo 3 While Intune Bakes
+
+Run the UTM provider-swap check:
+
+```powershell
+./examples/MMSMOA-2026/Demo3-UTM.ps1
+```
+
+This segment gives the live policy path its bake window without asking the audience to watch Company Portal sync.
+
+## Demo 4 Resume: Broken or Fallback
+
+Return once after the 10-15 minute bake window. If the profile landed cleanly, use the live broken state. If it did not land, say the recovery-pivot line and restore or use `Broken-Policy-State`.
 
 ## Demo 4 Gatekeeper Path
 
@@ -73,28 +106,35 @@ Demo 4 is a Gatekeeper rollback story, not a Defender-unhealthy story. The prefe
 - Enable Assessment: enabled.
 - Allow Identified Developers: disabled.
 
-Stage the policy or restore the prepared `Broken-Policy-State`, then run:
+Validate the broken state:
 
 ```powershell
-Invoke-MacPolicyValidation `
+./examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1 `
+  -Stage Broken `
   -Name 'mms-parallels-01' `
-  -TestPlan './examples/TestCases/Gatekeeper-AppStoreOnly.yml' `
-  -OutputPath './_evidence/runs/mms-demo4-gatekeeper-before' `
-  -RedactSecrets:$true
-
-Restore-MacLabVmCheckpoint `
-  -Provider Parallels `
-  -Name 'mms-parallels-01' `
-  -CheckpointName 'Post-Enroll-Baseline'
-
-Invoke-MacPolicyValidation `
-  -Name 'mms-parallels-01' `
-  -TestPlan './examples/TestCases/Gatekeeper-Recovered.yml' `
-  -OutputPath './_evidence/runs/mms-demo4-gatekeeper-after' `
-  -RedactSecrets:$true
+  -OutputPath './_evidence/runs/mms-demo4-gatekeeper-before'
 ```
 
 Before the rollback proof, disconnect VM networking so the bad Intune assignment cannot immediately reapply while the audience watches the local recovery. Do not capture `Post-Enroll-Baseline` with networking disconnected; only disconnect as a stage control immediately before restore.
+
+Restore the known-good checkpoint:
+
+```powershell
+Restore-MacLabVmCheckpoint `
+  -Provider Parallels `
+  -Name 'mms-parallels-01' `
+  -CheckpointName 'Post-Enroll-Baseline' `
+  -AcknowledgeCloudStateWarning
+```
+
+Validate the recovered state:
+
+```powershell
+./examples/MMSMOA-2026/Demo4-GatekeeperRollback.ps1 `
+  -Stage Recovered `
+  -Name 'mms-parallels-01' `
+  -OutputPath './_evidence/runs/mms-demo4-gatekeeper-after'
+```
 
 Audience-visible summary:
 
