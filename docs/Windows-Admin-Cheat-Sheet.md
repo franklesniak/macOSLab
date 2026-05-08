@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Translation guide for Windows-first Microsoft endpoint administrators working in a macOS VM lab.
 - **Related:** [Start Here](Start-Here.md), [Prerequisites](Prereqs.md), [Fidelity Boundaries](Fidelity-Boundaries.md), [Snapshot Strategy](Snapshot-Strategy.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md)
 
@@ -20,7 +20,7 @@ This document maps familiar Windows endpoint-management instincts to the macOS V
 | Use ISO media. | Use IPSW restore images or provider-appropriate install artifacts for Apple-silicon macOS guests. | Do not assume ISO workflows apply to macOS VMs on Apple silicon. |
 | Use Device Manager or Windows event logs. | Use macOS commands, MDM profile receipt, targeted app behavior, and sanitized logs. | Avoid screenshots as primary evidence; prefer structured facts. |
 | Validate BitLocker escrow end to end. | Validate FileVault status and escrow existence or retrieval path with recovery key values redacted. | Never display or persist raw recovery keys. |
-| Use AppLocker, WDAC, or SmartScreen to control app execution. | Use Gatekeeper/System Policy Control settings and `spctl` evidence for macOS app execution policy. | App Store only can block legitimate signed/notarized apps such as Visual Studio Code; test in a lab-only scope first. |
+| Use AppLocker, WDAC, or SmartScreen to control app execution. | Use Gatekeeper/System Policy Control settings and `spctl` evidence for macOS app execution policy. | App Store only can block newly introduced legitimate signed/notarized apps such as Visual Studio Code; Firefox can be a secondary staged option. Test in a lab-only scope first. |
 | Confirm Defender is installed. | Confirm Defender package, system extension, network extension when used, Full Disk Access/PPPC, onboarding, and `mdatp health`. | Host Defender is not required; validation is guest-scoped. |
 | Use broad Azure AD or Intune queries. | Use lab-only users, groups, naming, and scope filters. | Do not run cleanup or mutation against production-matching objects. |
 | Assume agent exit code equals success. | Inspect provider output and final VM state. | Some provider CLIs can return surprising exit codes or print operational errors with exit code 0. |

@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** MMSMOA demo runbook for media verification, provider paths, validation evidence, recovery pivots, and owner dry-run boundaries.
 - **Related:** [Start Here](Start-Here.md), [Troubleshooting](Troubleshooting.md), [Evidence and CAB](Evidence-and-CAB.md), [Snapshot Strategy](Snapshot-Strategy.md)
 
@@ -56,7 +56,7 @@ Before traveling or presenting:
 5. Do not sign in to Company Portal yet.
 6. Shut down the guest.
 7. Capture the `Pre-Enroll` checkpoint.
-8. Start from `Pre-Enroll` on reliable network, complete Company Portal enrollment, install and launch Visual Studio Code, wait for Intune sync and baseline policy delivery, then capture `Post-Enroll-Baseline`.
+8. Start from `Pre-Enroll` on reliable network, complete Company Portal enrollment, install Visual Studio Code, verify baseline acceptance with `spctl --assess -vv "/Applications/Visual Studio Code.app"`, do not launch Visual Studio Code, wait for Intune sync and baseline policy delivery, then capture `Post-Enroll-Baseline`.
 9. Use `Post-Enroll-Baseline` as the default live demo starting point.
 
 Use live enrollment during the talk only as an optional walkthrough. If the network is slow, say: "Enrollment is cloud-timed, so the stage path starts from a prepared enrolled checkpoint and the evidence records what changed."
@@ -82,7 +82,7 @@ Run the checklist helper:
 ```
 
 1. Start from the prepared enrolled Demo 4 VM at `Post-Enroll-Baseline`.
-2. Confirm Visual Studio Code launches before the break policy lands.
+2. Confirm Visual Studio Code is installed but has not been launched before the break policy lands.
 3. Assign or sync the lab-only Gatekeeper policy.
 4. In Company Portal, run **Check Status**.
 5. Leave the VM alone while Demo 3 runs.
@@ -152,7 +152,7 @@ Audience-visible summary:
 PASS  MDM enrollment profile present
 PASS  Gatekeeper assessment enabled
 PASS  System Policy Control profile detected
-FAIL  VS Code blocked by App-Store-only policy (expected failure)
+FAIL  VS Code first launch blocked by App-Store-only policy (expected failure)
 PASS  Blocking dialog captured
 PASS  Evidence redaction applied
 PASS  Rollback restored Post-Enroll-Baseline

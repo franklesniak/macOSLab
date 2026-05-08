@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Documents guest-scoped Microsoft Defender for Endpoint validation and Intune setup for the macOSLab demo path.
 - **Related:** [Evidence Redaction](Evidence-Redaction.md), [Evidence and CAB](Evidence-and-CAB.md), [Phase 8 TODO](../TODO-Phase-08-Validation-Loop.md), [Defender validation plan](../examples/TestCases/Defender-Validation.yml)
 
@@ -13,7 +13,7 @@
 
 Defender validation is guest-scoped. The daily-driver host Mac is intentionally not required to have Defender installed. `mdatp health` evidence MUST be collected inside the disposable enrolled macOS guest.
 
-Defender remains a required validation model for the accepted session contract, but it is no longer the live Demo 4 break-and-rollback failure. Demo 4 uses Gatekeeper/System Policy Control to block VS Code because that rollback story is deterministic and does not depend on Defender portal timing. The default Defender path is Intune-based Defender deployment after enrollment. A preinstalled-Defender guest MAY be kept only as a rehearsal or live-cloud timing fallback and MUST be labeled as a fallback.
+Defender remains a required validation model for the accepted session contract, but it is no longer the live Demo 4 break-and-rollback failure. Demo 4 uses Gatekeeper/System Policy Control to block VS Code on first launch because that rollback story is deterministic and does not depend on Defender portal timing. The default Defender path is Intune-based Defender deployment after enrollment. A preinstalled-Defender guest MAY be kept only as a rehearsal or live-cloud timing fallback and MUST be labeled as a fallback.
 
 ## Enrollment Demo Posture
 

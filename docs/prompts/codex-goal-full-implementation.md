@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Reusable OpenAI Codex CLI `/goal` prompt for autonomously implementing the `macOSLab` repository from the approved specification, ADRs, and root phase TODO files. This file does not replace the repository instructions, specification, ADRs, or phase gates.
 - **Related:** [Repository Copilot Instructions](../../.github/copilot-instructions.md), [macOSLab Repository Specification](../spec/macOSLab-repository-spec.md), [macOSLab Architecture Decision Records](../planning/macOS-imaging-08e-ADRs.md), [Phase 00 Branch Protection TODO](../../TODO-Phase-00-Branch-Protection.md), [Phase 04 Media Acquisition TODO](../../TODO-Phase-04-Media-Acquisition.md), [Phase 05 Parallels Provider TODO](../../TODO-Phase-05-Parallels-Provider.md), [Phase 06 UTM Provider TODO](../../TODO-Phase-06-UTM-Provider.md), [Phase 07 Evidence Pipeline TODO](../../TODO-Phase-07-Evidence-Pipeline.md), [Phase 08 Validation Loop TODO](../../TODO-Phase-08-Validation-Loop.md), [Phase 10 Deferred Work TODO](../../TODO-Phase-10-Deferred-Work.md)
 
@@ -30,7 +30,7 @@ Important constraints:
 - Do not add telemetry, external logging, secret-management services, or cloud mutation behavior unless explicitly approved.
 - Do not commit secrets, tenant IDs, device IDs, recovery keys, local private data, screenshots, recordings, .ipsw/.iso/.dmg/.app files, .utm bundles, or credential-bearing files.
 - Do not start a new macOS media download for the MMS demo path if the prepared IPSW exists at ~/Demo/Installers/UniversalMac_26.4.1_25E253_Restore.ipsw and matches SHA-256 8aa7f7aea6b20d1839d85a0017c9a1472f26c63ad496919f85db988eb01a5c32.
-- Do not pivot Demo 4 back to Defender-unhealthy. The active Demo 4 story is Gatekeeper/System Policy Control blocking Visual Studio Code through an App-Store-only policy, followed by rollback to a known-good checkpoint.
+- Do not pivot Demo 4 back to Defender-unhealthy. The active Demo 4 story is Gatekeeper/System Policy Control blocking Visual Studio Code on first launch through an App-Store-only policy, followed by rollback to a known-good checkpoint.
 - Do not commit a sample Gatekeeper `.mobileconfig`, screenshot, recording, app bundle, Team ID, tenant ID, UPN, device ID, profile UUID, recovery key, or tenant export.
 - Do not push, tag a release, enable branch protection/rulesets, or perform destructive provider/cloud actions without explicit owner approval.
 

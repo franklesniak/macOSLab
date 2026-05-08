@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Describes the evidence-bundle shape, summary files, Provider Version Matrix, and CAB-facing usage boundary for macOSLab validation runs.
 - **Related:** [macOSLab Repository Specification](spec/macOSLab-repository-spec.md), [Evidence Redaction](Evidence-Redaction.md), [Provider Version Matrix](Provider-Version-Matrix.md), [Evidence bundle schema](../schemas/evidence-bundle.schema.json)
 
@@ -46,7 +46,7 @@ For the Demo 4 Gatekeeper pivot, the CAB-facing summary should be explicit that 
 ```text
 Policy: MacLab - Gatekeeper - App Store Only
 Checkpoint: Broken-Policy-State
-Expected failure: Visual Studio Code is rejected by System Policy Control
+Expected failure: VS Code first launch is rejected by System Policy Control
 Recovery proof: Post-Enroll-Baseline restores `spctl --assess` acceptance and app launch
 Cloud caveat: Intune assignment remains until removed or narrowed
 ```

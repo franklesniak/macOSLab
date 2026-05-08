@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Canonical first-read guide for Windows-first Microsoft endpoint administrators starting with `macOSLab`.
 - **Related:** [README](../README.md), [Prerequisites](Prereqs.md), [Fidelity Boundaries](Fidelity-Boundaries.md), [Snapshot Strategy](Snapshot-Strategy.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md)
 
@@ -38,7 +38,7 @@ Use the VM lab for faster iteration, then use physical hardware where the fideli
 4. Read [Snapshot-Strategy.md](Snapshot-Strategy.md) so checkpoint names and cloud-state warnings are clear before you enroll a VM.
 5. Read [Fidelity-Boundaries.md](Fidelity-Boundaries.md) before turning VM evidence into a change ticket.
 
-The first risky-policy sample is a lab-only Gatekeeper/System Policy Control validation against a disposable VM. The broken-state plan proves an App-Store-only policy blocks Visual Studio Code, and the recovered plan proves rollback restores the known-good app-launch state. The first expected evidence artifact is a redacted JSON record under the evidence output root configured by the test plan.
+The first risky-policy sample is a lab-only Gatekeeper/System Policy Control validation against a disposable VM. The broken-state plan proves an App-Store-only policy blocks Visual Studio Code on first launch, and the recovered plan proves rollback restores the known-good app-launch state. The first expected evidence artifact is a redacted JSON record under the evidence output root configured by the test plan.
 
 ## First Command
 

@@ -60,14 +60,14 @@
       "message": "System Policy Control profile evidence is present."
     },
     {
-      "name": "VS Code blocked by App-Store-only policy",
+      "name": "VS Code first launch blocked by App-Store-only policy",
       "kind": "GatekeeperAssessment",
       "result": "Fail",
       "expectedFailure": true,
       "evidenceRefs": [
         "fixtures/gatekeeper-vscode-rejected.txt"
       ],
-      "message": "VS Code rejected by App-Store-only System Policy Control policy."
+      "message": "VS Code rejected by App-Store-only System Policy Control policy on first launch."
     }
   ]
 }

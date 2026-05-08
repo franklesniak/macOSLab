@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Defines the five-checkpoint model, restore warnings, report-only cloud cleanup posture, and checkpoint readiness expectations for `macOSLab`.
 - **Related:** [Fidelity Boundaries](Fidelity-Boundaries.md), [Provider Version Matrix](Provider-Version-Matrix.md), [Prerequisites](Prereqs.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md)
 
@@ -17,8 +17,8 @@ Snapshots are the reason the lab is fast, but they are also where local state an
 | --- | --- |
 | `Clean-OS` | Freshly installed guest, Setup Assistant complete, no demo software, never enrolled. |
 | `Pre-Enroll` | `Clean-OS` plus Intune Company Portal at the sign-in screen; not enrolled. |
-| `Post-Enroll-Baseline` | Fully enrolled, recently synced, deterministic healthy baseline. For Demo 4, Visual Studio Code is installed and launches successfully here. |
-| `Broken-Policy-State` | Deterministic intentionally broken state for the engineered demo failure. For Demo 4, the Gatekeeper/System Policy Control profile blocks VS Code. |
+| `Post-Enroll-Baseline` | Fully enrolled, recently synced, deterministic healthy baseline. For Demo 4, Visual Studio Code is installed or staged but has not been launched, and baseline `spctl` assessment accepts it. |
+| `Broken-Policy-State` | Deterministic intentionally broken state for the engineered demo failure. For Demo 4, the Gatekeeper/System Policy Control profile blocks VS Code on first launch. |
 | `Recovered-Known-Good` | Post-rollback healthy state, captured after report-only cloud cleanup review or manual reconciliation notes. For Demo 4, `spctl` accepts VS Code and the app launches again. |
 
 Alternative checkpoint names are not allowed in v1 unless a caller explicitly opts into non-canonical names for local experimentation.

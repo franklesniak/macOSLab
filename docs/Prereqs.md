@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Host, provider, tooling, and tenant prerequisites for building and validating a `macOSLab` environment.
 - **Related:** [Start Here](Start-Here.md), [Hypervisor Decision Guide](Hypervisor-Decision-Guide.md), [Apple Silicon Constraints](Apple-Silicon-Constraints.md), [Provider Version Matrix](Provider-Version-Matrix.md), [macOSLab repository specification](spec/macOSLab-repository-spec.md)
 
@@ -27,7 +27,7 @@ Recommended:
 - Separate local folder for installers, such as `~/Demo/Installers`.
 - Separate local folder for VM storage, outside the repository.
 - Network path that allows APNs, Intune, Microsoft Graph, Defender, and Apple software update endpoints when running live validation.
-- Visual Studio Code installed inside the enrolled demo guest before capturing `Post-Enroll-Baseline` when rehearsing Demo 4.
+- Visual Studio Code installed inside the enrolled demo guest before capturing `Post-Enroll-Baseline` when rehearsing Demo 4. Do not launch Visual Studio Code before the broken-state step; the live block depends on first-launch Gatekeeper behavior. Firefox MAY be staged as a secondary app under the same rule.
 - Sanitized Gatekeeper fixture text under `examples/TestCases/fixtures/` for stage-safe validation without live cloud timing.
 
 Do not place `.ipsw`, `.dmg`, `.iso`, `.app`, screenshots, recordings, VM bundles, private keys, or credential files inside the repository.

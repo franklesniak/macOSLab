@@ -51,7 +51,7 @@
 # [pscustomobject]. Stage checklist or redacted evidence.
 #
 # .NOTES
-# Version: 0.1.20260506.0
+# Version: 0.1.20260507.0
 # Positional parameters are not supported.
 #
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium', PositionalBinding = $false)]
@@ -112,11 +112,12 @@ if ($Stage -eq 'StartCloudSync') {
         FallbackCheckpoint = 'Broken-Policy-State'
         ManualSteps = [string[]]@(
             "Start from the prepared enrolled Demo 4 VM at Post-Enroll-Baseline.",
-            "Confirm Visual Studio Code launches before the break policy lands.",
+            "Confirm Visual Studio Code is installed but has not been launched before the break policy lands.",
+            "Optionally confirm baseline acceptance with spctl --assess -vv '/Applications/Visual Studio Code.app'.",
             "Assign or sync the lab-only Gatekeeper policy '${GatekeeperPolicyDisplayName}'.",
             "In Company Portal, run Check Status.",
             "Leave the VM alone while Demo 3 runs.",
-            "Resume Demo 4 once after the bake window.",
+            "Resume Demo 4 once after the bake window and attempt the first Visual Studio Code launch.",
             "If the policy did not land, say so and use Broken-Policy-State."
         )
     }

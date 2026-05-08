@@ -1,0 +1,13 @@
+Firefox secondary-app first-launch block dialog captured during rehearsal.
+
+Dialog transcript:
+"Firefox" can't be opened because it was not downloaded from the App Store.
+
+Your security settings allow installation of only apps from the App Store.
+
+Safari downloaded this file today at 11:12 AM.
+
+Notes:
+- The screenshot or recording is not committed.
+- The dynamic download timestamp is preserved as observed in the dialog, not as durable timing evidence.
+- No screenshot, recording, app bundle, tenant identifier, user identifier, or device identifier is committed.

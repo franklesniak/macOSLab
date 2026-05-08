@@ -5,7 +5,7 @@
 
 - **Status:** Draft
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Talk-development working artifact for the MMSMOA 2026 session: "Don't Brick the CEO's Mac: MMSMOA 2026 Session Plan and Speaker Runbook". Captures interim concepting, prioritization, outline, or runbook content for that session; not a final published deliverable.
 - **Related:** [macOSLab repository specification](../spec/macOSLab-repository-spec.md), [Architecture decision records](macOS-imaging-08e-ADRs.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
 
@@ -211,7 +211,7 @@ The canonical risk map for this session — referenced throughout the rest of th
 | FileVault | Unlock, recovery, escrow, user prompts. | Executive lockout, urgent helpdesk escalation, security visibility. |
 | PPPC/TCC | Required tools cannot access protected data. | Broken screen sharing, recording, accessibility, backup, EDR, or remote support workflows. |
 | Defender | System extension, network extension, Full Disk Access, onboarding. | Security gap, false-positive noise, SOC escalation, unhealthy endpoint posture. |
-| App execution control | Gatekeeper/System Policy Control blocks legitimate signed/notarized apps when over-tightened. | Users cannot launch required tools such as Visual Studio Code. |
+| App execution control | Gatekeeper/System Policy Control blocks legitimate signed/notarized apps when over-tightened. | Users cannot launch newly introduced required tools such as Visual Studio Code. |
 | Compliance/CA | Device marked noncompliant or access blocked. | Users lose access to Outlook, SharePoint, Teams, approval apps, or business workflows. |
 
 Optional 10-second calibration:
@@ -275,9 +275,9 @@ enroll -> apply policy -> validate -> intentionally fail -> collect evidence -> 
 
 The live break-and-rollback proof point is Gatekeeper/System Policy Control:
 
-- Known-good VM has Visual Studio Code installed and launched.
+- Known-good VM has Visual Studio Code installed but not launched.
 - Lab-only Intune Settings Catalog policy enables Gatekeeper assessment and disables identified developers.
-- VS Code is rejected in `Broken-Policy-State`.
+- VS Code is rejected on first launch in `Broken-Policy-State`.
 - Rollback to `Post-Enroll-Baseline` restores `spctl` acceptance and app launch.
 
 Supporting proof points remain:
@@ -1098,7 +1098,7 @@ Start state:
 
 - VM at `Post-Enroll-Baseline`.
 - Device already enrolled in the demo tenant.
-- Visual Studio Code installed, accepted by `spctl`, and launched successfully.
+- Visual Studio Code installed, not launched, and accepted by `spctl`.
 - Recent sync completed.
 - Evidence script ready.
 - Evidence output redaction already tested.
@@ -1118,7 +1118,7 @@ Primary live flow:
 2. Show the lab-only Intune Settings Catalog policy or the slide equivalent.
 3. Restore or reveal `Broken-Policy-State`.
 4. Run the Gatekeeper App-Store-only validation plan.
-5. Show VS Code rejected by `spctl` and the captured block-dialog reference.
+5. Show VS Code rejected by `spctl` on first launch and the captured block-dialog reference.
 6. Disconnect VM networking as the stage control.
 7. Restore `Post-Enroll-Baseline`.
 8. Run the recovered validation plan.
@@ -1152,7 +1152,7 @@ Minimum evidence to show:
 PASS  MDM enrollment profile present
 PASS  Gatekeeper assessment enabled
 PASS  System Policy Control profile detected
-FAIL  VS Code blocked by App-Store-only policy (expected failure)
+FAIL  VS Code first launch blocked by App-Store-only policy (expected failure)
 PASS  Blocking dialog captured
 PASS  Evidence redaction applied
 PASS  Rollback restored Post-Enroll-Baseline
@@ -1176,7 +1176,7 @@ Transition line:
 Recovery playbook:
 
 - If live Intune timing is slow, say the checkpoint pivot line and use `Broken-Policy-State`.
-- If VS Code does not block after rehearsal, adjust wording to "the policy blocks the next newly installed or updated legitimate app" before the talk.
+- If an already-launched app does not block after rehearsal, use the VS Code first-launch path and say the policy blocks the next newly introduced legitimate app.
 - If rollback fails, stop and diagnose before the session; do not claim the rollback restores app launch until `spctl` accepts VS Code.
 - If a secret appears on screen, stop, switch to redacted screenshots, and continue calmly.
 
@@ -1193,7 +1193,7 @@ Show a prebuilt triage table.
 | Recovery key not visible. | Escrow not complete, device not corporate, role permissions, or wrong report path. | Encryption report, device ownership, RBAC, policy timing. |
 | Recovery key appears on screen. | Evidence redaction failed. | Stop showing live output; switch to redacted screenshot or sanitized JSON. |
 | Defender installed but unhealthy. | System extension, network extension, Full Disk Access, or onboarding missing. | `mdatp health`, system extension list, PPPC profile. |
-| VS Code is blocked. | Gatekeeper/System Policy Control App-Store-only policy is active. | `spctl --status`, `spctl --assess -vv`, profile receipt. |
+| VS Code is blocked. | Gatekeeper/System Policy Control App-Store-only policy is active and VS Code is launching for the first time. | `spctl --status`, `spctl --assess -vv`, profile receipt. |
 | VS Code stays blocked after rollback. | Bad policy reapplied or the wrong checkpoint was restored. | Disconnect networking, restore `Post-Enroll-Baseline`, re-run `spctl --assess`. |
 | Rollback causes duplicate/stale devices. | VM identity rolled back while cloud state moved forward. | Report-only cloud cleanup routine, then manual reconciliation. |
 | Clones behave strangely. | MAC address, name, or identity collision. | Naming convention, clone settings, DHCP, device record. |
@@ -1322,7 +1322,7 @@ Final line:
 | 19 | Demo 3 title card. | 50:00 |
 | 20 | Demo 4 setup: audit finding leads to Gatekeeper hardening. | 57:00 |
 | 21 | System Policy Control model: App Store only vs. identified developers. | 58:30 |
-| 22 | Demo 4 evidence: VS Code blocked, `spctl` rejects, rollback restores. | During Demo 4 |
+| 22 | Demo 4 evidence: VS Code first launch blocked, `spctl` rejects, rollback restores. | During Demo 4 |
 | 23 | FileVault and Defender proof boundaries: still required, not the live failure. | 68:00 |
 | 24 | Dragons checklist updated for Gatekeeper and cloud state. | 70:00 |
 | 25 | Repo tree and Start Here. | 72:25 |
@@ -1484,7 +1484,7 @@ Ship these even if everything else is rough:
 | --- | --- |
 | `FileVault-Validation.yml` | Policy receipt, local status capture, escrow evidence path, rollback note, and redacted recovery-key proof. |
 | `Defender-Validation.yml` | System extension, network extension, Full Disk Access, onboarding, `mdatp health`. |
-| `Gatekeeper-AppStoreOnly.yml` | System Policy Control profile receipt, `spctl` reject, VS Code block dialog reference, expected failure. |
+| `Gatekeeper-AppStoreOnly.yml` | System Policy Control profile receipt, `spctl` reject, VS Code first-launch block dialog reference, expected failure. |
 | `Gatekeeper-Recovered.yml` | Rollback proof, `spctl` accept, VS Code launch recovery, cloud-assignment warning. |
 | `PPPC-Validation.yml` | Bundle ID/code requirement/profile receipt/app behavior. |
 | `Compliance-SmokeTest.yml` | Fast deterministic pass/fail loop before risky tests. |
@@ -1512,7 +1512,7 @@ Ship these even if everything else is rough:
     { "name": "FileVault escrow evidence captured", "result": "Pass" },
     { "name": "FileVault recovery key value redacted", "result": "Pass" },
     { "name": "Defender health captured", "result": "Pass" },
-    { "name": "VS Code blocked by App-Store-only policy", "result": "Fail", "expectedFailure": true },
+    { "name": "VS Code first launch blocked by App-Store-only policy", "result": "Fail", "expectedFailure": true },
     { "name": "VS Code accepted after rollback", "result": "Pass" },
     { "name": "Rollback restored known-good VM checkpoint", "result": "Pass" },
     { "name": "Report-only cloud cleanup routine documented", "result": "Warn" }

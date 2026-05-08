@@ -5,17 +5,17 @@
 
 - **Status:** Draft
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Handoff plan for pivoting the MMSMOA 2026 `macOSLab` demo and supporting repository from a Defender-unhealthy failure scenario to a Gatekeeper/System Policy Control scenario that blocks a legitimate non-App-Store app, captures evidence, and rolls back to a known-good VM snapshot.
 - **Related:** [Accepted CFP submission](macOS-imaging-01a-CFP-submission.md), [Bolstered outline](macOS-imaging-03a-bolstered-outline.md), [Recommended software setup runbook](macos-imaging-05c-recommended-software-step-by-step-revised.md), [Implementation prompt](../prompts/codex-goal-full-implementation.md), [Repository specification](../spec/macOSLab-repository-spec.md), [Architecture decision records](macOS-imaging-08e-ADRs.md), [Example slide description artifact](EXAMPLE-slides-from-another-talk.md), [Demo runbook](../Demo-Runbook.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
 
 ## Executive Decision
 
-Pivot Demo 4 from "Defender becomes unhealthy because supporting profiles are missing or wrong" to "a new Gatekeeper hardening policy requires App-Store-only app execution and blocks Microsoft Visual Studio Code." Keep FileVault and Defender as required learning-objective content, supporting proof paths, and backup discussion because the accepted CFP cannot change. The live failure and rollback payoff should be Gatekeeper/System Policy Control because the timeline is coherent: known-good snapshot, apply new policy, app breaks, evidence proves why, rollback restores app launch.
+Pivot Demo 4 from "Defender becomes unhealthy because supporting profiles are missing or wrong" to "a new Gatekeeper hardening policy requires App-Store-only app execution and blocks Microsoft Visual Studio Code on first launch." Keep FileVault and Defender as required learning-objective content, supporting proof paths, and backup discussion because the accepted CFP cannot change. The live failure and rollback payoff should be Gatekeeper/System Policy Control because the timeline is coherent: known-good snapshot, apply new policy, app breaks, evidence proves why, rollback restores app launch.
 
 The central demo sentence becomes:
 
-> A Windows-first admin responds to an application allowlisting audit finding, pushes an over-tight Gatekeeper policy, blocks a legitimate Microsoft app, catches it in the lab, captures evidence, and rolls back before production users discover it.
+> A Windows-first admin responds to an application allowlisting audit finding, pushes an over-tight Gatekeeper policy, blocks Visual Studio Code on first launch, catches it in the lab, captures evidence, and rolls back before production users discover it.
 
 ## Non-Negotiables
 
@@ -106,11 +106,11 @@ The new Demo 4 should tell this story:
 
 1. The lab VM starts at `Post-Enroll-Baseline`.
 2. Visual Studio Code is installed at `/Applications/Visual Studio Code.app`.
-3. VS Code has launched successfully under the baseline Gatekeeper policy.
-4. Firefox is not part of the required stage or repo path. It can remain a private emergency fallback if VS Code proves unreliable during rehearsal.
+3. VS Code has not been launched yet, but baseline `spctl` assessment accepts it.
+4. Already-launched apps are not used as the required block target because macOS may continue to allow apps that were admitted before the policy changed.
 5. A new System Policy Control profile is applied with `EnableAssessment = true` and `AllowIdentifiedDevelopers = false`.
 6. Gatekeeper now permits only Mac App Store sourced apps.
-7. VS Code is signed and notarized by Microsoft, but it is not a Mac App Store app, so it is blocked.
+7. VS Code is signed and notarized by Microsoft, but it is not a Mac App Store app, so it is blocked on first launch.
 8. `spctl --assess -vv "/Applications/Visual Studio Code.app"` rejects the app.
 9. The macOS "[App] cannot be opened" dialog is captured.
 10. The evidence bundle includes `spctl`, profile, screenshot/recording reference, test report, and rollback warning.
@@ -124,7 +124,7 @@ The new Demo 4 should tell this story:
 | --- | --- |
 | `Clean-OS` | Clean guest OS before enrollment and app-specific demo state. Keep as the slowest but cleanest reset point. |
 | `Pre-Enroll` | Guest ready for enrollment, before lab identity and policy assignment. Keep for identity-fidelity rehearsals. |
-| `Post-Enroll-Baseline` | Enrolled lab VM, no App-Store-only System Policy Control payload, VS Code installed and launched successfully, baseline `spctl` assessment accepted, evidence script ready. This is the main rollback target. |
+| `Post-Enroll-Baseline` | Enrolled lab VM, no App-Store-only System Policy Control payload, VS Code installed but not launched, baseline `spctl` assessment accepted, evidence script ready. This is the main rollback target. |
 | `Broken-Policy-State` | System Policy Control profile present, `EnableAssessment = true`, `AllowIdentifiedDevelopers = false`, VS Code blocked, `spctl` rejection captured, macOS block dialog captured, sanitized evidence exported. |
 | `Recovered-Known-Good` | Optional verification checkpoint after rollback proves the profile is gone or inactive, VS Code is accepted, and VS Code opens again. |
 
@@ -143,9 +143,10 @@ For stage explanation:
 
 | Role | App | Why |
 | --- | --- | --- |
-| Primary | Microsoft Visual Studio Code | Free, well-known, Microsoft-authored, signed/notarized, not Mac App Store sourced. The irony lands with a Microsoft endpoint audience. |
+| Primary | Microsoft Visual Studio Code | Free, well-known, Microsoft-authored, signed/notarized, not Mac App Store sourced, and strong for a Microsoft endpoint audience. Must be staged but not launched before the restrictive policy lands. |
+| Secondary | Mozilla Firefox | Free, well-known, signed/notarized, not Mac App Store sourced, and useful if VS Code cannot be staged reliably. It must follow the same staged-but-not-launched rule. |
 
-Use the app name in public artifacts. Redact codesigning Team IDs and any profile identifiers copied from a real environment. Keep Firefox only as a private emergency fallback if rehearsal proves VS Code is unreliable; do not make Firefox a required fixture, stage beat, or acceptance criterion.
+Use the app name in public artifacts. Redact codesigning Team IDs and any profile identifiers copied from a real environment. Keep the stage wording focused on the first-launch admission point: apps already launched before the policy lands may keep opening, so the required proof uses VS Code installed and assessed at baseline, then launched only after the restrictive policy is active.
 
 ## Pre-Demo Setup Plan
 
@@ -163,16 +164,16 @@ On the demo guest:
 
 1. Install Visual Studio Code from the official VS Code download.
 2. Move or confirm the app bundle at `/Applications/Visual Studio Code.app`.
-3. Launch VS Code once under baseline Gatekeeper and quit it.
-4. Optional private fallback: install Firefox only if rehearsal shows VS Code is unreliable. Do not make Firefox part of the required repo or stage path.
-5. Run and save baseline assessments:
+3. Do not launch VS Code before capturing the baseline checkpoint.
+4. Run and save baseline assessments:
 
    ```bash
    spctl --status
    spctl --assess -vv "/Applications/Visual Studio Code.app"
    ```
 
-6. Capture `Post-Enroll-Baseline` only after VS Code launches successfully.
+5. Capture `Post-Enroll-Baseline` only after baseline assessment accepts VS Code and before VS Code has been launched.
+6. Optional secondary path: stage Firefox only if rehearsal shows VS Code is unreliable, and keep Firefox under the same baseline-assessed, not-launched-before-policy rule.
 
 ### Intune Gatekeeper Policy Setup
 
@@ -244,7 +245,7 @@ Capture sanitized text fixtures from the actual VM and store them in `examples/T
 | `gatekeeper-vscode-accepted.txt` | Baseline `spctl --assess -vv` output for VS Code. |
 | `gatekeeper-vscode-rejected.txt` | Hardened `spctl --assess -vv` output for VS Code. |
 | `profiles-system-policy-control-redacted.txt` | Sanitized `profiles show -type configuration` excerpt for the System Policy Control payload. |
-| `app-launch-vscode-blocked-dialog.txt` | Text description or transcript of the captured VS Code block dialog. |
+| `app-launch-vscode-blocked-dialog.txt` | Text description or transcript of the captured VS Code first-launch block dialog. |
 | `app-launch-vscode-recovered.txt` | Post-rollback proof that VS Code launched again. |
 
 Do not commit the actual screenshot or recording. Reference external/local stage assets in the evidence bundle with sanitized names only.
@@ -264,7 +265,7 @@ Example workflow:
 4. Commit the sanitized text file under `examples/TestCases/fixtures/`.
 5. Reference that fixture from `Gatekeeper-AppStoreOnly.yml` or `Gatekeeper-Recovered.yml`.
 
-The committed fixture text does not need to preserve exact macOS dialog wording. Use dialog screenshots or recordings as local stage assets, and keep only a generic text reference in the repo such as "VS Code block dialog captured during rehearsal."
+The committed fixture text does not need to preserve exact macOS dialog wording. Use dialog screenshots or recordings as local stage assets, and keep only a generic text reference in the repo such as "VS Code first-launch block dialog captured during rehearsal."
 
 ### Redaction Requirements
 
@@ -284,14 +285,15 @@ Add tests for the redaction behavior rather than trusting a manual scan.
 Run this rehearsal end-to-end on the actual VM:
 
 1. Start from `Post-Enroll-Baseline`.
-2. Confirm VS Code launches.
-3. Apply the System Policy Control profile or restore to the prebuilt `Broken-Policy-State`.
-4. Confirm VS Code is blocked.
-5. Capture evidence.
-6. Restore `Post-Enroll-Baseline`.
-7. Re-run `spctl --assess -vv "/Applications/Visual Studio Code.app"`.
-8. Launch VS Code.
-9. Capture or refresh `Recovered-Known-Good`.
+2. Confirm VS Code is installed but has not been launched.
+3. Run `spctl --assess -vv "/Applications/Visual Studio Code.app"` and confirm baseline acceptance.
+4. Apply the System Policy Control profile or restore to the prebuilt `Broken-Policy-State`.
+5. Attempt the first VS Code launch and confirm it is blocked.
+6. Capture evidence.
+7. Restore `Post-Enroll-Baseline`.
+8. Re-run `spctl --assess -vv "/Applications/Visual Studio Code.app"`.
+9. Launch VS Code.
+10. Capture or refresh `Recovered-Known-Good`.
 
 If VS Code stays blocked after snapshot restore, stop and diagnose before the talk. That would mean the profile state or related cache is not being captured by the checkpoint in the way the demo requires.
 
@@ -400,7 +402,7 @@ The audience-visible summary should be short:
 PASS  MDM enrollment profile present
 PASS  Gatekeeper assessment enabled
 PASS  System Policy Control profile detected
-FAIL  VS Code blocked by App-Store-only policy (expected failure)
+FAIL  VS Code first launch blocked by App-Store-only policy (expected failure)
 PASS  Blocking dialog captured
 PASS  Evidence redaction applied
 PASS  Rollback restored Post-Enroll-Baseline
@@ -457,7 +459,7 @@ Preferred implementation:
 - Parse `spctl --status` fixtures enough to identify assessment enabled/disabled.
 - Parse `spctl --assess -vv` fixtures enough to identify accept/reject.
 - Preserve the raw sanitized fixture path in `evidenceRefs`.
-- Emit a useful message such as "VS Code rejected by App-Store-only System Policy Control policy."
+- Emit a useful message such as "VS Code rejected by App-Store-only System Policy Control policy on first launch."
 
 Do not introduce live remote command execution into the module for this pivot. Fixture-backed validation is acceptable for the stage plan.
 
@@ -563,7 +565,7 @@ This is the main talk outline and should be updated carefully:
 - Replace the Demo 4 Defender-health failure with the Gatekeeper/App-Store-only story.
 - Keep FileVault and Defender in the risk map, evidence model, fidelity boundaries, Q&A, and backup proof sections.
 - Add app execution control/Gatekeeper to the risk framing without letting the talk become a Gatekeeper-only session.
-- Update the demo timeline from 57:00-70:00 to show System Policy Control, VS Code block, fixture-backed evidence, rollback, and app relaunch.
+- Update the demo timeline from 57:00-70:00 to show System Policy Control, VS Code first-launch block, fixture-backed evidence, rollback, and app relaunch.
 - Update "Minimum evidence to show" with the Gatekeeper summary.
 - Update controlled failure options so the recommended failure is the pre-created `Broken-Policy-State` Gatekeeper state.
 - Update final self-check placeholders and redaction checks to include codesigning Team IDs and dialog screenshots.
@@ -573,7 +575,7 @@ This is the main talk outline and should be updated carefully:
 Update the pre-demo setup runbook:
 
 - Add guest installation of VS Code.
-- Add baseline launch and `spctl` capture steps.
+- Add baseline `spctl` capture and explicit no-launch-before-policy steps.
 - Add Intune System Policy Control policy setup, assignment, sync, and evidence capture steps.
 - Remove any requirement to create or commit a sample `.mobileconfig`.
 - Add fixture capture steps.
@@ -586,7 +588,7 @@ Update the pre-demo setup runbook:
 
 Update the future implementation prompt:
 
-- State that the active Demo 4 pivot is Gatekeeper/System Policy Control blocking VS Code.
+- State that the active Demo 4 pivot is Gatekeeper/System Policy Control blocking VS Code on first launch.
 - State that Defender remains a required validation doc/test area but is no longer the live failure path.
 - Ask future agents to add Gatekeeper fixtures, validation tests, docs, and slide-description artifact.
 - Preserve all protected-file rules.
@@ -599,7 +601,7 @@ Add a new ADR:
 - Title: `Use Gatekeeper/System Policy Control as the live Demo 4 failure`.
 - Status: Accepted.
 - Context: Defender failure had rollback-narrative incoherence; Gatekeeper policy addition is a more realistic admin mistake.
-- Decision: Use fixture-backed System Policy Control evidence and VS Code app block as the stage failure.
+- Decision: Use fixture-backed System Policy Control evidence and VS Code first-launch app block as the stage failure.
 - Consequences: FileVault/Defender stay as required content; direct profile install must be verified; screenshots/recordings remain out of repo; Team IDs are redacted.
 
 Do not rewrite older ADRs unless they directly contradict the new decision. Add a supersession note where needed, especially near Defender-stage-demo language.
@@ -712,7 +714,7 @@ The slide description must preserve the CFP contract:
 | 19 | Demo 3 title card: UTM provider swap. | 50:00 |
 | 20 | Demo 4 setup: audit finding leads to Gatekeeper hardening. | 57:00 |
 | 21 | System Policy Control model: App Store only vs. identified developers. | 58:30 |
-| 22 | Demo 4 evidence: VS Code blocked, `spctl` rejects, rollback restores. | During Demo 4 |
+| 22 | Demo 4 evidence: VS Code first launch blocked, `spctl` rejects, rollback restores. | During Demo 4 |
 | 23 | FileVault and Defender proof boundaries: still required, not the live failure. | 68:00 |
 | 24 | Dragons checklist updated for Gatekeeper and cloud state. | 70:00 |
 | 25 | Repo tree and `Start-Here.md`. | 72:25 |
@@ -915,13 +917,13 @@ This section records the pivot disposition for every file tracked before this pl
 
 The pivot is complete when all of these are true:
 
-- Demo 4 defaults to Gatekeeper/System Policy Control blocking VS Code.
+- Demo 4 defaults to Gatekeeper/System Policy Control blocking VS Code on first launch.
 - Intune Settings Catalog is documented as the preferred rehearsal delivery path for the Gatekeeper profile.
 - Direct/local profile installation is documented only as fallback/proof, not as the primary story.
 - No sample `.mobileconfig` is created or committed.
 - The repo still documents FileVault and Defender validation strongly enough to meet the accepted CFP.
-- `Post-Enroll-Baseline` contains VS Code installed and successfully launched.
-- `Broken-Policy-State` blocks VS Code through the Gatekeeper policy.
+- `Post-Enroll-Baseline` contains VS Code installed but not launched, with baseline `spctl` acceptance captured.
+- `Broken-Policy-State` blocks VS Code through the Gatekeeper policy on first launch.
 - Rollback to `Post-Enroll-Baseline` restores VS Code launch.
 - The stage rollback path disconnects VM networking before restoring `Post-Enroll-Baseline`, and `Post-Enroll-Baseline` itself remains a normal network-capable snapshot.
 - Gatekeeper fixtures are sanitized and committed.
@@ -939,7 +941,7 @@ These are required after the repo changes are implemented and before conference/
 
 | Follow-up | Why it matters | Pass condition |
 | --- | --- | --- |
-| Verify whether Gatekeeper blocks VS Code after VS Code has already launched once. | The ideal story is "previously-working legitimate app broke after new policy." If macOS only blocks newly downloaded or updated apps, the story needs a small wording adjustment. | Rehearsal proves the already-launched VS Code path blocks, or docs/slides say the policy blocks the next newly installed or updated legitimate app. |
+| Verify VS Code first-launch behavior under App-Store-only Gatekeeper. | The story is "the policy blocks the next legitimate non-App-Store app at first launch." Rehearsal showed apps admitted before the policy may continue opening. | `Post-Enroll-Baseline` has VS Code installed but not launched, baseline `spctl` accepts it, broken policy rejects first launch, and rollback accepts and launches it. |
 | Verify live Intune delivery timing with forced Company Portal sync. | The live stage variant depends on assignment/sync landing while other content runs. | The profile lands in the target 10-15 minute window during rehearsal, or the presenter commits to using `Broken-Policy-State` as the hard fallback. |
 | Verify stage-safe rollback with networking disconnected before restore. | Prevents Intune from reapplying the bad policy immediately after rollback. | With networking disconnected before restore, `Post-Enroll-Baseline` restores, `spctl` accepts VS Code, and VS Code opens locally. |
 | Capture dialog visual asset without committing wording dependency. | The audience benefits from seeing the real dialog, but docs should not depend on exact OS wording. | Screenshot or recording exists locally for the deck/stage, and repo docs refer generically to the captured block dialog. |
@@ -955,7 +957,7 @@ These are required after the repo changes are implemented and before conference/
 | Should the Demo 4 script use the Gatekeeper rollback name? | Resolved: yes. Use `Demo4-GatekeeperRollback.ps1` and update all references in the same implementation pass. |
 | Should a sample `.mobileconfig` be committed? | Resolved: no. It is not central to the repository purpose or talk narrative. Use Intune Settings Catalog as the canonical policy authoring surface. |
 | Should the live path install or wait for the profile during the session? | Do not make live arrival the critical path. Initiate the Intune deployment as a background stage thread, then use checkpointed state and sanitized evidence for the payoff if timing does not cooperate. |
-| Should Firefox be shown live? | Resolved: no. Do not make Firefox part of the required stage path, repo fixtures, or acceptance criteria. Keep it only as a private emergency fallback if VS Code proves unreliable in rehearsal. |
+| Should Firefox be shown live? | Resolved: not as the primary app. Firefox MAY be shown only as a secondary staged option if VS Code is unavailable, and it must follow the same first-launch Gatekeeper framing. |
 | Should Defender unhealthy fixtures be removed? | Resolved: no before the talk. Keep them as backup and accepted-takeaway support, but clearly mark them as supporting fixtures rather than the live Demo 4 path. |
 | Should Gatekeeper use one test plan or split broken/recovered plans? | Resolved: split plans. Use one plan for the broken App-Store-only state and one for recovered known-good state. |
 | What is the slide-description artifact path? | Resolved: `docs/planning/macOS-imaging-09a-generated-slides.md`. |

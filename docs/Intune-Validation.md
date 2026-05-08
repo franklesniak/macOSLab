@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Documents fixture-backed Intune compliance and Gatekeeper/System Policy Control validation, plus cloud-state warnings for macOSLab.
 - **Related:** [Evidence and CAB](Evidence-and-CAB.md), [Snapshot Strategy](Snapshot-Strategy.md), [Gatekeeper App Store only test](../examples/TestCases/Gatekeeper-AppStoreOnly.yml), [Gatekeeper recovered test](../examples/TestCases/Gatekeeper-Recovered.yml), [Compliance smoke test](../examples/TestCases/Compliance-SmokeTest.yml)
 
@@ -47,7 +47,9 @@ The repository does not commit a sample `.mobileconfig`. A local profile install
 
 Use split validation plans:
 
-- [Gatekeeper-AppStoreOnly.yml](../examples/TestCases/Gatekeeper-AppStoreOnly.yml) represents `Broken-Policy-State`; it expects the profile to be present and VS Code to be rejected as an expected failure.
+- [Gatekeeper-AppStoreOnly.yml](../examples/TestCases/Gatekeeper-AppStoreOnly.yml) represents `Broken-Policy-State`; it expects the profile to be present and VS Code first launch to be rejected as an expected failure.
 - [Gatekeeper-Recovered.yml](../examples/TestCases/Gatekeeper-Recovered.yml) represents rollback to `Post-Enroll-Baseline`; it expects `spctl` to accept VS Code and launch evidence to show recovery.
+
+The live demo MUST NOT use an app that was already launched and admitted before the App-Store-only policy arrived. A previously launched app can continue opening and make the policy look ineffective. The preferred path is to install or stage Visual Studio Code before `Post-Enroll-Baseline`, verify baseline acceptance with `spctl --assess -vv "/Applications/Visual Studio Code.app"`, and reserve the first GUI launch for `Broken-Policy-State`. Firefox MAY be used as a secondary staged app only when it follows the same not-launched-before-policy rule.
 
 This pattern is for high-risk policies, repeated validation loops, demo scenarios, and evidence that must be reproducible. It is not a requirement to create a YAML plan for every low-risk Intune setting change.

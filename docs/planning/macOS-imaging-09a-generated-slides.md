@@ -5,7 +5,7 @@
 
 - **Status:** Draft
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Slide-content artifact for the MMSMOA 2026 macOSLab session. Defines every slide in the deck, in stage order, with visual concepts, talking points, memorable lines, speaker handoffs, and transitions. A reader should be able to build the full deck from this document alone.
 - **Related:** [CFP Submission](macOS-imaging-01a-CFP-submission.md), [Bolstered Outline](macOS-imaging-03a-bolstered-outline.md), [Repository Specification](../spec/macOSLab-repository-spec.md), [Demo Runbook](../Demo-Runbook.md)
 
@@ -367,7 +367,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 - **Talking points:**
   - The whole demo follows this loop, but the stage path is selective. Demo 1 covers pinned media and the cache hit for steps 1 and 2.
   - Demo 2 shows the automated Parallels build and checkpoint path: create the VM, apply provider guardrails, and capture `Clean-OS`.
-  - Demo 4 starts before Demo 3: we begin at `Post-Enroll-Baseline`, confirm VS Code launches, start the lab-only Gatekeeper policy sync, and run Company Portal **Check Status**.
+  - Demo 4 starts before Demo 3: we begin at `Post-Enroll-Baseline`, confirm VS Code is installed but not launched, start the lab-only Gatekeeper policy sync, and run Company Portal **Check Status**.
   - Demo 3 fills the bake window with UTM provider checks after manual VM creation. Demo 4 then resumes with the live broken state if it landed, or `Broken-Policy-State` if it did not.
   - The resumed Demo 4 path uses fixture-backed Gatekeeper evidence for validation and recovery, then ends with the report-only cleanup review.
   - Step 12 is the part most labs skip. It keeps stale cloud records from becoming invisible assumptions.
@@ -444,7 +444,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   - `Demo2-Parallels.ps1` is the owner live dry-run path. It verifies the same prepared IPSW, calls `New-MacLabVm -Provider Parallels`, then calls `Checkpoint-MacLabVm -CheckpointName 'Clean-OS' -RequireCleanShutdown`.
   - Provider hardening checks final state after `prlctl` changes. Shared profile, app sharing, SmartMount, shared clipboard/cloud, device auto-sharing, and host location all have to be accounted for.
   - The checkpoint here is `Clean-OS`, not an enrollment state. `Pre-Enroll` and `Post-Enroll-Baseline` are prepared later in the runbook for the dependable Demo 4 path.
-  - Near the end of this segment, start Demo 4 with `Demo4-GatekeeperRollback.ps1 -Stage StartCloudSync`. Use the checklist: start from `Post-Enroll-Baseline`, confirm VS Code launches, assign or sync the Gatekeeper policy, run Company Portal **Check Status**, then park the VM while Demo 3 runs.
+  - Near the end of this segment, start Demo 4 with `Demo4-GatekeeperRollback.ps1 -Stage StartCloudSync`. Use the checklist: start from `Post-Enroll-Baseline`, confirm VS Code is installed but not launched, assign or sync the Gatekeeper policy, run Company Portal **Check Status**, then park the VM while Demo 3 runs.
 - **Memorable line:** *"Provider commands return 0. That is not the same as being safe."*
 - **Transition cue:** "We have started the cloud path. While it bakes, same workflow, different engine."
 
@@ -469,7 +469,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
 - **Driver / narrator:** Michael drives this segment of Demo 4; Frank narrates lab scaffold.
 - **Visual concept:** A mock-up of an "audit finding" memo, single column, with a redaction stripe across the org name. Headline: **Finding: User-installed apps from non-App-Store sources.** Below: a paragraph (synthetic) recommending Gatekeeper hardening to App Store sources only. Footer in red: *"What could go wrong?"* Beneath the memo, a small two-step pictogram: a pen ticking a box, followed by an emoji-free distress-icon-style "yikes" mark.
 - **Talking points:**
-  - "A reasonable security recommendation lands. A reasonable admin tightens Gatekeeper to App Store only. The CEO opens Visual Studio Code (VS Code). The CEO calls."
+  - "A reasonable security recommendation lands. A reasonable admin tightens Gatekeeper to App Store only. The CEO opens a line-of-business app for the first time. The CEO calls."
   - We are resuming Demo 4 now. The policy sync has had time to land; if it did not, the fallback checkpoint is ready.
   - Good intentions can still create executive outages.
   - The lab is where this scenario is supposed to surface, not the executive's laptop.
@@ -490,7 +490,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   - The category is "System Policy Control" but most of the audience knows it as Gatekeeper.
   - Notarization is not enough. The policy explicitly excludes identified developers.
   - The live Intune stage thread has been baking since the Demo 4 start handoff before Demo 3. If it lands cleanly, use it. If it does not, the payoff still uses `Broken-Policy-State` and fixture-backed evidence.
-- **Memorable line:** *"Two switches in Settings Catalog can lock the CEO out of Visual Studio Code."*
+- **Memorable line:** *"Two switches in Settings Catalog can block the next legitimate app launch."*
 - **Transition cue:** "Let's see whether the live thread landed."
 
 ### Slide 29 — Demo 4 Live Run
@@ -506,7 +506,7 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   - PASS  mobile device management (MDM) enrollment profile present
   - PASS  Gatekeeper assessment enabled
   - PASS  System Policy Control profile detected
-  - FAIL  VS Code blocked by App-Store-only policy *(expected)*
+  - FAIL  VS Code first launch blocked by App-Store-only policy *(expected)*
   - PASS  Blocking dialog captured
   - PASS  Evidence redaction applied
   - PASS  Rollback restored Post-Enroll-Baseline
@@ -516,10 +516,10 @@ The **REDACTED stripe** doubles as the deck's structural motif. It appears on th
   The cloud-rollback warning composite sits in the lower-right corner.
 - **Talking points (live demo cadence):**
   - Check the background stage thread once. Use the live state only if it landed cleanly; otherwise say so and restore or use `Broken-Policy-State`.
-  - Show baseline state. VS Code launches. All green. Move the state-machine dot to **Baseline**.
-  - Run `Demo4-GatekeeperRollback.ps1 -Stage Broken`. VS Code is rejected by `spctl`. The expected FAIL appears. Move the dot to **Broken**.
+  - Show baseline state. VS Code is installed but not launched, and `spctl` accepts it. All green. Move the state-machine dot to **Baseline**.
+  - Run `Demo4-GatekeeperRollback.ps1 -Stage Broken`. VS Code is rejected by `spctl` on first launch. The expected FAIL appears. Move the dot to **Broken**.
   - Disconnect VM networking. This is the stage control. Explain why out loud. Move the dot to **Rolling Back**.
-  - Restore `Post-Enroll-Baseline`, then run `Demo4-GatekeeperRollback.ps1 -Stage Recovered`. VS Code launches again. The PASS row appears. Move the dot to **Recovered**.
+  - Restore `Post-Enroll-Baseline`, then run `Demo4-GatekeeperRollback.ps1 -Stage Recovered`. VS Code launches. The PASS row appears. Move the dot to **Recovered**.
   - End on the WARN. Report-only cleanup review and manual reconciliation are real steps, not an asterisk.
 - **Memorable line:** *"Policy failure belongs in the lab, not on the executive laptop."*
 - **Transition cue:** "Here is what you would attach to a change ticket."
@@ -841,7 +841,7 @@ This is the cadence track. Speakers should rehearse these lines in order, separa
 | 25 | "Provider commands return 0. That is not the same as being safe." |
 | 26 | "The provider abstraction prevents tool differences from changing the entire workflow." |
 | 27 | "Reasonable security recommendation. Reasonable admin response. Unreasonable Monday morning." |
-| 28 | "Two switches in Settings Catalog can lock the CEO out of Visual Studio Code." |
+| 28 | "Two switches in Settings Catalog can block the next legitimate app launch." |
 | 29 | "Policy failure belongs in the lab, not on the executive laptop." |
 | 30 | "Evidence beats portal confidence." |
 | 31 | "Show that the secret exists. Do not show the secret." |

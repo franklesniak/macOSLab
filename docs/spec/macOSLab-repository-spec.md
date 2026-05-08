@@ -5,7 +5,7 @@
 
 - **Status:** Draft for owner approval
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Human-readable implementation specification for creating the public `franklesniak/macOSLab` repository from the [`franklesniak/copilot-repo-template`](https://github.com/franklesniak/copilot-repo-template). It defines repository identity, authority hierarchy, safety rules, functional requirements, file layout, PowerShell module contracts, provider contracts, scripts, examples, documentation, tests, CI, phase gates, and definition of done.
 - **Related:** [Original prompt](../planning/macOS-imaging-08-repo-spec.md), [Bolstered outline](../planning/macOS-imaging-03a-bolstered-outline.md), [Software runbook](../planning/macos-imaging-05c-recommended-software-step-by-step-revised.md), [Repository description](../planning/macos-imaging-06a-repo-description.md), [CFP submission](../planning/macOS-imaging-01a-CFP-submission.md), [Closed questions archive](../planning/macOS-imaging-08d-closed-questions-archive.md), [Architecture decision records](../planning/macOS-imaging-08e-ADRs.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md), [PowerShell Writing Style](../../.github/instructions/powershell.instructions.md)
 
@@ -569,7 +569,7 @@ The repository MUST include Gatekeeper/System Policy Control as a first-class va
 
 **Acceptance Criteria:**
 
-- Demo 4 defaults to Gatekeeper/System Policy Control blocking Visual Studio Code through an App-Store-only policy.
+- Demo 4 defaults to Gatekeeper/System Policy Control blocking Visual Studio Code on first launch through an App-Store-only policy.
 - Intune Settings Catalog is documented as the preferred rehearsal delivery path.
 - Direct or local profile installation is documented only as a verified fallback or payload-mechanics probe.
 - Split validation plans exist for `Broken-Policy-State` and post-rollback recovery.
@@ -1659,7 +1659,7 @@ The agent MUST pause earlier only when a requirement is ambiguous, required evid
 - `docs/Demo-Runbook.md`
 - `docs/Troubleshooting.md`
 
-**Acceptance:** Owner completes a dry run of apply, Gatekeeper app block, rollback, VS Code relaunch, and evidence export. Demo media steps verify and reuse the prepared IPSW without starting a new download.
+**Acceptance:** Owner completes a dry run of apply, Gatekeeper first-launch app block, rollback, VS Code relaunch, and evidence export. Demo media steps verify and reuse the prepared IPSW without starting a new download.
 
 **Gate:** Pause at the owner-validation boundary. Do not tag `v0.1.0-mmsmoa-preview` until the owner approves the live dry run and release action.
 
@@ -1807,7 +1807,7 @@ Every evidence record produced by `Invoke-MacPolicyValidation` and bundled by `E
       "evidenceRefs": ["mdatp-health.json"]
     },
     {
-      "name": "VS Code blocked by App-Store-only policy",
+      "name": "VS Code first launch blocked by App-Store-only policy",
       "kind": "GatekeeperAssessment",
       "result": "Fail",
       "expectedFailure": true,

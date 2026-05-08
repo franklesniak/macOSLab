@@ -5,7 +5,7 @@
 
 - **Status:** Local implementation complete; Defender retained and Gatekeeper pivot added
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Deferred verification for Defender health evidence and Gatekeeper/System Policy Control fixture validation.
 
 ## Confirmed Preflight Evidence
@@ -16,7 +16,7 @@ Defender validation evidence should be collected inside a disposable macOS guest
 
 The owner approved the recommended Defender lifecycle on 2026-05-05: use Intune-based Defender deployment as the default demo path, with a preinstalled-Defender fallback for rehearsal or live-cloud timing issues. The owner then configured the Intune macOS Defender path and supplied a working guest `mdatp health` capture from a disposable enrolled VM.
 
-The Demo 4 live failure path is now Gatekeeper/System Policy Control blocking Visual Studio Code, with Defender retained as required validation content and backup proof. The committed Gatekeeper fixtures are sanitized text examples; final session sign-off still requires rehearsal capture from the actual demo guest.
+The Demo 4 live failure path is now Gatekeeper/System Policy Control blocking Visual Studio Code on first launch, with Defender retained as required validation content and backup proof. The committed Gatekeeper fixtures are sanitized text examples; final session sign-off still requires rehearsal capture from the actual demo guest.
 
 Owner-supplied Defender evidence from a lab macOS environment also confirms:
 

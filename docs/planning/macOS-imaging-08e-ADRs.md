@@ -5,7 +5,7 @@
 
 - **Status:** Draft for owner review
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Architecture and planning decisions for the future `macOSLab` repository specification. This file records accepted decisions and conditional follow-up decisions that affect implementation, phase gates, or repository policy.
 - **Related:** [macOSLab repository specification](../spec/macOSLab-repository-spec.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Original prompt](macOS-imaging-08-repo-spec.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
 
@@ -481,7 +481,7 @@ The expected v1 owner/demo path is `~/Demo/Installers/UniversalMac_26.4.1_25E253
 
 The accepted session contract still requires FileVault and Defender validation content, but the previous live-failure story centered on Defender health or compliance drift. That made the rollback narrative less coherent because Defender portal timing, health-settling behavior, and cloud reporting can continue after a local VM restore.
 
-Gatekeeper/System Policy Control gives the demo a cleaner operator story: a Windows-first admin responds to an app-execution audit finding, over-tightens the macOS policy to App-Store-only behavior, blocks a legitimate signed/notarized app such as Visual Studio Code, catches the issue in the lab, captures evidence, and rolls back before production users are affected.
+Gatekeeper/System Policy Control gives the demo a cleaner operator story: a Windows-first admin responds to an app-execution audit finding, over-tightens the macOS policy to App-Store-only behavior, blocks a legitimate signed/notarized app such as Visual Studio Code on first launch, catches the issue in the lab, captures evidence, and rolls back before production users are affected. Rehearsal showed that an app already launched and admitted before the policy lands can keep opening, so the demo uses a staged-but-not-launched app for the block proof. Firefox remains acceptable as a secondary staged option when it follows the same rule.
 
 ### Decision
 

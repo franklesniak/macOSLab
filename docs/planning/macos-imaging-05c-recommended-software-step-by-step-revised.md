@@ -5,7 +5,7 @@
 
 - **Status:** Draft
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** Talk-development working artifact for the MMSMOA 2026 session: "Step-by-Step Acquisition & Installation Instructions". Captures interim concepting, prioritization, outline, or runbook content for that session; not a final published deliverable.
 - **Related:** [macOSLab repository specification](../spec/macOSLab-repository-spec.md), [Architecture decision records](macOS-imaging-08e-ADRs.md), [Closed questions archive](macOS-imaging-08d-closed-questions-archive.md), [Repository Copilot Instructions](../../.github/copilot-instructions.md), [Documentation Writing Style](../../.github/instructions/docs.instructions.md)
 
@@ -30,7 +30,7 @@ Use these fixed decisions while following the runbook:
 - Keep `SECURITY.md` unchanged by default in the generated repo. Do not rewrite it.
 - `Reset-IntuneMacLabDevice.ps1` is report-only in v1. It identifies candidate stale cloud records and manual cleanup steps; it does not retire, soft-delete, or hard-delete Intune, Entra, or Defender records.
 - Do not commit example screenshots to the public v1 repo. Keep rehearsal/deck screenshots local unless later Phase 10 work explicitly approves checked-in visual artifacts.
-- Demo 4 is Gatekeeper/System Policy Control blocking Visual Studio Code, then rollback. Defender remains required validation content and backup proof, but do not pivot the live failure back to Defender-unhealthy.
+- Demo 4 is Gatekeeper/System Policy Control blocking Visual Studio Code on first launch, then rollback. Defender remains required validation content and backup proof, but do not pivot the live failure back to Defender-unhealthy.
 - Do not commit a sample Gatekeeper `.mobileconfig`. Use Intune Settings Catalog as the canonical policy authoring surface; keep any local profile payload only as an uncommitted fallback after verifying the exact target-VM `profiles` command.
 - If deferred work remains, create root per-phase TODO files such as `TODO-Phase-00-Branch-Protection.md`, `TODO-Phase-04-Media-Acquisition.md`, `TODO-Phase-05-Parallels-Provider.md`, `TODO-Phase-06-UTM-Provider.md`, `TODO-Phase-07-Evidence-Pipeline.md`, `TODO-Phase-08-Validation-Loop.md`, and `TODO-Phase-10-Deferred-Work.md`. Omit a phase TODO file only when that phase has no deferred work.
 
@@ -1055,8 +1055,8 @@ Do this **only** if your Demo 4 design assumes Defender is already present at th
    - **Intune admin center → Devices → All devices** lists this device with a recent **Last check-in** time.
    - The device shows as **Compliant** (or as the deterministic compliance state your demo expects to start from).
 6. Trigger one manual sync from Company Portal (**Devices → \[this device\] → Check Status**) and confirm it completes successfully.
-7. Install Visual Studio Code inside the guest, launch it once, and capture a baseline acceptance check with `spctl --assess -vv "/Applications/Visual Studio Code.app"`.
-8. **Do not** apply the risky Gatekeeper/System Policy Control demo policy yet. FileVault, PPPC, and Defender policies may be present only to the extent required for their supporting evidence paths. The `Post-Enroll-Baseline` snapshot is supposed to be the clean enrolled state you roll back **to**.
+7. Install Visual Studio Code inside the guest and capture a baseline acceptance check with `spctl --assess -vv "/Applications/Visual Studio Code.app"`.
+8. **Do not** launch Visual Studio Code and **do not** apply the risky Gatekeeper/System Policy Control demo policy yet. FileVault, PPPC, and Defender policies may be present only to the extent required for their supporting evidence paths. The `Post-Enroll-Baseline` snapshot is supposed to be the clean enrolled state you roll back **to**. Firefox MAY be staged as a secondary app only if it follows the same not-launched-before-policy rule.
 
 ### Step 37: Capture the `Post-Enroll-Baseline` snapshot
 
@@ -1206,13 +1206,13 @@ For **each** hypervisor in your matrix (Parallels, and UTM if used), all five ch
   - enrolled
   - recently synced
   - deterministic baseline compliance state
-  - Visual Studio Code installed, accepted by `spctl`, and launched successfully
+  - Visual Studio Code installed, not launched, and accepted by `spctl`
 - [ ] `Broken-Policy-State`
-  - Gatekeeper/System Policy Control profile blocks Visual Studio Code
+  - Gatekeeper/System Policy Control profile blocks VS Code first launch
   - validation script reports the engineered deterministic failure as expected
 - [ ] `Recovered-Known-Good`
-  - `spctl` accepts Visual Studio Code after rollback
-  - Visual Studio Code launches after rollback
+  - `spctl` accepts VS Code after rollback
+  - VS Code launches after rollback
   - validation script reports green
   - cloud cleanup/reconciliation warning is documented if applicable (expected audit/history entries are noted as expected, not as failures)
 
@@ -1251,7 +1251,7 @@ baseline -> reveal failure -> collect evidence -> roll back -> known good
 
 - [ ] Pre-redacted screenshots of Intune portal state exist locally for every page the demo would otherwise load live.
 - [ ] Offline screenshots and evidence examples are available for Graph and Defender proof points if used.
-- [ ] The VS Code block dialog visual asset exists locally for the deck or stage and is not committed to the repository.
+- [ ] The VS Code first-launch block dialog visual asset exists locally for the deck or stage and is not committed to the repository.
 - [ ] No example screenshots are committed to the public v1 repo unless later Phase 10 work explicitly approves checked-in visual artifacts.
 
 #### Redaction and secret safety

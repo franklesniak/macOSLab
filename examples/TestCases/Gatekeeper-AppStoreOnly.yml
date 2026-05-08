@@ -26,12 +26,12 @@ tests:
     expectedProfilePresent: true
     expectedFailure: false
     fixture: "fixtures/profiles-system-policy-control-redacted.txt"
-  - name: "VS Code blocked by App-Store-only policy"
+  - name: "VS Code first launch blocked by App-Store-only policy"
     kind: "GatekeeperAssessment"
     result: "Fail"
     expectedFailure: true
     expectedAssessment: "Rejected"
-    message: "VS Code rejected by App-Store-only System Policy Control policy."
+    message: "VS Code rejected by App-Store-only System Policy Control policy on first launch."
     fixture: "fixtures/gatekeeper-vscode-rejected.txt"
   - name: "Blocking dialog captured"
     kind: "AppLaunchBlocked"

@@ -90,7 +90,7 @@ Describe 'MacLab evidence redaction' {
             $arrGatekeeperFixture = @(
                 Get-ChildItem -LiteralPath $strFixtureRoot -Filter 'gatekeeper-*.txt'
                 Get-ChildItem -LiteralPath $strFixtureRoot -Filter 'profiles-system-policy-control-redacted.txt'
-                Get-ChildItem -LiteralPath $strFixtureRoot -Filter 'app-launch-vscode-*.txt'
+                Get-ChildItem -LiteralPath $strFixtureRoot -Filter 'app-launch-*.txt'
             )
 
             $arrGatekeeperFixture.Count | Should -BeGreaterThan 0

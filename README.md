@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Frank Lesniak
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-07
 - **Scope:** User-facing overview for `franklesniak/macOSLab`, including the fastest safe starting path, project boundaries, current phase status, validation commands, deferred work, and license information.
 - **Related:** [Start Here](docs/Start-Here.md), [Prerequisites](docs/Prereqs.md), [macOSLab repository specification](docs/spec/macOSLab-repository-spec.md), [macOSLab ADRs](docs/planning/macOS-imaging-08e-ADRs.md)
 
@@ -22,7 +22,7 @@ This repository is not a production Mac management platform, not legal advice, n
 
 Start at [docs/Start-Here.md](docs/Start-Here.md), then read [docs/Prereqs.md](docs/Prereqs.md) before running any provider or cloud workflow. The implementation is delivered in phase checkpoints; the coding agent can continue through locally verifiable, non-destructive phases and pauses at the owner-validation boundary before live demo validation, release, branch protection, destructive provider/cloud actions, or optional Phase 10 expansion.
 
-For the MMSMOA demo path, Demo 4 uses a Gatekeeper/System Policy Control pivot: a lab-only Intune Settings Catalog policy makes Visual Studio Code fail under App-Store-only execution rules, the fixture-backed validation captures that expected failure, and rollback proves the known-good VM state. FileVault and Defender remain required validation guides and backup proof paths, but they are not the live break-and-rollback failure.
+For the MMSMOA demo path, Demo 4 uses a Gatekeeper/System Policy Control pivot: a lab-only Intune Settings Catalog policy makes Visual Studio Code fail on first launch under App-Store-only execution rules, the fixture-backed validation captures that expected failure, and rollback proves the known-good VM state. FileVault and Defender remain required validation guides and backup proof paths, but they are not the live break-and-rollback failure.
 
 The intended v1 command path is:
 

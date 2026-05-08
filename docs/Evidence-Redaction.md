@@ -5,7 +5,7 @@
 
 - **Status:** Active
 - **Owner:** Repository owner
-- **Last Updated:** 2026-05-06
+- **Last Updated:** 2026-05-08
 - **Scope:** Documents `Protect-MacLabEvidence` behavior, sensitive field names, value-shape redaction, and verification expectations for macOSLab evidence.
 - **Related:** [macOSLab Repository Specification](spec/macOSLab-repository-spec.md), [Evidence and CAB](Evidence-and-CAB.md), [Evidence bundle schema](../schemas/evidence-bundle.schema.json), [Phase 7 TODO](../TODO-Phase-07-Evidence-Pipeline.md)
 
@@ -55,4 +55,4 @@ Pester tests cover:
 - evidence export preserving redaction.
 - Gatekeeper fixture scans that fail if committed fixtures contain Team IDs, profile UUIDs, or local home paths.
 
-Gatekeeper screenshots and recordings are local stage assets only. The repository may keep a generic text reference that a VS Code block dialog was captured during rehearsal, but it MUST NOT commit the screenshot, recording, exact personal file path, Team ID, tenant identifier, profile UUID, device identifier, UPN, or app bundle.
+Gatekeeper screenshots and recordings are local stage assets only. The repository may keep generic text references or sanitized dialog transcripts for VS Code first-launch evidence and secondary-app rehearsal evidence, but it MUST NOT commit the screenshot, recording, exact personal file path, Team ID, tenant identifier, profile UUID, device identifier, UPN, or app bundle.
