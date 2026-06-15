@@ -106,7 +106,7 @@ repos:
   #      `files:` pattern at that time. Do not vendor third-party
   #      schemas into this repository to fill the gap.
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: "0.37.2"
+    rev: "0.37.3"
     hooks:
       - id: check-jsonschema
         name: Validate evidence-bundle valid examples
